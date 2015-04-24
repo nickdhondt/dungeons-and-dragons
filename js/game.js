@@ -1,9 +1,27 @@
 window.onload = function() { init(); };
-var user_id;
-var username;
+var userId, permissionId;
 
 function init() {
     document.getElementById("btn_login").addEventListener("click", function() { tryLogin(); });
+    document.getElementById("logout").addEventListener("click", function() { logout(); });
+    requestUserData();
+}
+
+function logout() {
+    sendXHR("", "http/http_logout.php", "get", "processLogout");
+}
+
+function processLogout(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.logged_out === "true") {
+            window.location.reload();
+        }
+        else {
+            var notif = new Notification("Er is een fout opgetreden.", false);
+        }
+    }
 }
 
 function tryLogin() {
@@ -28,6 +46,12 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processLoginResponse":
                     processLoginResponse(response);
                     break;
+                case "processUserData":
+                    processUserData(response);
+                    break;
+                case "processLogout":
+                    processLogout(response);
+                    break;
             }
         }
     };
@@ -44,17 +68,62 @@ function sendXHR(data, url, type, executeFunction) {
 
 function processLoginResponse(jsonData) {
     var responseParse = parseJSON(jsonData);
-    console.log(responseParse);
 
     if (responseParse !== null) {
         if (responseParse.login === "true") {
             disableLogin();
-            user_id = responseParse.data.user_id;
-            username = responseParse.data.username;
-            document.getElementById("user_info").innerHTML = username;
+            userId = responseParse.data.user_id;
+
+            requestUserData();
         }
         else {
-            var notification = new Notification(responseParse.errors[0], false);
+            displayErrors(responseParse.errors);
+        }
+    }
+}
+
+function displayErrors(errorsObject) {
+    var errorsAmount = errorsObject.length;
+    console.log(errorsAmount);
+    for (var i = 0; i < errorsAmount; i++) {
+        var notification = new Notification(errorsObject[i], false);
+    }
+}
+
+function requestUserData(requestUserId) {
+    var requestDataFromUser = {};
+
+    if (typeof (requestUserId) === "undefined") {
+        if (typeof (userId) === "undefined") {
+            requestDataFromUser.user_id = "false";
+        } else {
+            requestDataFromUser.user_id = userId;
+        }
+        //console.log("ok");
+    } else {
+        requestDataFromUser.user_id = requestUserId;
+        //console.log("ok2");
+    }
+
+    var jsonData = JSON.stringify(requestDataFromUser);
+
+    sendXHR(jsonData, "http/http_user_data.php", "post", "processUserData");
+}
+
+function processUserData(jsonData) {
+    //console.log(jsonData);
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_accepted === "true") {
+            var user_info = document.getElementById("user_info");
+            disableLogin();
+
+            user_info.innerHTML = "Welkom " + responseParse.data.username + " <span>(" + responseParse.data.permission_name + ")</span>";
+            userId = responseParse.data.user_id;
+            permissionId = responseParse.data.permission_type;
+        } else {
+            displayErrors(responseParse.errors);
         }
     }
 }
@@ -110,5 +179,5 @@ Notification.prototype.disable = function() {
     setTimeout(function() {
         currentNotification.style.opacity = "0";
         setTimeout(function() { currentNotification.remove() }, 490);
-    }, 5000);
+    }, 50000);
 };

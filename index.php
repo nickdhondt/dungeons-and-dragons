@@ -27,6 +27,9 @@
 <div id="game_area">
     <header>
         <div id="user_info"></div>
+        <div id="logout" class="button">
+            Uitloggen
+        </div>
     </header>
 </div>
 <div id="notifications"></div>
