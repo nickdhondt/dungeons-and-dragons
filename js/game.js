@@ -5,7 +5,43 @@ var userId, permissionId;
 function init() {
     document.getElementById("btn_login").addEventListener("click", function() { tryLogin(); });
     document.getElementById("logout").addEventListener("click", function() { logout(); });
+    document.getElementById("one").addEventListener("click", function() { showTab("one"); });
+    document.getElementById("two").addEventListener("click", function() { showTab("two"); });
+    document.getElementById("three").addEventListener("click", function() { showTab("three"); });
     requestUserData();
+}
+
+function showTab(tab) {
+    var tabOne = document.getElementById("tab_one");
+    var tabTwo = document.getElementById("tab_two");
+    var tabThree = document.getElementById("tab_three");
+
+    var one = document.getElementById("one");
+    var two = document.getElementById("two");
+    var three = document.getElementById("three");
+
+    if (tab === "one") {
+        tabOne.style.display = "block";
+        tabTwo.style.display = "none";
+        tabThree.style.display = "none";
+        one.setAttribute("class", "active");
+        two.setAttribute("class", "");
+        three.setAttribute("class", "");
+    } else if (tab === "two") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "block";
+        tabThree.style.display = "none";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "active");
+        three.setAttribute("class", "");
+    } else if (tab === "three") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "none";
+        tabThree.style.display = "block";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "");
+        three.setAttribute("class", "active");
+    }
 }
 
 function logout() {

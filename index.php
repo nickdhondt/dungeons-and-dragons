@@ -31,6 +31,25 @@
             Uitloggen
         </div>
     </header>
+    <div id="container">
+        <nav id="tabs">
+            <ul>
+                <li class="active" id="one">Tab 1</li>
+                <li id="two">Tab 2</li>
+                <li id="three">Tab 3</li>
+            </ul>
+        </nav>
+        <div class="clearfix"></div>
+        <div id="tab_one" class="tab_area">
+            <h1>Een</h1>
+        </div>
+        <div id="tab_two" class="tab_area">
+            <h1>Twee</h1>
+        </div>
+        <div id="tab_three" class="tab_area">
+            <h1>Drie</h1>
+        </div>
+    </div>
 </div>
 <div id="notifications"></div>
 </body>
