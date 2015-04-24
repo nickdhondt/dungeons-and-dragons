@@ -12,7 +12,7 @@ h1 {
     margin-bottom: .75em;
 }
 
-div#notifications > div {
+div#notifications > div, div#game_area > header > div.button {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -113,14 +113,42 @@ div#notifications > div > span.close_notif {
 div#game_area {
     position: absolute;
     top: 0;
-    background: #77af1f;
-    width: calc(100vw - 2em);
-    min-height: calc(100vh - 2em);
-    padding: 1em;
+    background: #26af00;
+    width: 100vw;
+    min-height: 100vh;
     overflow-y: scroll;
 }
 
 div#game_area > header {
-    background: #00cc00;
+    position: fixed;
+    top: 0;
+    background: #b1cc00;
     padding: 1em;
+    width: calc(100% - 2em);
+}
+
+div#game_area > header > div#user_info {
+    font-size: 2em;
+    font-weight: bold;
+    display: inline-block;
+}
+
+div#game_area > header > div#user_info > span {
+    font-size: 0.7em;
+    font-weight: normal;
+}
+
+div#game_area > header > div.button {
+    cursor: pointer;
+    padding: .7em;
+    float: right;
+    background: #f2f2f2;
+}
+
+div#game_area > header > div.button:hover {
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
+}
+
+div#game_area > header > div.button:active {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
 }

@@ -9,6 +9,7 @@ $user_id = 0;
 $user_data  = array();
 
 // Data will be receive as a JSON string in the $_POST superglobal.
+// Post superglobal not required, get superglobal (using the querystring) is also possible.
 // The JSON string will always be in the "data" value.
 if (!empty($_POST["data"])) {
 
@@ -66,8 +67,6 @@ if (!empty($errors) && $user_passed === "false") {
         "login" => $user_passed,
         "errors" => $errors // Note: $errors is an array put in an array => multidimensional array
     );
-    // JSON encode our array
-    $return_data = json_encode($return_message);
 } else {
     // Guideline: make sure the data is understandable client side.
     // Example: errors are put in a numeric array => no problem, errors are errors, we just display them.
@@ -76,9 +75,10 @@ if (!empty($errors) && $user_passed === "false") {
         "login" => $user_passed,
         "data" => array("user_id" => $user_id)
     );
-    // JSON encode the array
-    $return_data = json_encode($return_message);
 }
+
+// JSON encode our array
+$return_data = json_encode($return_message);
 
 // "Return" the json string to the client
 echo $return_data;

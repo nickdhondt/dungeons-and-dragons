@@ -3,6 +3,8 @@
 /* The well known functions.php */
 
 require_once("db/connect.php");
+session_start();
+
 
 function user_exists($username) {
     global $connection;
@@ -39,6 +41,16 @@ function user_data($user_id, $fields) {
     }
 }
 
+function permission_name($permission_type) {
+    global $connection;
+
+    $sql = $connection->query("SELECT name FROM permission WHERE type='$permission_type'");
+
+    $permission_name = $sql->fetch_assoc();
+
+    return $permission_name["name"];
+}
+
 function prepare_fields_select($fields) {
     if (!empty ($fields)) {
         $sql_fields = implode(", ", $fields);
@@ -47,4 +59,12 @@ function prepare_fields_select($fields) {
     }
 
     return $sql_fields;
+}
+
+function user_logged_in () {
+    if (!empty($_SESSION["user_id"])) {
+        return $_SESSION["user_id"];
+    } else {
+        return false;
+    }
 }
