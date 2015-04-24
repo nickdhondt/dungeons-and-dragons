@@ -6,6 +6,7 @@ require_once "../includes/functions.php";
 session_unset();
 session_destroy();
 
+// Prepare and send a confirm flag
 $response_message = array(
     "logged_out" => "true"
 );

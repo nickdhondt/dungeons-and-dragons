@@ -1,3 +1,4 @@
+// Pfff comments
 window.onload = function() { init(); };
 var userId, permissionId;
 
@@ -179,5 +180,5 @@ Notification.prototype.disable = function() {
     setTimeout(function() {
         currentNotification.style.opacity = "0";
         setTimeout(function() { currentNotification.remove() }, 490);
-    }, 50000);
+    }, 5000);
 };
