@@ -2,6 +2,15 @@
 /* Template to build on */
 /* This document will stream real time events to clients */
 
+// This header defines this file is a steam
+header("Content-Type: text/event-stream\n\n");
+header("Cache-Control: no-cache");
+
+/*
+header("Content-type: text/plain");
+header('Cache-Control: no-cache');
+*/
+
 // Set the script start as a float
 $script_beginning = microtime(true);
 
@@ -9,7 +18,7 @@ $script_beginning = microtime(true);
 $last_ping = microtime(true);
 
 // Set the maximum execution time to 300 seconds (= 5 minutes) instead of 30 seconds
-ini_set('max_execution_time', 300);
+//ini_set('max_execution_time', 300);
 
 require_once "../includes/functions.php";
 
@@ -20,6 +29,8 @@ $timestamp = 0;
 // We need to flush data while running the script (because otherwise the script will send all it's data after about 5 minutes instead of real time
 ob_implicit_flush(true);
 ob_end_flush();
+
+$first_loop = true;
 
 // Based on the script beginning time, we execute as far as 280 seconds (4 minutes 40 seconds)
 while ($script_beginning >= (microtime(true) - 280)) {
@@ -42,10 +53,9 @@ while ($script_beginning >= (microtime(true) - 280)) {
         $ping_event_time = json_encode(array("time" => microtime(true)));
         echo "data: " . $ping_event_time . "\n\n";
 
-        // Flush the cache to the user
-        flush();
+        $last_ping = microtime(true);
     }
-
+/*
     if (!empty($new_events)) {
         // JSON encode
         $json_game_data = json_encode($new_events);
@@ -61,8 +71,15 @@ while ($script_beginning >= (microtime(true) - 280)) {
         flush();
         // Update current time to prevent db form returning data when not necessary
         $timestamp = microtime(true);
-    }
+    }*/
+
+    // Flush the cache to the user
+    flush();
 
     // pause the loop for .5 seconds
-    usleep(500000);
+    if ($first_loop === true) {
+        $first_loop = false;
+    } else {
+        usleep(500000);
+    }
 }
