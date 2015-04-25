@@ -130,7 +130,7 @@ div#container > nav > ul > li {
     min-width: 10em;
     text-align: center;
     cursor: pointer;
-    transition: background .2s;
+    transition: background .15s;
 }
 
 div#container > nav > ul > li:hover {
@@ -190,6 +190,7 @@ div#game_area > header > div.button {
     padding: .7em;
     float: right;
     background: #f2f2f2;
+    transition: box-shadow .15s;
 }
 
 div#game_area > header > div.button:hover {
