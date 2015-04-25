@@ -5,6 +5,7 @@ var ownUserId;
 var admin;
 var lastPing = 0, connectionErrors = 0;
 var connectionLost = false;
+var adminPanelOpen = false;
 
 function init() {
     document.getElementById("btn_login").addEventListener("click", function() { tryLogin(); });
@@ -12,10 +13,21 @@ function init() {
     document.getElementById("one").addEventListener("click", function() { showTab("one"); });
     document.getElementById("two").addEventListener("click", function() { showTab("two"); });
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
-    document.getElementById("admin_one").addEventListener("click", function() { showAdminTab("one"); });
-    document.getElementById("admin_two").addEventListener("click", function() { showAdminTab("two"); });
+    document.getElementById("admin_one").addEventListener("click", function(e) { showAdminTab("one"); e.stopPropagation(); });
+    document.getElementById("admin_two").addEventListener("click", function(e) { showAdminTab("two"); e.stopPropagation(); });
     document.getElementById("btn_register").addEventListener("click", function() { requestUserRegister(); });
+    document.getElementById("show_admin").addEventListener("click", function() { toggleAdminPanel(); });
     requestUserData();
+}
+
+function toggleAdminPanel() {
+    if (adminPanelOpen === false) {
+        document.getElementById("show_admin").style.right = "0";
+        adminPanelOpen = true;
+    } else {
+        document.getElementById("show_admin").style.right = "-22em";
+        adminPanelOpen = false;
+    }
 }
 
 function requestUserRegister() {
