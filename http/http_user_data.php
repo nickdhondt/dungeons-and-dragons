@@ -38,11 +38,13 @@ if ($user_id != false) {
 
             if ($user_data["permission_type"] === "1") {
                 $user_data["admin"] = "true";
+
+                $user_data["admin_data"] = $user_data;
+                $user_data["admin_data"]["permission_name"] = $permission_name;
             } else {
                 $user_data["admin"] = "false";
             }
-        }
-        else {
+        } else {
             $user_data = user_data($post_data["user_id"], $fields);
 
             // Get the permission name (Gebruiker, Administrator, etc.)

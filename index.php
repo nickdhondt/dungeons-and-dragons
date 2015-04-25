@@ -13,7 +13,7 @@
         <h1>Login</h1>
         <ul>
             <li>
-                <input type="text" placeholder="Gebruikersnaam" id="txt_username"/>
+                <input type="text" placeholder="Gebruikersnaam" id="txt_username" autofocus/>
             </li>
             <li>
                 <input type="password" placeholder="Wachtwoord" id="txt_password"/>
@@ -32,33 +32,16 @@
         </div>
     </header>
     <div id="show_admin">
-        Admin
+        <div id="admin_user"></div>
         <div id="admin_panel">
             <div id="admin_tabs">
                 <ul>
                     <li id="admin_one" class="active">Gebruikers</li>
-                </ul>
-                <ul>
                     <li id="admin_two">Nieuwe gebruiker</li>
                 </ul>
             </div>
             <div class="clearfix"></div>
-            <div id="admin_tab_one" class="admin_tab">
-                <ul>
-                    <li>
-                        <div>Gebruiker</div>
-                        <div>✖</div>
-                    </li>
-                    <li>
-                        <div>Andere gebruiker</div>
-                        <div>✖</div>
-                    </li>
-                    <li>
-                        <div>Nog een</div>
-                        <div>✖</div>
-                    </li>
-                </ul>
-            </div>
+            <div id="admin_tab_one" class="admin_tab"></div>
             <div id="admin_tab_two" class="admin_tab">
                 <ul>
                     <li>
@@ -77,9 +60,9 @@
     <div id="container">
         <nav id="tabs">
             <ul>
-                <li class="active" id="one">Tab 1</li>
-                <li id="two">Tab 2</li>
-                <li id="three">Tab 3</li>
+                <li class="active" id="one">Basic</li>
+                <li id="two">Levelling</li>
+                <li id="three">Skill Assigning</li>
             </ul>
         </nav>
         <div class="clearfix"></div>

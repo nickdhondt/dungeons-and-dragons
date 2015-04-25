@@ -27,6 +27,12 @@ function microtime(getAsFloat) {
 function openStream() {
     var eventSource = new EventSource("stream/stream_push_events.php?user_id=" + userId);
 
+    var changeUserview = document.getElementsByClassName("change_userview");
+
+    for (var i = 0; i < changeUserview.length; i++) {
+        changeUserview[i].addEventListener("click", function() { eventSource.close(); console.log("close"); });
+    }
+
     eventSource.addEventListener("ping", function(e) {
         connectionLost = false;
         connectionErrors = 0;
@@ -40,7 +46,7 @@ function openStream() {
 
     setInterval(function () {
         if (((lastPing < (microtime(true) - 10)) || connectionErrors >= 2) && connectionLost === false) {
-            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus moest hij de pagona herladen.", false);
+            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus moest hij de pagina herladen.", false);
             connectionLost = true;
         }
     }, 1000);
@@ -144,6 +150,9 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processLogout":
                     processLogout(response);
                     break;
+                case "processUserList":
+                    processUserList(response);
+                    break;
             }
         }
     };
@@ -213,12 +222,58 @@ function processUserData(jsonData) {
             if (admin === "true") {
                 showAdminPanel();
                 console.log("ok");
-            }
+                var adminPanelName = document.getElementById("admin_user");
 
-            openStream();
+                adminPanelName.innerHTML = responseParse.data.admin_data.username;
+                requestUserList();
+            }
         } else {
             displayErrors(responseParse.errors);
         }
+    }
+}
+
+function requestUserList() {
+    sendXHR("", "http/http_user_list.php", "get", "processUserList");
+}
+
+function processUserList(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    console.log(responseParse);
+    var usersCount = responseParse.data.length;
+
+    var userListNode = document.createElement("ul");
+
+    for (var i = 0; i < usersCount; i++) {
+        var userNode = document.createElement("li");
+        var usernameNode = document.createElement("div");
+        var usernameText = document.createTextNode(responseParse.data[i].username);
+        var deleteUserNode = document.createElement("div");
+        var deleteUserText = document.createTextNode("✖");
+        userNode.setAttribute("id", responseParse.data[i].user_id);
+        deleteUserNode.appendChild(deleteUserText);
+        usernameNode.appendChild(usernameText);
+        userNode.appendChild(usernameNode);
+        userNode.appendChild(deleteUserNode);
+        usernameNode.setAttribute("class", "change_userview");
+        usernameNode.setAttribute("id", responseParse.data[i].user_id);
+        userListNode.appendChild(userNode);
+    }
+
+    var userListTab = document.getElementById("admin_tab_one");
+    userListTab.innerHTML = "";
+
+    userListTab.appendChild(userListNode);
+
+    openStream();
+
+    var changeUserview = document.getElementsByClassName("change_userview");
+
+    for (var j = 0; j < changeUserview.length; j++) {
+        changeUserview[j].addEventListener("click", function() {
+            requestUserData(this.id);
+        });
     }
 }
 
@@ -248,7 +303,7 @@ function disableLogin() {
 
 var Notification = function(message, keepAlive) {
     this.message = message;
-    this.id = ("" + (Math.floor((Math.random() * 10000) + 1000))).substring(0,4);
+    this.norifId = ("" + (Math.floor((Math.random() * 10000) + 1000))).substring(0,4);
     this.keepAlive = keepAlive;
 
     var notifContainer = document.getElementById("notifications");
@@ -256,7 +311,7 @@ var Notification = function(message, keepAlive) {
     var notifNode = document.createElement("div");
     var notifText = document.createTextNode(message);
     notifNode.appendChild(notifText);
-    notifNode.setAttribute("id", this.id);
+    notifNode.setAttribute("id", this.norifId);
     var closeNotifNode = document.createElement("span");
     var closeNotifText = document.createTextNode("✖");
     closeNotifNode.appendChild(closeNotifText);
@@ -273,8 +328,8 @@ var Notification = function(message, keepAlive) {
 };
 
 Notification.prototype.disable = function() {
-    var currentId = this.id;
-    var currentNotification = document.getElementById(this.id);
+    var currentId = this.norifId;
+    var currentNotification = document.getElementById(this.norifId);
 
     setTimeout(function() {
         currentNotification.style.opacity = "0";

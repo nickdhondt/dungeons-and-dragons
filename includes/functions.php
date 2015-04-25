@@ -66,3 +66,17 @@ function user_logged_in () {
         return false;
     }
 }
+
+function get_user_list() {
+    global $connection;
+
+    $sql = $connection->query("SELECT username, user_id FROM user");
+
+    $rows = array();
+
+    while($row = $sql->fetch_assoc()) {
+        $rows[] = $row;
+    }
+
+    return $rows;
+}
