@@ -45,13 +45,13 @@
             <div id="admin_tab_two" class="admin_tab">
                 <ul>
                     <li>
-                        <input type="text" placeholder="Gebruikersnaam"/>
+                        <input type="text" placeholder="Gebruikersnaam" id="txt_new_username"/>
                     </li>
                     <li>
-                        <input type="password" placeholder="Wachtwoord"/>
+                        <input type="password" placeholder="Wachtwoord" id="txt_new_password"/>
                     </li>
                     <li>
-                        <input type="button" value="Registreer"/>
+                        <input type="button" value="Registreer" id="btn_register"/>
                     </li>
                 </ul>
             </div>

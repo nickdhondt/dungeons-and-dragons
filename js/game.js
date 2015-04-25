@@ -1,6 +1,7 @@
 // Pfff comments
 window.onload = function() { init(); };
 var userId, permissionId;
+var ownUserId;
 var admin;
 var lastPing = 0, connectionErrors = 0;
 var connectionLost = false;
@@ -13,7 +14,33 @@ function init() {
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
     document.getElementById("admin_one").addEventListener("click", function() { showAdminTab("one"); });
     document.getElementById("admin_two").addEventListener("click", function() { showAdminTab("two"); });
+    document.getElementById("btn_register").addEventListener("click", function() { requestUserRegister(); });
     requestUserData();
+}
+
+function requestUserRegister() {
+    var userCredentials = {};
+
+    userCredentials.username = document.getElementById("txt_new_username").value;
+    userCredentials.password = document.getElementById("txt_new_password").value;
+
+    var registerData = JSON.stringify(userCredentials);
+
+    sendXHR(registerData, "http/http_register_user.php", "post", "processRegisterResponse");
+}
+
+function processRegisterResponse(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal === "true") {
+            var notif = new Notification("De gebruiker werd succesvol toegevoegd.");
+            requestUserData();
+        }
+        else {
+            displayErrors(responseParse.errors);
+        }
+    }
 }
 
 function microtime(getAsFloat) {
@@ -30,7 +57,7 @@ function openStream() {
     var changeUserview = document.getElementsByClassName("change_userview");
 
     for (var i = 0; i < changeUserview.length; i++) {
-        changeUserview[i].addEventListener("click", function() { eventSource.close(); console.log("close"); });
+        changeUserview[i].addEventListener("click", function() { eventSource.close(); });
     }
 
     eventSource.addEventListener("ping", function(e) {
@@ -153,6 +180,12 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processUserList":
                     processUserList(response);
                     break;
+                case "processRegisterResponse":
+                    processRegisterResponse(response);
+                    break;
+                case "processDeleteUser":
+                    processDeleteUser(response);
+                    break;
             }
         }
     };
@@ -207,8 +240,6 @@ function requestUserData(requestUserId) {
 function processUserData(jsonData) {
     var responseParse = parseJSON(jsonData);
 
-    console.log(responseParse);
-
     if (responseParse !== null) {
         if (responseParse.request_accepted === "true") {
             var user_info = document.getElementById("user_info");
@@ -218,10 +249,14 @@ function processUserData(jsonData) {
             userId = responseParse.data.user_id;
             permissionId = responseParse.data.permission_type;
             admin = responseParse.data.admin;
+            if (admin === "true") {
+                ownUserId = responseParse.data.admin_data.user_id;
+            } else {
+                ownUserId = responseParse.data.user_id;
+            }
 
             if (admin === "true") {
                 showAdminPanel();
-                console.log("ok");
                 var adminPanelName = document.getElementById("admin_user");
 
                 adminPanelName.innerHTML = responseParse.data.admin_data.username;
@@ -240,7 +275,6 @@ function requestUserList() {
 function processUserList(jsonData) {
     var responseParse = parseJSON(jsonData);
 
-    console.log(responseParse);
     var usersCount = responseParse.data.length;
 
     var userListNode = document.createElement("ul");
@@ -251,13 +285,14 @@ function processUserList(jsonData) {
         var usernameText = document.createTextNode(responseParse.data[i].username);
         var deleteUserNode = document.createElement("div");
         var deleteUserText = document.createTextNode("✖");
-        userNode.setAttribute("id", responseParse.data[i].user_id);
         deleteUserNode.appendChild(deleteUserText);
         usernameNode.appendChild(usernameText);
         userNode.appendChild(usernameNode);
         userNode.appendChild(deleteUserNode);
         usernameNode.setAttribute("class", "change_userview");
         usernameNode.setAttribute("id", responseParse.data[i].user_id);
+        deleteUserNode.setAttribute("class", "delete_user");
+        deleteUserNode.setAttribute("id", responseParse.data[i].user_id);
         userListNode.appendChild(userNode);
     }
 
@@ -269,11 +304,45 @@ function processUserList(jsonData) {
     openStream();
 
     var changeUserview = document.getElementsByClassName("change_userview");
+    var deleteUser = document.getElementsByClassName("delete_user");
 
     for (var j = 0; j < changeUserview.length; j++) {
         changeUserview[j].addEventListener("click", function() {
             requestUserData(this.id);
         });
+
+        deleteUser[j].addEventListener("click", function() {
+            if (this.id == ownUserId) new Notification("Je kan jezelf niet verwijderen.", false);
+            else if (confirm("De gebruiker verwijderen?") === true) requestDeleteUser(this.id);
+        });
+    }
+}
+
+function requestDeleteUser(deleteUserId) {
+    var userDeleteData = {};
+
+    userDeleteData.user_id = deleteUserId;
+
+    var deleteData = JSON.stringify(userDeleteData);
+
+    //console.log(deleteData);
+
+    sendXHR(deleteData, "http/http_delete_user.php", "post", "processDeleteUser");
+}
+
+function processDeleteUser(jsonData) {
+    console.log(jsonData);
+
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal === "true") {
+            var notif = new Notification("De gebruiker werd succesvol verwijderd.");
+            requestUserData();
+        }
+        else {
+            displayErrors(responseParse.errors);
+        }
     }
 }
 
