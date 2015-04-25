@@ -78,6 +78,7 @@ function openStream() {
         connectionLost = false;
         connectionErrors = 0;
         lastPing = microtime(true);
+        document.getElementById("ping_info").innerHTML = JSON.parse(e.data).time;
     }, false);
 
     eventSource.onerror = function(e) {

@@ -23,6 +23,17 @@ div#notifications > div, div#game_area > header > div.button, div#container > na
     user-select: none;
 }
 
+div#ping_info {
+    position: absolute;
+    display: inline-block;
+    top: 0;
+    right: 0;
+    padding: .5em;
+    font-size: .7em;
+    opacity: .5;
+    pointer-events: none;
+}
+
 /*
 *
 * Form

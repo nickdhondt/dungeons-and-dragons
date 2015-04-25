@@ -77,6 +77,7 @@
         </div>
     </div>
 </div>
+<div id="ping_info"></div>
 <div id="notifications"></div>
 </body>
 </html>
