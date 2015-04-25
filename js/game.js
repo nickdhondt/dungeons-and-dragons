@@ -237,6 +237,10 @@ function requestUserData(requestUserId) {
     sendXHR(jsonData, "http/http_user_data.php", "post", "processUserData");
 }
 
+function enableGameArea() {
+    document.getElementById("game_area").style.opacity = "1";
+}
+
 function processUserData(jsonData) {
     var responseParse = parseJSON(jsonData);
 
@@ -262,6 +266,8 @@ function processUserData(jsonData) {
                 adminPanelName.innerHTML = responseParse.data.admin_data.username;
                 requestUserList();
             }
+
+            enableGameArea();
         } else {
             displayErrors(responseParse.errors);
         }
