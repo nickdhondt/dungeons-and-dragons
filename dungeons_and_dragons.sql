@@ -1,4 +1,4 @@
--- phpMyAdmin SQL Dump
+﻿-- phpMyAdmin SQL Dump
 -- version 4.2.11
 -- http://www.phpmyadmin.net
 --
@@ -41,7 +41,7 @@ INSERT INTO `basic` (`basic_id`, `name`) VALUES
 (2, 'walking'),
 (3, 'Mana'),
 (4, 'Health'),
-(5, 'Condition'),
+(5, 'Skillpoints'),
 (6, 'Arrows'),
 (7, 'Gold Coins'),
 (8, 'turn_id'),
