@@ -9,6 +9,7 @@ html, body {
 
 body {
     font-family: "Open Sans", sans-serif;
+    background: #26af00;
 }
 
 h1 {
@@ -123,9 +124,12 @@ div.clearfix {
 
 div#container > nav > ul {
     list-style: none;
+    overflow: hidden;
+    padding-top: .6em;
 }
 
 div#container > nav > ul > li {
+    position: relative;
     float: left;
     padding: 1em;
     background: #87cdff;
@@ -133,7 +137,8 @@ div#container > nav > ul > li {
     min-width: 10em;
     text-align: center;
     cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, z-index .15s;
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
 }
 
 div#container > nav > ul > li:hover {
@@ -142,6 +147,7 @@ div#container > nav > ul > li:hover {
 
 div#container > nav > ul > li.active {
     background: #009bff;
+    z-index: 1;
 }
 
 div#container > nav > ul > li:last-of-type {
@@ -156,6 +162,7 @@ div#container > div.tab_area {
     background: #009bff;
     padding: 1em;
     position: relative;
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
 }
 
 div#container > div#tab_two, div#container > div#tab_three {
@@ -163,12 +170,13 @@ div#container > div#tab_two, div#container > div#tab_three {
 }
 
 div#game_area {
+    opacity: 0;
     position: absolute;
     top: 0;
-    background: #26af00;
     width: 100vw;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: opacity .5s;
 }
 
 div#game_area > header {
@@ -176,6 +184,7 @@ div#game_area > header {
     background: #b1cc00;
     padding: 1em;
     width: calc(100% - 2em);
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
 }
 
 div#game_area > header > div#user_info {
@@ -196,6 +205,16 @@ div#game_area > header > div.button {
     background: #f2f2f2;
     margin-left: 1em;
     display: inline-block;
+    transition: box-shadow .2s;
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
+}
+
+div#game_area > header > div.button:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+div#game_area > header > div.button:active {
+    box-shadow: inset 0 0 7px rgba(0, 0, 0, 0.7);
 }
 
 div#game_area > div#show_admin {
@@ -285,14 +304,14 @@ div#game_area > div#show_admin > div#admin_panel ul > li > div {
     display: inline-block;
 }
 
+div#game_area > div#show_admin > div#admin_panel ul > li > div:hover {
+    background: #ea7642;
+}
+
+div#game_area > div#show_admin > div#admin_panel ul > li > div:active {
+    background: #ff8959;
+}
+
 div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
     margin-top: 0;
-}
-
-div#game_area > header > div.button:hover {
-    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
-}
-
-div#game_area > header > div.button:active {
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
 }
