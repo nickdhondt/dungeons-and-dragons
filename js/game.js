@@ -15,7 +15,7 @@ function init() {
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
     document.getElementById("admin_one").addEventListener("click", function(e) { showAdminTab("one"); e.stopPropagation(); });
     document.getElementById("admin_two").addEventListener("click", function(e) { showAdminTab("two"); e.stopPropagation(); });
-    document.getElementById("btn_register").addEventListener("click", function() { requestUserRegister(); });
+    document.getElementById("btn_register").addEventListener("click", function(e) { requestUserRegister(); e.stopPropagation(); });
     document.getElementById("show_admin").addEventListener("click", function() { toggleAdminPanel(); });
     requestUserData();
 }
