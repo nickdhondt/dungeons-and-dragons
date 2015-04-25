@@ -1,6 +1,7 @@
 // Pfff comments
 window.onload = function() { init(); };
 var userId, permissionId;
+var admin;
 var lastPing = 0, connectionErrors = 0;
 var connectionLost = false;
 
@@ -10,6 +11,8 @@ function init() {
     document.getElementById("one").addEventListener("click", function() { showTab("one"); });
     document.getElementById("two").addEventListener("click", function() { showTab("two"); });
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
+    document.getElementById("admin_one").addEventListener("click", function() { showAdminTab("one"); });
+    document.getElementById("admin_two").addEventListener("click", function() { showAdminTab("two"); });
     requestUserData();
 }
 
@@ -27,7 +30,6 @@ function openStream() {
     eventSource.addEventListener("ping", function(e) {
         connectionLost = false;
         connectionErrors = 0;
-        console.log(".addEventListener: " + e.data);
         lastPing = microtime(true);
     }, false);
 
@@ -42,6 +44,26 @@ function openStream() {
             connectionLost = true;
         }
     }, 1000);
+}
+
+function showAdminTab(tab) {
+    var tabOne = document.getElementById("admin_tab_one");
+    var tabTwo = document.getElementById("admin_tab_two");
+
+    var one = document.getElementById("admin_one");
+    var two = document.getElementById("admin_two");
+
+    if (tab === "one") {
+        tabOne.style.display = "block";
+        tabTwo.style.display = "none";
+        one.setAttribute("class", "active");
+        two.setAttribute("class", "");
+    } else if (tab === "two") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "block";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "active");
+    }
 }
 
 function showTab(tab) {
@@ -163,11 +185,7 @@ function requestUserData(requestUserId) {
     var requestDataFromUser = {};
 
     if (typeof (requestUserId) === "undefined") {
-        if (typeof (userId) === "undefined") {
-            requestDataFromUser.user_id = "false";
-        } else {
-            requestDataFromUser.user_id = userId;
-        }
+        requestDataFromUser.user_id = "false";
     } else {
         requestDataFromUser.user_id = requestUserId;
     }
@@ -180,6 +198,8 @@ function requestUserData(requestUserId) {
 function processUserData(jsonData) {
     var responseParse = parseJSON(jsonData);
 
+    console.log(responseParse);
+
     if (responseParse !== null) {
         if (responseParse.request_accepted === "true") {
             var user_info = document.getElementById("user_info");
@@ -188,12 +208,24 @@ function processUserData(jsonData) {
             user_info.innerHTML = "Welkom " + responseParse.data.username + " <span>(" + responseParse.data.permission_name + ")</span>";
             userId = responseParse.data.user_id;
             permissionId = responseParse.data.permission_type;
+            admin = responseParse.data.admin;
+
+            if (admin === "true") {
+                showAdminPanel();
+                console.log("ok");
+            }
 
             openStream();
         } else {
             displayErrors(responseParse.errors);
         }
     }
+}
+
+function showAdminPanel() {
+    var adminPanel = document.getElementById("show_admin");
+
+    adminPanel.style.display = "block";
 }
 
 function parseJSON(jsonData) {
@@ -247,5 +279,5 @@ Notification.prototype.disable = function() {
     setTimeout(function() {
         currentNotification.style.opacity = "0";
         setTimeout(function() { currentNotification.remove() }, 490);
-    }, 5000);
+    }, 7000);
 };

@@ -31,6 +31,49 @@
             Uitloggen
         </div>
     </header>
+    <div id="show_admin">
+        Admin
+        <div id="admin_panel">
+            <div id="admin_tabs">
+                <ul>
+                    <li id="admin_one" class="active">Gebruikers</li>
+                </ul>
+                <ul>
+                    <li id="admin_two">Nieuwe gebruiker</li>
+                </ul>
+            </div>
+            <div class="clearfix"></div>
+            <div id="admin_tab_one" class="admin_tab">
+                <ul>
+                    <li>
+                        <div>Gebruiker</div>
+                        <div>✖</div>
+                    </li>
+                    <li>
+                        <div>Andere gebruiker</div>
+                        <div>✖</div>
+                    </li>
+                    <li>
+                        <div>Nog een</div>
+                        <div>✖</div>
+                    </li>
+                </ul>
+            </div>
+            <div id="admin_tab_two" class="admin_tab">
+                <ul>
+                    <li>
+                        <input type="text" placeholder="Gebruikersnaam"/>
+                    </li>
+                    <li>
+                        <input type="password" placeholder="Wachtwoord"/>
+                    </li>
+                    <li>
+                        <input type="button" value="Registreer"/>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <div id="container">
         <nav id="tabs">
             <ul>
