@@ -327,11 +327,13 @@ function processUserList(jsonData) {
     var deleteUser = document.getElementsByClassName("delete_user");
 
     for (var j = 0; j < changeUserview.length; j++) {
-        changeUserview[j].addEventListener("click", function() {
+        changeUserview[j].addEventListener("click", function(e) {
+            e.stopPropagation();
             requestUserData(this.id);
         });
 
-        deleteUser[j].addEventListener("click", function() {
+        deleteUser[j].addEventListener("click", function(e) {
+            e.stopPropagation();
             if (this.id == ownUserId) new Notification("Je kan jezelf niet verwijderen.", false);
             else if (confirm("De gebruiker verwijderen?") === true) requestDeleteUser(this.id);
         });
