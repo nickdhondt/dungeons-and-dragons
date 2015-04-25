@@ -6,25 +6,23 @@
 header("Content-Type: text/event-stream\n\n");
 header("Cache-Control: no-cache");
 
-/*
-header("Content-type: text/plain");
-header('Cache-Control: no-cache');
-*/
-
 // Set the script start as a float
 $script_beginning = microtime(true);
 
 // Every 5 seconds we will send a ping event to check connectivity
-$last_ping = microtime(true);
+$last_ping = 0;
 
 // Set the maximum execution time to 300 seconds (= 5 minutes) instead of 30 seconds
-//ini_set('max_execution_time', 300);
+ini_set('max_execution_time', 300);
 
 require_once "../includes/functions.php";
 
 // The timestamp is set to 0 at the beginning of the script, this will cause the script to stream all data one time at the beginning
 // Explanation follows
 $timestamp = 0;
+
+// Get the request user id
+$user_id = $_GET["user_id"];
 
 // We need to flush data while running the script (because otherwise the script will send all it's data after about 5 minutes instead of real time
 ob_implicit_flush(true);
@@ -44,9 +42,9 @@ while ($script_beginning >= (microtime(true) - 280)) {
     //$new_events = function_in_other_file($timestamp);
 
     // Ping very 5 seconds
-    if ($last_ping < microtime(true) - 5) {
+    if ($last_ping < (microtime(true) - 5)) {
         // Define ping event for javascript eventSource()
-        echo "event: ping\n\n";
+        echo "event: ping\n";
         // Force a reconnection after 2 seconds (if connection is lost client side)
         echo "retry: 2000\n";
         // Actual data (please always JSON)
@@ -61,7 +59,7 @@ while ($script_beginning >= (microtime(true) - 280)) {
         $json_game_data = json_encode($new_events);
 
         // Define ping event for javascript eventSource()
-        echo "event: game_event\n\n";
+        echo "event: game_event\n";
         // Force a reconnection after 2 seconds (if connection is lost client side)
         echo "retry: 2000\n";
         // Actual data (please always JSON)

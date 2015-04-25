@@ -1,6 +1,8 @@
 // Pfff comments
 window.onload = function() { init(); };
 var userId, permissionId;
+var lastPing = 0, connectionErrors = 0;
+var connectionLost = false;
 
 function init() {
     document.getElementById("btn_login").addEventListener("click", function() { tryLogin(); });
@@ -9,6 +11,37 @@ function init() {
     document.getElementById("two").addEventListener("click", function() { showTab("two"); });
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
     requestUserData();
+}
+
+function microtime(getAsFloat) {
+    var now = new Date()
+            .getTime() / 1000;
+    var s = parseInt(now, 10);
+
+    return (getAsFloat) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
+}
+
+function openStream() {
+    var eventSource = new EventSource("stream/stream_push_events.php?user_id=" + userId);
+
+    eventSource.addEventListener("ping", function(e) {
+        connectionLost = false;
+        connectionErrors = 0;
+        console.log(".addEventListener: " + e.data);
+        lastPing = microtime(true);
+    }, false);
+
+    eventSource.onerror = function(e) {
+        console.log("connection error [time: " + microtime(true) + "]");
+        connectionErrors++;
+    };
+
+    setInterval(function () {
+        if (((lastPing < (microtime(true) - 10)) || connectionErrors >= 2) && connectionLost === false) {
+            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus moest hij de pagona herladen.", false);
+            connectionLost = true;
+        }
+    }, 1000);
 }
 
 function showTab(tab) {
@@ -121,7 +154,6 @@ function processLoginResponse(jsonData) {
 
 function displayErrors(errorsObject) {
     var errorsAmount = errorsObject.length;
-    console.log(errorsAmount);
     for (var i = 0; i < errorsAmount; i++) {
         var notification = new Notification(errorsObject[i], false);
     }
@@ -136,10 +168,8 @@ function requestUserData(requestUserId) {
         } else {
             requestDataFromUser.user_id = userId;
         }
-        //console.log("ok");
     } else {
         requestDataFromUser.user_id = requestUserId;
-        //console.log("ok2");
     }
 
     var jsonData = JSON.stringify(requestDataFromUser);
@@ -148,7 +178,6 @@ function requestUserData(requestUserId) {
 }
 
 function processUserData(jsonData) {
-    //console.log(jsonData);
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
@@ -159,6 +188,8 @@ function processUserData(jsonData) {
             user_info.innerHTML = "Welkom " + responseParse.data.username + " <span>(" + responseParse.data.permission_name + ")</span>";
             userId = responseParse.data.user_id;
             permissionId = responseParse.data.permission_type;
+
+            openStream();
         } else {
             displayErrors(responseParse.errors);
         }
