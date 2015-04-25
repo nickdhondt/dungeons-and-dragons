@@ -168,7 +168,6 @@ div#game_area {
     background: #26af00;
     width: 100vw;
     min-height: 100vh;
-    overflow-y: scroll;
     overflow-x: hidden;
 }
 

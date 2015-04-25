@@ -22,6 +22,7 @@ if ($user_id != false) {
     }
 } else {
     $request_legal = "false";
+    $errors[] = "Gebruiker niet ingelogd.";
 }
 
 if ($request_legal === "true" && empty($errors)) {
