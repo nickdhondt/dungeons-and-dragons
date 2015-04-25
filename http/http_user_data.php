@@ -29,13 +29,36 @@ if ($user_id != false) {
         // posted user id => false => get user data based on session
         // posted user id => "id integer" => get user data based on the sent id
         $fields = array("user_id", "username", "permission_type");
-        if ($post_data["user_id"] === "false") $user_data = user_data($user_id, $fields);
-        else $user_data = user_data($post_data["user_id"], $fields);
+        if ($post_data["user_id"] === "false") {
+            $user_data = user_data($user_id, $fields);
 
-        // Get the permission name (Gebruiker, Administrator, etc.)
-        $permission_name = permission_name($user_data["permission_type"]);
+            // Get the permission name (Gebruiker, Administrator, etc.)
+            $permission_name = permission_name($user_data["permission_type"]);
+            $user_data["permission_name"] = $permission_name;
 
-        $user_data["permission_name"] = $permission_name;
+            if ($user_data["permission_type"] === "1") {
+                $user_data["admin"] = "true";
+
+                $user_data["admin_data"] = $user_data;
+                $user_data["admin_data"]["permission_name"] = $permission_name;
+            } else {
+                $user_data["admin"] = "false";
+            }
+        } else {
+            $user_data = user_data($post_data["user_id"], $fields);
+
+            // Get the permission name (Gebruiker, Administrator, etc.)
+            $permission_name = permission_name($user_data["permission_type"]);
+            $user_data["permission_name"] = $permission_name;
+
+            $admin_user_data = user_data($user_id, $fields);
+            $admin_permission_name = permission_name($admin_user_data["permission_type"]);
+
+            $user_data["admin"] = "true";
+
+            $user_data["admin_data"] = $admin_user_data;
+            $user_data["admin_data"]["permission_name"] = $admin_permission_name;
+        }
     }
 } else {
     // Set flag to false

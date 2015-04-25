@@ -3,9 +3,12 @@
     margin: 0;
 }
 
+html, body {
+    overflow-x: hidden;
+}
+
 body {
     font-family: "Open Sans", sans-serif;
-    overflow: hidden;
 }
 
 h1 {
@@ -34,7 +37,7 @@ div#login_holder {
     background: rgba(0, 0, 0, .4);
     opacity: 1;
     transition: opacity .5s;
-    z-index: 1;
+    z-index: 998;
 }
 
 div#login_holder > div {
@@ -152,6 +155,7 @@ div#container > nav > ul > li:first-of-type {
 div#container > div.tab_area {
     background: #009bff;
     padding: 1em;
+    position: relative;
 }
 
 div#container > div#tab_two, div#container > div#tab_three {
@@ -164,7 +168,7 @@ div#game_area {
     background: #26af00;
     width: 100vw;
     min-height: 100vh;
-    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 div#game_area > header {
@@ -187,10 +191,102 @@ div#game_area > header > div#user_info > span {
 
 div#game_area > header > div.button {
     cursor: pointer;
-    padding: .7em;
-    float: right;
+    padding: 1em;
+    height: auto;
     background: #f2f2f2;
-    transition: box-shadow .15s;
+    margin-left: 1em;
+    display: inline-block;
+}
+
+div#game_area > div#show_admin {
+    display: none;
+    position: absolute;
+    right: -22em;
+    top: 6em;
+    padding: 1em;
+    width: 22em;
+    background: #f8f7d0;
+    z-index: 997;
+    transition: right .3s;
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
+}
+
+div#game_area > div#show_admin > div#admin_user {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+div#game_area > div#show_admin:hover {
+    right: 0;
+}
+
+div#game_area > div#show_admin > div#admin_panel {
+    padding-top: 1em;
+    margin-top: 1em;
+    border-top: 1px solid #000000;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div#admin_tab_two {
+    display: none;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div.admin_tab {
+    padding: .5em;
+    background: #ffae00;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div#admin_tabs > ul > li {
+    float: left;
+    padding: .5em;
+    margin-right: 1em;
+    background: #ffd198;
+    transition: background .15s;
+    cursor: pointer;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div#admin_tabs > ul > li:hover {
+    background: #f6c893;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div#admin_tabs > ul > li.active {
+    background: #ffae00;
+}
+
+div#game_area > div#show_admin > div#admin_panel > div#admin_tabs > ul > li:first-of-type {
+    margin-left: .5em;
+}
+
+div#game_area > div#show_admin > div#admin_panel ul {
+    list-style: none;
+}
+
+
+div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div#game_area > div#show_admin > div#admin_panel ul > li > input[type=password] {
+    padding: .5em;
+    font-family: "Open Sans", sans-serif;
+    font-size: .8em;
+    width: calc(100% - 1.1em);
+    margin-bottom: .5em;
+}
+
+div#game_area > div#show_admin > div#admin_panel ul > li > input[type=button] {
+    padding: .5em;
+    font-family: "Open Sans", sans-serif;
+    font-size: .8em;
+    width: 100%;
+}
+
+div#game_area > div#show_admin > div#admin_panel ul > li > div {
+    padding: .5em;
+    margin-top: .3em;
+    margin-right: .3em;
+    background: #ff4f00;
+    cursor: pointer;
+    display: inline-block;
+}
+
+div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
+    margin-top: 0;
 }
 
 div#game_area > header > div.button:hover {

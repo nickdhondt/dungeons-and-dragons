@@ -25,6 +25,23 @@ function user_exists($username) {
     }
 }
 
+function user_id_exists($user_id) {
+    global $connection;
+
+    $sql = $connection->query("SELECT COUNT(user_id) AS users FROM user WHERE user_id='$user_id'");
+
+    if (!$sql) {
+        return $connection->error;
+    } else {
+        $users = $sql->fetch_assoc();
+        if ($users >= 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 function user_data($user_id, $fields) {
     global $connection;
 
@@ -64,5 +81,59 @@ function user_logged_in () {
         return $_SESSION["user_id"];
     } else {
         return false;
+    }
+}
+
+function get_user_list() {
+    global $connection;
+
+    $sql = $connection->query("SELECT username, user_id FROM user");
+
+    if (!$sql) {
+        return $connection->connect_error;
+    } else {
+        $rows = array();
+
+        while($row = $sql->fetch_assoc()) {
+            $rows[] = $row;
+        }
+    }
+
+    return $rows;
+}
+
+function register_user($username, $password) {
+    global $connection;
+
+    $options = [
+        'cost' => 10,
+    ];
+
+    $hash = password_hash($password, PASSWORD_BCRYPT, $options);
+
+    $sql = $connection->query("INSERT INTO user (username, password, permission_type) VALUES ('$username', '$password', 0)");
+
+    if (!$sql) {
+        return $connection->connect_error;
+    } else {
+        return true;
+    }
+}
+
+function delete_user($user_id) {
+    global $connection;
+
+    $sql = $connection->query("DELETE FROM user WHERE user_id='$user_id'");
+
+    if (!$sql) {
+        return $connection->connect_error;
+    } else {
+        $num_rows = $connection->affected_rows;
+
+        if ($num_rows >= 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
