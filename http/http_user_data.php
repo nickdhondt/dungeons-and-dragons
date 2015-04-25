@@ -1,6 +1,7 @@
 <?php
 
 require_once("../includes/functions.php");
+session_start();
 
 $errors = array();
 $data_acquired = "false";
