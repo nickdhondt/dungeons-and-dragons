@@ -205,7 +205,7 @@ div#game_area > div#show_admin {
     top: 6em;
     padding: 1em;
     width: 22em;
-    background: #f7f7f7;
+    background: #f8f7d0;
     z-index: 997;
     transition: right .3s;
     box-shadow: 0 0 7px rgba(0, 0, 0, 0.7);
