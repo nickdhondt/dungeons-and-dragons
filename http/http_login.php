@@ -2,6 +2,7 @@
 
 // Include functions.php
 require_once("../includes/functions.php");
+session_start();
 
 $errors = array();
 $user_passed = "false";

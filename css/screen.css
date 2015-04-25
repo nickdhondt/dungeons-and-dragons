@@ -12,7 +12,7 @@ h1 {
     margin-bottom: .75em;
 }
 
-div#notifications > div, div#game_area > header > div.button {
+div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -110,6 +110,54 @@ div#notifications > div > span.close_notif {
 *
 */
 
+div#container {
+    padding: 1em;
+}
+
+div.clearfix {
+    clear: both;
+}
+
+div#container > nav > ul {
+    list-style: none;
+}
+
+div#container > nav > ul > li {
+    float: left;
+    padding: 1em;
+    background: #87cdff;
+    margin-right: 2em;
+    min-width: 10em;
+    text-align: center;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+div#container > nav > ul > li:hover {
+    background: #7cbeee;
+}
+
+div#container > nav > ul > li.active {
+    background: #009bff;
+}
+
+div#container > nav > ul > li:last-of-type {
+    margin-right: 0;
+}
+
+div#container > nav > ul > li:first-of-type {
+    margin-left: 1em;
+}
+
+div#container > div.tab_area {
+    background: #009bff;
+    padding: 1em;
+}
+
+div#container > div#tab_two, div#container > div#tab_three {
+    display: none;
+}
+
 div#game_area {
     position: absolute;
     top: 0;
@@ -120,7 +168,6 @@ div#game_area {
 }
 
 div#game_area > header {
-    position: fixed;
     top: 0;
     background: #b1cc00;
     padding: 1em;
@@ -143,6 +190,7 @@ div#game_area > header > div.button {
     padding: .7em;
     float: right;
     background: #f2f2f2;
+    transition: box-shadow .15s;
 }
 
 div#game_area > header > div.button:hover {

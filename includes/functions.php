@@ -3,8 +3,6 @@
 /* The well known functions.php */
 
 require_once("db/connect.php");
-session_start();
-
 
 function user_exists($username) {
     global $connection;
