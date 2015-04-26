@@ -19,7 +19,19 @@ function init() {
     document.getElementById("txt_new_username").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("txt_new_password").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("show_admin").addEventListener("click", function() { toggleAdminPanel(); });
+    window.matchMedia("(orientation: portrait)").addListener(handleOrientationChange);
+
     requestUserData();
+}
+
+function handleOrientationChange() {
+    if (adminPanelOpen === false) {
+        if (window.matchMedia("screen and (max-device-width: 640px)").matches) {
+            document.getElementById("show_admin").style.right = "-90%";
+        } else {
+            document.getElementById("show_admin").style.right = "-22em";
+        }
+    }
 }
 
 function toggleAdminPanel() {
@@ -27,8 +39,13 @@ function toggleAdminPanel() {
         document.getElementById("show_admin").style.right = "0";
         adminPanelOpen = true;
     } else {
-        document.getElementById("show_admin").style.right = "-22em";
-        adminPanelOpen = false;
+        if (window.matchMedia("screen and (max-device-width: 640px)").matches) {
+            document.getElementById("show_admin").style.right = "-90%";
+            adminPanelOpen = false;
+        } else {
+            document.getElementById("show_admin").style.right = "-22em";
+            adminPanelOpen = false;
+        }
     }
 }
 

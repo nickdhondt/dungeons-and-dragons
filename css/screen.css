@@ -239,10 +239,6 @@ div#game_area > div#show_admin > div#admin_user {
     font-weight: bold;
 }
 
-div#game_area > div#show_admin:hover {
-    right: 0 !important;
-}
-
 div#game_area > div#show_admin > div#admin_panel {
     padding-top: 1em;
     margin-top: 1em;
@@ -336,7 +332,7 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
 
     div#game_area > div#show_admin {
         width: 90%;
-        right: -90% !important;
+        right: -90%;
     }
 
     div#container > nav > ul {
