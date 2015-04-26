@@ -48,7 +48,7 @@ function processRegisterResponse(jsonData) {
 
     if (responseParse !== null) {
         if (responseParse.request_legal === "true") {
-            var notif = new Notification("De gebruiker werd succesvol toegevoegd.");
+            var notif = new Notification("De gebruiker werd succesvol toegevoegd.", false);
             requestUserData();
         }
         else {
@@ -75,6 +75,13 @@ function openStream() {
     }
 
     eventSource.addEventListener("ping", function(e) {
+        var streamErrorNotifs = document.getElementsByClassName("streamErrorNotif");
+        var streamErrorLength = streamErrorNotifs.length;
+
+        for(var i = 0; i < streamErrorLength; i++) {
+            disableClick(streamErrorNotifs[i].id);
+        }
+
         connectionLost = false;
         connectionErrors = 0;
         lastPing = microtime(true);
@@ -88,7 +95,7 @@ function openStream() {
 
     setInterval(function () {
         if (((lastPing < (microtime(true) - 10)) || connectionErrors >= 2) && connectionLost === false) {
-            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus moest hij de pagina herladen.", false);
+            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus overwoog hij de pagina herladen.", true, "streamErrorNotif");
             connectionLost = true;
         }
     }, 1000);
@@ -204,6 +211,8 @@ function sendXHR(data, url, type, executeFunction) {
             }
         }
     };
+
+    xhr.onerror = function() { new Notification("De actie werd niet verzonden. Er zijn mogelijk connectie problemen.", false); };
 
     xhr.open(type, url);
 
@@ -360,7 +369,7 @@ function processDeleteUser(jsonData) {
 
     if (responseParse !== null) {
         if (responseParse.request_legal === "true") {
-            var notif = new Notification("De gebruiker werd succesvol verwijderd.");
+            var notif = new Notification("De gebruiker werd succesvol verwijderd.", false);
             requestUserData();
         }
         else {
@@ -393,9 +402,9 @@ function disableLogin() {
     loginHolder.style.pointerEvents = "none";
 }
 
-var Notification = function(message, keepAlive) {
+var Notification = function(message, keepAlive, notifClass) {
     this.message = message;
-    this.norifId = ("" + (Math.floor((Math.random() * 10000) + 1000))).substring(0,4);
+    this.notifId = ("" + (Math.floor((Math.random() * 10000) + 1000))).substring(0,4);
     this.keepAlive = keepAlive;
 
     var notifContainer = document.getElementById("notifications");
@@ -403,12 +412,8 @@ var Notification = function(message, keepAlive) {
     var notifNode = document.createElement("div");
     var notifText = document.createTextNode(message);
     notifNode.appendChild(notifText);
-    notifNode.setAttribute("id", this.norifId);
-    var closeNotifNode = document.createElement("span");
-    var closeNotifText = document.createTextNode("✖");
-    closeNotifNode.appendChild(closeNotifText);
-    closeNotifNode.setAttribute("class", "close_notif");
-    notifNode.appendChild(closeNotifNode);
+    notifNode.setAttribute("id", this.notifId);
+    if (notifClass !== "undefined") notifNode.setAttribute("class", notifClass);
     notifNode.style.opacity = "0";
     setTimeout(function() { notifNode.style.opacity = "1"; }, 5);
 
@@ -417,14 +422,23 @@ var Notification = function(message, keepAlive) {
     if(keepAlive !== true) {
         this.disable();
     }
+
+    document.getElementById(this.notifId).addEventListener("click", function(e) { disableClick(e.target.id); } );
 };
 
 Notification.prototype.disable = function() {
-    var currentId = this.norifId;
-    var currentNotification = document.getElementById(this.norifId);
+    var currentId = this.notifId;
+    var currentNotification = document.getElementById(this.notifId);
 
     setTimeout(function() {
         currentNotification.style.opacity = "0";
         setTimeout(function() { currentNotification.remove() }, 490);
     }, 7000);
 };
+
+function disableClick(id) {
+    var currentNotification = document.getElementById(id);
+
+    currentNotification.style.opacity = "0";
+    setTimeout(function() { currentNotification.remove() }, 490);
+}
