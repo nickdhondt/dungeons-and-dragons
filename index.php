@@ -5,6 +5,7 @@
     <title>Dungeons and Dragons</title>
     <script src="js/game.js"></script>
     <link rel="stylesheet" href="css/screen.css"/>
+    <meta name=viewport content="width=device-width, initial-scale=1">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>

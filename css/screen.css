@@ -329,3 +329,39 @@ div#game_area > div#show_admin > div#admin_panel ul > li > div:active {
 div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
     margin-top: 0;
 }
+
+@media screen and (max-device-width: 640px) {
+    div#login_holder > div {
+        margin: auto 1em;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    div#game_area > header > div.button {
+        width: calc(100% - 2em);
+        margin: 1em 0 0 0;
+        display: block;
+        text-align: center;
+    }
+
+    div#game_area > div#show_admin {
+        width: 90%;
+        right: -90% !important;
+    }
+
+    div#container > nav > ul {
+        overflow: visible;
+        padding: 0;
+    }
+
+    div#container > nav > ul > li {
+        float: none;
+        position: static;
+        width: calc(100% - 2em);
+        margin: 0 0 1em 0;
+    }
+
+    div#container > nav > ul > li:first-of-type {
+        margin: 0 0 1em 0;
+    }
+}
