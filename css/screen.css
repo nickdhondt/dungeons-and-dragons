@@ -284,7 +284,7 @@ div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
-    width: calc(100% - 1.1em);
+    width: calc(100% - 1.31em);
     margin-bottom: .5em;
 }
 

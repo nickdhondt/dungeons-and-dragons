@@ -111,7 +111,7 @@ function openStream() {
     };
 
     setInterval(function () {
-        if (((lastPing < (microtime(true) - 10)) || connectionErrors >= 2) && connectionLost === false) {
+        if (((lastPing < (microtime(true) - 10)) || (connectionErrors >= 2)) && connectionLost === false) {
             var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus overwoog hij de pagina herladen.", true, "streamErrorNotif");
             connectionLost = true;
         }
