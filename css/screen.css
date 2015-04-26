@@ -106,16 +106,6 @@ div#notifications > div {
     background: rgba(0, 0, 0, .4);
     padding: .5em;
     transition: opacity, .5s;
-    cursor: default;
-}
-
-div#notifications > div > span.close_notif {
-    background: rgba(0, 0, 0, .4);
-    width: 1.5em;
-    height: 1.5em;
-    position: absolute;
-    right: 0;
-    margin-right: .5em;
     cursor: pointer;
 }
 
@@ -249,10 +239,6 @@ div#game_area > div#show_admin > div#admin_user {
     font-weight: bold;
 }
 
-div#game_area > div#show_admin:hover {
-    right: 0 !important;
-}
-
 div#game_area > div#show_admin > div#admin_panel {
     padding-top: 1em;
     margin-top: 1em;
@@ -346,7 +332,7 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
 
     div#game_area > div#show_admin {
         width: 90%;
-        right: -90% !important;
+        right: -90%;
     }
 
     div#container > nav > ul {
