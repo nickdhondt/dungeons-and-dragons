@@ -156,7 +156,7 @@ function get_basic_data_user($user_id, $current_timestamp){
         //This code is gathers the new data.
         $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '".$user_id."'");
 
-        if(!sql){
+        if(!$sql){
             return $connection->error;
         } else {
             $rows = array();    //Declare empty array to avoid problems
