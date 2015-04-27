@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 27 apr 2015 om 21:15
+-- Gegenereerd op: 27 apr 2015 om 21:27
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -467,7 +467,7 @@ CREATE TABLE IF NOT EXISTS `races` (
   `attack` int(11) NOT NULL,
   `defence` int(11) NOT NULL,
   `walking` int(11) NOT NULL,
-  `intelligence` int(11) NOT NULL,
+  `mana` int(11) NOT NULL,
   `health` int(11) NOT NULL,
   `available_skills` text NOT NULL COMMENT 'refers to the table skills, divided by ;'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -476,7 +476,7 @@ CREATE TABLE IF NOT EXISTS `races` (
 -- Gegevens worden geëxporteerd voor tabel `races`
 --
 
-INSERT INTO `races` (`race_id`, `name`, `attack`, `defence`, `walking`, `intelligence`, `health`, `available_skills`) VALUES
+INSERT INTO `races` (`race_id`, `name`, `attack`, `defence`, `walking`, `mana`, `health`, `available_skills`) VALUES
 (1, 'Elf', 1, 1, 1, 4, 2, '1;2;3;4;5;6;7;8;9;10;11;12;26;19;28;29;33;13;15;16;21'),
 (2, 'Dwarf', 1, 1, 0, 2, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;30;23'),
 (3, 'Dragonborn', 1, 1, 1, 3, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;26'),
