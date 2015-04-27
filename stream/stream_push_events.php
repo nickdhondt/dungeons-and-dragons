@@ -53,8 +53,12 @@ while ($script_beginning >= (microtime(true) - 280)) {
 
         $last_ping = microtime(true);
     }
-/*
-    if (!empty($new_events)) {
+
+    //Set the new events to the following arrays.
+    $new_events = get_basic_data_users($timestamp); //Returns the basic data for the users.
+
+    //Stream the $new_events
+    if ($new_events != false) {
         // JSON encode
         $json_game_data = json_encode($new_events);
 
@@ -69,7 +73,7 @@ while ($script_beginning >= (microtime(true) - 280)) {
         flush();
         // Update current time to prevent db form returning data when not necessary
         $timestamp = microtime(true);
-    }*/
+    }
 
     // Flush the cache to the user
     flush();
