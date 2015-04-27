@@ -1,9 +1,9 @@
-﻿-- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 4.2.11
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 25 apr 2015 om 13:12
+-- Gegenereerd op: 27 apr 2015 om 17:50
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -19,6 +19,58 @@ SET time_zone = "+00:00";
 --
 -- Databank: `dungeons_and_dragons`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `advantages`
+--
+
+CREATE TABLE IF NOT EXISTS `advantages` (
+  `advantage_id` int(11) NOT NULL,
+  `condition_id` int(11) NOT NULL,
+  `basic_id` int(11) NOT NULL,
+  `advantage_value` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `advantages`
+--
+
+INSERT INTO `advantages` (`advantage_id`, `condition_id`, `basic_id`, `advantage_value`) VALUES
+(0, 0, 0, '0'),
+(1, 1, 1, '2'),
+(2, 1, 0, '-2'),
+(3, 1, 9, '-2'),
+(4, 2, 9, '-5'),
+(5, 3, 2, '-1'),
+(6, 4, 10, 'Alle vijanden zullen jou aanvallen ipv de anderen. Laat de DM dit weten.'),
+(7, 5, 0, '-5'),
+(8, 5, 1, '-5'),
+(9, 6, 2, '-5'),
+(10, 7, 4, '-4'),
+(11, 8, 10, 'Je mag het speelbord niet meer aanschouwen'),
+(12, 9, 4, '-2'),
+(13, 9, 2, '-1'),
+(14, 10, 7, '1'),
+(15, 11, 2, '-5'),
+(16, 12, 0, '1'),
+(17, 12, 9, '2'),
+(18, 13, 0, '-5'),
+(19, 13, 1, '-5'),
+(20, 13, 2, '-5'),
+(21, 14, 10, 'Je verdiend het dubbele EXP tijdens de Blood Thirst, maar je verdediging gaat met 50% naar beneden'),
+(22, 15, 4, '1'),
+(23, 16, 3, '1'),
+(24, 17, 10, 'Valstrikken hebben geen Effect'),
+(25, 18, 3, '3'),
+(26, 19, 4, '-1'),
+(27, 20, 10, 'Wissel met een andere speler in de beurtvolgorde'),
+(28, 21, 10, 'Verplaats een monster naar keuze in de huidige kamer.'),
+(29, 22, 10, 'Elke held in de kamer mag zich eenmaal vrij verplaatsen'),
+(30, 23, 3, '4'),
+(31, 23, 4, '4'),
+(32, 24, 4, '3');
 
 -- --------------------------------------------------------
 
@@ -59,8 +111,6 @@ INSERT INTO `basic` (`basic_id`, `name`) VALUES
 CREATE TABLE IF NOT EXISTS `condition` (
   `condition_id` int(11) NOT NULL,
   `name` text NOT NULL,
-  `advantage_value` text NOT NULL COMMENT 'gives the value for the advantages',
-  `advantage` text NOT NULL COMMENT 'refers to basic. Divided by ;',
   `duration` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -68,56 +118,56 @@ CREATE TABLE IF NOT EXISTS `condition` (
 -- Gegevens worden geëxporteerd voor tabel `condition`
 --
 
-INSERT INTO `condition` (`condition_id`, `name`, `advantage_value`, `advantage`, `duration`) VALUES
-(0, 'Healthy', '0', '0', 0),
-(1, 'Prone', '2;-2;-2', '1;0;9', 2),
-(2, 'Surprized', '-5', '9', 1),
-(3, 'Slowed', '-1', '2', 1),
-(4, 'Marked', 'Alle vijanden zullen jou aanvallen ipv de anderen. Laat de DM dit weten.', '10', 4),
-(5, 'Stunned', '-5;-5', '0;1', 1),
-(6, 'Dazed', '-5', '2', 1),
-(7, 'Poisoned', '-4', '4', 3),
-(8, 'Blinded', 'Je mag het speelbord niet meer aanschouwen', '10', 3),
-(9, 'Crippled', '-2;-1', '4;2', 2),
-(10, 'Lucky', '1', '7', 1),
-(11, 'Immobilized', '-5', '2', 5),
-(12, 'Overthrown', '1;2', '0;9', 3),
-(13, 'Dying', '-5;-5;-5', '0;1;2', 3),
-(14, 'Blood Thirst', 'Je verdiend het dubbele EXP tijdens de Blood Thirst, maar je verdediging gaat met 50% naar beneden', '10', 4),
-(15, 'Healing', '1', '4', 0),
-(16, 'Strenthening', '1', '3', 0),
-(17, 'Blessed', 'Valstrikken hebben geen effect', '10', 5),
-(18, 'Strenthening', '3', '3', 0),
-(19, 'Poisoned', '-1', '4', 1),
-(20, 'Blessed', 'Wissel met een andere speler in de beurtvolgorde.', '10', 0),
-(21, 'Fortified', 'Verplaats een monster naar keuze in de huidige kamer', '10', 0),
-(22, 'Light feeted', 'Elke held in de kamer mag zich eenmaal vrij verplaatsen', '10', 0),
-(23, 'Recovering', '4;4', '3;4', 0),
-(24, 'Healing', '3', '4', 0),
-(25, 'Incapacitated', 'The DM skips his next turn', '10', 1),
-(26, 'Heavy Strenthening', '4', '3', 0),
-(27, 'Rushed', 'Val onmiddellijk aan (zelfs als het je beurt niet is.)', '10', 0),
-(28, 'Heavy Healing', '4', '4', 0),
-(29, 'Extreme Healing', '5;1', '4;3', 0),
-(30, 'Extreme Strenthening', '5;1', '3;4', 0),
-(31, 'Blessed', 'Gooi je laatste dobbelsteenworp opnieuw', '10', 0),
-(32, 'Blessed', 'Voer onmiddellijk een andere combo aanval uit', '10', 0),
-(33, 'Blessed', 'Vind dubbel zoveel ingredienten', '10', 10),
-(34, 'Fastened', '2', '2', 2),
-(35, 'Holy', 'Alle aanvallen op jou komen op de aanvaller terecht', '10', 2),
-(36, 'Elevated', '2', '12', 5),
-(37, 'Cursed', '-5', '2', 1),
-(38, 'Cursed', '-1', '4', 6),
-(39, 'Cursed', 'Laat het slachtoffer gooien met de conditiedobbelsteen', '10', 0),
-(40, 'Cursed', 'Het monster  dicht bij je veranderd in een monster willekeurig getrokken uit de stapel monsterkaarten', '10', 0),
-(41, 'Slightly Fortified Defence', '1', '1', 20),
-(42, 'Slighty Fastened Movement', '1', '2', 20),
-(43, 'Fortified Defence', '2', '1', 20),
-(44, 'Fastened Walking', '2', '2', 20),
-(45, 'Strongly Fortyfied Defence', '3', '1', 20),
-(46, 'Strongly Fastened Walking', '3', '2', 20),
-(47, 'Mana Restoration', '1', '3', 20),
-(48, 'Wizard Guide', '1;2', '3;12', 20);
+INSERT INTO `condition` (`condition_id`, `name`, `duration`) VALUES
+(0, 'Healthy', 0),
+(1, 'Prone', 2),
+(2, 'Surprized', 1),
+(3, 'Slowed', 1),
+(4, 'Marked', 4),
+(5, 'Stunned', 1),
+(6, 'Dazed', 1),
+(7, 'Poisoned', 3),
+(8, 'Blinded', 3),
+(9, 'Crippled', 2),
+(10, 'Lucky', 1),
+(11, 'Immobilized', 5),
+(12, 'Overthrown', 3),
+(13, 'Dying', 3),
+(14, 'Blood Thirst', 4),
+(15, 'Healing', 0),
+(16, 'Strenthening', 0),
+(17, 'Blessed', 5),
+(18, 'Strenthening', 0),
+(19, 'Poisoned', 1),
+(20, 'Blessed', 0),
+(21, 'Fortified', 0),
+(22, 'Light feeted', 0),
+(23, 'Recovering', 0),
+(24, 'Healing', 0),
+(25, 'Incapacitated', 1),
+(26, 'Heavy Strenthening', 0),
+(27, 'Rushed', 0),
+(28, 'Heavy Healing', 0),
+(29, 'Extreme Healing', 0),
+(30, 'Extreme Strenthening', 0),
+(31, 'Blessed', 0),
+(32, 'Blessed', 0),
+(33, 'Blessed', 10),
+(34, 'Fastened', 2),
+(35, 'Holy', 2),
+(36, 'Elevated', 5),
+(37, 'Cursed', 1),
+(38, 'Cursed', 6),
+(39, 'Cursed', 0),
+(40, 'Cursed', 0),
+(41, 'Slightly Fortified Defence', 20),
+(42, 'Slighty Fastened Movement', 20),
+(43, 'Fortified Defence', 20),
+(44, 'Fastened Walking', 20),
+(45, 'Strongly Fortyfied Defence', 20),
+(46, 'Strongly Fastened Walking', 20),
+(47, 'Mana Restoration', 20),
+(48, 'Wizard Guide', 20);
 
 -- --------------------------------------------------------
 
@@ -629,6 +679,27 @@ INSERT INTO `skills` (`skill_id`, `name`, `type`, `subtype`, `levels`, `level_ad
 -- --------------------------------------------------------
 
 --
+-- Tabelstructuur voor tabel `timestamps`
+--
+
+CREATE TABLE IF NOT EXISTS `timestamps` (
+  `user_id` int(11) NOT NULL,
+  `basic_timestamp` text NOT NULL,
+  `skill_timestamp` text NOT NULL,
+  `inventory_timestamp` text NOT NULL,
+  `condition_timestamp` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `timestamps`
+--
+
+INSERT INTO `timestamps` (`user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
+(1, '0', '0', '0', '0');
+
+-- --------------------------------------------------------
+
+--
 -- Tabelstructuur voor tabel `types`
 --
 
@@ -685,30 +756,105 @@ CREATE TABLE IF NOT EXISTS `user` (
   `permission_type` int(11) NOT NULL,
   `race` int(11) NOT NULL COMMENT 'The race of the Character',
   `class` int(11) NOT NULL COMMENT 'The class of the Character',
-  `basic_value` text NOT NULL COMMENT 'gives the values of the basics',
-  `basic` text NOT NULL COMMENT 'refers to basic table',
-  `basic_timestamp` int(11) NOT NULL COMMENT 'last updated on:',
-  `skill_value` text NOT NULL COMMENT 'gives the values of the skills',
-  `skill` text NOT NULL COMMENT 'refers to the skill table',
-  `skill_timestamp` int(11) NOT NULL COMMENT 'last updated on:',
-  `inventory_value` text NOT NULL COMMENT 'gives the value of the inventory',
-  `inventory` text NOT NULL COMMENT 'refers to the inventory table',
-  `inventory_timestamp` int(11) NOT NULL COMMENT 'last updated on:',
-  `condition_value` text NOT NULL COMMENT 'the value of the condition duration',
-  `condition` text NOT NULL COMMENT 'refers to the table condition',
-  `condition_timestamp` int(11) NOT NULL COMMENT 'time since last update'
+  `general_timestamp` int(11) NOT NULL COMMENT 'time since last update'
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user`
 --
 
-INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`, `class`, `basic_value`, `basic`, `basic_timestamp`, `skill_value`, `skill`, `skill_timestamp`, `inventory_value`, `inventory`, `inventory_timestamp`, `condition_value`, `condition`, `condition_timestamp`) VALUES
-(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 1, 1, '1;1;1', '1;1;1', 0, '1;1;1', '1;1;1', 0, '1;1;1', '1;1;1', 0, '1;1;1', '1;1;1', 0);
+INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`, `class`, `general_timestamp`) VALUES
+(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 1, 1, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user_basic_data`
+--
+
+CREATE TABLE IF NOT EXISTS `user_basic_data` (
+  `user_id` int(11) NOT NULL,
+  `basic_id` int(11) NOT NULL,
+  `basic_value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user_basic_data`
+--
+
+INSERT INTO `user_basic_data` (`user_id`, `basic_id`, `basic_value`) VALUES
+(1, 1, 1),
+(1, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user_condition_data`
+--
+
+CREATE TABLE IF NOT EXISTS `user_condition_data` (
+  `user_id` int(11) NOT NULL,
+  `condition_id` int(11) NOT NULL,
+  `condition_value` int(11) NOT NULL COMMENT 'Dit bevat hoeveel beurten de conditie nog actief is'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user_condition_data`
+--
+
+INSERT INTO `user_condition_data` (`user_id`, `condition_id`, `condition_value`) VALUES
+(1, 1, 1),
+(1, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user_inventory_data`
+--
+
+CREATE TABLE IF NOT EXISTS `user_inventory_data` (
+  `user_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `item_value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user_inventory_data`
+--
+
+INSERT INTO `user_inventory_data` (`user_id`, `item_id`, `item_value`) VALUES
+(1, 1, 1),
+(1, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user_skill_data`
+--
+
+CREATE TABLE IF NOT EXISTS `user_skill_data` (
+  `user_id` int(11) NOT NULL,
+  `skill_id` int(11) NOT NULL,
+  `skill_value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user_skill_data`
+--
+
+INSERT INTO `user_skill_data` (`user_id`, `skill_id`, `skill_value`) VALUES
+(1, 2, 1),
+(1, 1, 1);
 
 --
 -- Indexen voor geëxporteerde tabellen
 --
+
+--
+-- Indexen voor tabel `advantages`
+--
+ALTER TABLE `advantages`
+ ADD PRIMARY KEY (`advantage_id`);
 
 --
 -- Indexen voor tabel `basic`
