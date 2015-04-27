@@ -58,7 +58,7 @@ while ($script_beginning >= (microtime(true) - 280)) {
     $new_events = get_basic_data_users($timestamp); //Returns the basic data for the users.
 
     //Stream the $new_events
-    if (!empty($new_events)) {
+    if ($new_events != false) {
         // JSON encode
         $json_game_data = json_encode($new_events);
 

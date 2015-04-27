@@ -149,10 +149,10 @@ function get_basic_data_user($user_id, $current_timestamp){
     if(!$sql){
         return $connection->error;
     } else {
-        $basic_timestamp = $sql->fetch_assoc()[0];
+        $basic_timestamp = $sql->fetch_assoc();
     }
 
-    if($basic_timestamp >= $current_timestamp){
+    if($basic_timestamp["basic_timestamp"] >= $current_timestamp) {
         //This code is gathers the new data.
         $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '".$user_id."'");
 
@@ -184,11 +184,16 @@ function get_basic_data_users($current_timestamp){
         $user_id = $user["user_id"];
 
         $basic_data_user = get_basic_data_user($user_id, $current_timestamp);
-        $basic_data_users_entry["user_id"] = $user_id;
-        $basic_data_users_entry["username"] = $username;
-        $basic_data_users_entry["basic_data"] = $basic_data_user;
 
-        $basic_data_users[] = $basic_data_users_entry;
+        if ($basic_data_user != false) {
+
+            $basic_data_users_entry["user_id"] = $user_id;
+            $basic_data_users_entry["username"] = $username;
+            $basic_data_users_entry["basic_data"] = $basic_data_user;
+
+            $basic_data_users[] = $basic_data_users_entry;
+
+        }
     }
 
     return $basic_data_users;
