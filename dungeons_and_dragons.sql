@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 27 apr 2015 om 17:50
+-- Gegenereerd op: 27 apr 2015 om 20:37
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -683,19 +683,20 @@ INSERT INTO `skills` (`skill_id`, `name`, `type`, `subtype`, `levels`, `level_ad
 --
 
 CREATE TABLE IF NOT EXISTS `timestamps` (
+  `timestamp_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `basic_timestamp` text NOT NULL,
-  `skill_timestamp` text NOT NULL,
-  `inventory_timestamp` text NOT NULL,
-  `condition_timestamp` text NOT NULL
+  `basic_timestamp` varchar(16) NOT NULL,
+  `skill_timestamp` varchar(16) NOT NULL,
+  `inventory_timestamp` varchar(16) NOT NULL,
+  `condition_timestamp` varchar(16) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `timestamps`
 --
 
-INSERT INTO `timestamps` (`user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
-(1, '0', '0', '0', '0');
+INSERT INTO `timestamps` (`timestamp_id`, `user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
+(0, 1, '10', '10', '10', '10');
 
 -- --------------------------------------------------------
 
@@ -773,6 +774,7 @@ INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`
 --
 
 CREATE TABLE IF NOT EXISTS `user_basic_data` (
+  `ubd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `basic_id` int(11) NOT NULL,
   `basic_value` int(11) NOT NULL
@@ -782,9 +784,9 @@ CREATE TABLE IF NOT EXISTS `user_basic_data` (
 -- Gegevens worden geëxporteerd voor tabel `user_basic_data`
 --
 
-INSERT INTO `user_basic_data` (`user_id`, `basic_id`, `basic_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_basic_data` (`ubd_id`, `user_id`, `basic_id`, `basic_value`) VALUES
+(0, 1, 1, 1),
+(1, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -793,6 +795,7 @@ INSERT INTO `user_basic_data` (`user_id`, `basic_id`, `basic_value`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `user_condition_data` (
+  `ucd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `condition_id` int(11) NOT NULL,
   `condition_value` int(11) NOT NULL COMMENT 'Dit bevat hoeveel beurten de conditie nog actief is'
@@ -802,9 +805,9 @@ CREATE TABLE IF NOT EXISTS `user_condition_data` (
 -- Gegevens worden geëxporteerd voor tabel `user_condition_data`
 --
 
-INSERT INTO `user_condition_data` (`user_id`, `condition_id`, `condition_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_condition_data` (`ucd_id`, `user_id`, `condition_id`, `condition_value`) VALUES
+(0, 1, 1, 1),
+(1, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -813,6 +816,7 @@ INSERT INTO `user_condition_data` (`user_id`, `condition_id`, `condition_value`)
 --
 
 CREATE TABLE IF NOT EXISTS `user_inventory_data` (
+  `uid_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `item_id` int(11) NOT NULL,
   `item_value` int(11) NOT NULL
@@ -822,9 +826,9 @@ CREATE TABLE IF NOT EXISTS `user_inventory_data` (
 -- Gegevens worden geëxporteerd voor tabel `user_inventory_data`
 --
 
-INSERT INTO `user_inventory_data` (`user_id`, `item_id`, `item_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_inventory_data` (`uid_id`, `user_id`, `item_id`, `item_value`) VALUES
+(0, 1, 1, 1),
+(1, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -833,6 +837,7 @@ INSERT INTO `user_inventory_data` (`user_id`, `item_id`, `item_value`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `user_skill_data` (
+  `usd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `skill_id` int(11) NOT NULL,
   `skill_value` int(11) NOT NULL
@@ -842,9 +847,9 @@ CREATE TABLE IF NOT EXISTS `user_skill_data` (
 -- Gegevens worden geëxporteerd voor tabel `user_skill_data`
 --
 
-INSERT INTO `user_skill_data` (`user_id`, `skill_id`, `skill_value`) VALUES
-(1, 2, 1),
-(1, 1, 1);
+INSERT INTO `user_skill_data` (`usd_id`, `user_id`, `skill_id`, `skill_value`) VALUES
+(0, 1, 1, 1),
+(1, 1, 2, 1);
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -905,6 +910,12 @@ ALTER TABLE `skills`
  ADD PRIMARY KEY (`skill_id`);
 
 --
+-- Indexen voor tabel `timestamps`
+--
+ALTER TABLE `timestamps`
+ ADD PRIMARY KEY (`timestamp_id`);
+
+--
 -- Indexen voor tabel `types`
 --
 ALTER TABLE `types`
@@ -915,6 +926,30 @@ ALTER TABLE `types`
 --
 ALTER TABLE `user`
  ADD PRIMARY KEY (`user_id`);
+
+--
+-- Indexen voor tabel `user_basic_data`
+--
+ALTER TABLE `user_basic_data`
+ ADD PRIMARY KEY (`ubd_id`);
+
+--
+-- Indexen voor tabel `user_condition_data`
+--
+ALTER TABLE `user_condition_data`
+ ADD PRIMARY KEY (`ucd_id`);
+
+--
+-- Indexen voor tabel `user_inventory_data`
+--
+ALTER TABLE `user_inventory_data`
+ ADD PRIMARY KEY (`uid_id`);
+
+--
+-- Indexen voor tabel `user_skill_data`
+--
+ALTER TABLE `user_skill_data`
+ ADD PRIMARY KEY (`usd_id`);
 
 --
 -- AUTO_INCREMENT voor geëxporteerde tabellen
