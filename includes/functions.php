@@ -214,7 +214,7 @@ function get_condition_data_user($user_id, $current_timestamp){
     }
 
     if($condition_timestamp["condition_timestamp"] >= $current_timestamp){
-        $sql = $connection->query("SELECT ucd.condition_id, ucd.condition_value as 'turns', a.advantage_value as 'damage', b.name as 'damage on', c.name as 'condition' FROM user_condition_data ucd
+        $sql = $connection->query("SELECT ucd.condition_id, a.basic_id, ucd.condition_value as 'turns', a.advantage_value as 'damage', b.name as 'damage on', c.name as 'condition' FROM user_condition_data ucd
         INNER JOIN advantages a ON ucd.condition_id = a.condition_id
         INNER JOIN basic b ON a.basic_id = b.basic_id
         INNER JOIN `condition` c ON ucd.condition_id = c.condition_id
@@ -242,7 +242,7 @@ function get_condition_data_user($user_id, $current_timestamp){
         return false;
     }
     //This function returns an array containing:
-        //"condition_id, turns left, damage, damage_on, condition"-values.
+        //"condition_id, basic_id, turns left, damage, damage_on, condition"-values.
 }
 
 
