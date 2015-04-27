@@ -137,3 +137,64 @@ function delete_user($user_id) {
         }
     }
 }
+
+function get_basic_data_user($user_id, $current_timestamp){
+    //This function gets the basic data for a user.
+    //Basic data is described in the database-table "Basic"
+    global $connection;
+
+    //Check the basic Timestamp to determine whether or not the basic info is needed.
+    $sql = $connection->query("SELECT basic_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $basic_timestamp = $sql->fetch_assoc();
+    }
+
+    if($basic_timestamp["basic_timestamp"] >= $current_timestamp) {
+        //This code is gathers the new data.
+        $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '".$user_id."'");
+
+        if(!$sql){
+            return $connection->error;
+        } else {
+            $rows = array();    //Declare empty array to avoid problems
+            while($row = $sql->fetch_array(MYSQLI_ASSOC))
+            {
+                $rows[] = $row;
+            }
+            return $rows;   //This array contains the name and the value of the basic information.
+        }
+
+    } else {
+        //If no new data is found, this function returns false
+        return false;
+    }
+}
+
+function get_basic_data_users($current_timestamp){
+    //This function will get the basic data for all the listed users.
+    //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
+    $users = get_user_list();
+
+    $basic_data_users = array();
+    foreach($users as $user){
+        $username = $user["username"];
+        $user_id = $user["user_id"];
+
+        $basic_data_user = get_basic_data_user($user_id, $current_timestamp);
+
+        if ($basic_data_user != false) {
+
+            $basic_data_users_entry["user_id"] = $user_id;
+            $basic_data_users_entry["username"] = $username;
+            $basic_data_users_entry["basic_data"] = $basic_data_user;
+
+            $basic_data_users[] = $basic_data_users_entry;
+
+        }
+    }
+
+    return $basic_data_users;
+}
