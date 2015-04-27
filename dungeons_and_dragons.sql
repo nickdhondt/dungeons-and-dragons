@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 27 apr 2015 om 20:37
+-- Gegenereerd op: 27 apr 2015 om 21:15
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -101,6 +101,34 @@ INSERT INTO `basic` (`basic_id`, `name`) VALUES
 (10, 'Plain Text Message'),
 (11, 'EXP'),
 (12, 'EXP Multiplier');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `classes`
+--
+
+CREATE TABLE IF NOT EXISTS `classes` (
+  `class_id` int(11) NOT NULL,
+  `name` text NOT NULL,
+  `attack` int(11) NOT NULL,
+  `defence` int(11) NOT NULL,
+  `walking` int(11) NOT NULL,
+  `mana` int(11) NOT NULL,
+  `health` int(11) NOT NULL,
+  `available_skills` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `classes`
+--
+
+INSERT INTO `classes` (`class_id`, `name`, `attack`, `defence`, `walking`, `mana`, `health`, `available_skills`) VALUES
+(1, 'Rogue', 1, 1, 1, 2, 2, '15;16;18;19;14;27;28;29;31'),
+(2, 'Mage', 0, 1, 1, 3, 1, '24;25;13;14;26'),
+(3, 'Cleric', 1, 1, 1, 2, 2, '23;24;34;13;32;33'),
+(4, 'Palladin', 1, 1, 1, 1, 2, '17;18;15;19;20;22;23;32;28'),
+(5, 'Warrior', 2, 1, 1, 0, 4, '17;18;19;22;23');
 
 -- --------------------------------------------------------
 
@@ -449,16 +477,11 @@ CREATE TABLE IF NOT EXISTS `races` (
 --
 
 INSERT INTO `races` (`race_id`, `name`, `attack`, `defence`, `walking`, `intelligence`, `health`, `available_skills`) VALUES
-(0, 'Human', 1, 1, 1, 3, 3, '1;2;3;4;5;6;7;8;9;10;11;12;26;27;33;19;28'),
 (1, 'Elf', 1, 1, 1, 4, 2, '1;2;3;4;5;6;7;8;9;10;11;12;26;19;28;29;33;13;15;16;21'),
 (2, 'Dwarf', 1, 1, 0, 2, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;30;23'),
 (3, 'Dragonborn', 1, 1, 1, 3, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;26'),
 (4, 'Halfling', 1, 1, 1, 2, 3, '1;2;3;4;5;6;7;8;9;10;11;12;16;18;28;27;29'),
-(5, 'Warrior', 2, 1, 1, 0, 4, '17;18;19;22;23'),
-(6, 'Rogue', 1, 1, 1, 2, 2, '15;16;18;19;14;27;28;29;31'),
-(7, 'Mage', 0, 1, 1, 3, 1, '24;25;13;14;26'),
-(8, 'Cleric', 1, 1, 1, 2, 2, '23;24;34;13;32;33'),
-(9, 'Palladin', 1, 1, 1, 1, 2, '17;18;15;19;20;22;23;32;28');
+(5, 'Human', 1, 1, 1, 3, 3, '1;2;3;4;5;6;7;8;9;10;11;12;26;27;33;19;28');
 
 -- --------------------------------------------------------
 
@@ -765,7 +788,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`, `class`, `general_timestamp`) VALUES
-(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 1, 1, 0);
+(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 0, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -866,6 +889,12 @@ ALTER TABLE `advantages`
 --
 ALTER TABLE `basic`
  ADD PRIMARY KEY (`basic_id`);
+
+--
+-- Indexen voor tabel `classes`
+--
+ALTER TABLE `classes`
+ ADD PRIMARY KEY (`class_id`);
 
 --
 -- Indexen voor tabel `condition`
