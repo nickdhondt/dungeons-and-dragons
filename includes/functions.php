@@ -245,5 +245,43 @@ function get_condition_data_user($user_id, $current_timestamp){
         //"condition_id, basic_id, turns left, damage, damage_on, condition"-values.
 }
 
+function get_inventory_data_user($user_id, $current_timestamp){
+    //This function gets the inventory data for a user.
+        //Inventory data is described in the database-table "inventory".
+    global $connection;
+
+    //Check the basic Timestamp to determine whether or not the inventory info is up-to-date.
+    $sql=$connection->query("SELECT inventory_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $inventory_timestamp = $sql->fetch_assoc();
+    }
+
+    if($inventory_timestamp["inventory_timestamp"] >= $current_timestamp){
+        $sql = $connection->query("SELECT uid.item_id, uid.item_value as 'items', i.name as 'name', t.name as 'type', i.condition as 'condition'
+        FROM user_inventory_data uid INNER JOIN inventory i ON uid.item_id = i.item_id
+        INNER JOIN types t ON i.type = t.type_id WHERE uid.user_id = '".$user_id."'");
+
+        if(!$sql){
+            return $connection->error;
+        } else {
+            $rows = array();
+            while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+                $rows[] = $row;
+            }
+
+            $inventory_data = array();
+            $inventory_data["user_id"] = $user_id;
+            $inventory_data["inventory_data"] = $rows;
+
+            return $inventory_data; //This array contains the item id, the number of items, the name of the item, the type of the item and the condition of the item.
+        }
+    } else {
+        //If no new data is found, this function returns false
+        return false;
+    }
+}
 
 

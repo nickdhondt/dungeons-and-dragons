@@ -58,6 +58,7 @@ while ($script_beginning >= (microtime(true) - 280)) {
     $new_events = array();
     $new_events[] = get_basic_data_users($timestamp); //Returns the basic data for the users.
     $new_events[] = get_condition_data_user($_GET["user_id"], $timestamp);  //Returns the condition data for the users.
+    $new_events[] = get_inventory_data_user($_GET["user_id"], $timestamp); //Returns the inventory data for the user.
 
     //Stream the $new_events
     if ($new_events != false) {
