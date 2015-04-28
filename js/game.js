@@ -88,9 +88,13 @@ function openStream() {
 
     var changeUserview = document.getElementsByClassName("change_userview");
 
+    console.log(changeUserview);
+
     for (var i = 0; i < changeUserview.length; i++) {
         changeUserview[i].addEventListener("click", function() { eventSource.close(); });
     }
+
+    document.getElementById("btn_register").addEventListener("click", function() { eventSource.close(); });
 
     eventSource.addEventListener("ping", function(e) {
         var streamErrorNotifs = document.getElementsByClassName("streamErrorNotif");
@@ -319,6 +323,9 @@ function processUserData(jsonData) {
 
                     adminPanelName.innerHTML = responseParse.data.admin_data.username;
                     requestUserList();
+                } else {
+                    console.log("no admin");
+                    openStream();
                 }
 
                 enableGameArea();
@@ -360,6 +367,9 @@ function processRacesAndClasses(jsonData) {
 
             var racesList = document.getElementById("race");
             var classesList = document.getElementById("class");
+
+            racesList.innerHTML = "";
+            classesList.innerHTML = "";
 
             for (var i = 0; i < racesAmount; i++) {
                 var raceNode = document.createElement("li");
@@ -460,7 +470,7 @@ function processRegisterClassRace(jsonData) {
             requestUserData();
             disableRaceClassPrompt();
             enableGameArea();
-            openStream();
+            //openStream();
         }
     }
 }
