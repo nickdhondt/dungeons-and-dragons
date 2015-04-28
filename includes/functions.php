@@ -165,6 +165,25 @@ function update_conditions_from_user($user_id){
     }
 }
 
+function get_user_turn_list(){
+    global $connection;
+
+    $sql = $connection->query("SELECT ubd.user_id as 'id', ubd.basic_value as 'turn'
+            FROM user_basic_data ubd
+            INNER JOIN basic b ON ubd.basic_id = b.basic_id
+            WHERE ubd.basic_id = '8'");
+
+    if(!$sql){
+        return false;
+    } else {
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+    }
+    return $rows;
+}
+
 function register_user($username, $password) {
     global $connection;
 

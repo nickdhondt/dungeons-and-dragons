@@ -49,13 +49,29 @@ if(empty($_POST["data"])){
             if($succes){
                 //The turn has been updated in the database, but we must re-evaluate all the conditions for the user at next turn.
                 //Determine which user can play in the next turn.
-                    $processed = update_conditions_from_user($user_id);
-                    if($processed){
-                        //The conditions are succesfully checked.
-                        //There isn't anything else that this page needs to process right now.
+                        //Search what user is next.
+                    $users_turn_data = get_user_turn_list();
+                    if($users_turn_data != false){
+                        $user_found = false;
+                        foreach($users_turn_data as $user_turn){
+                            if ($user_turn["turn"] === $next_turn){
+                                $next_user = $user_turn["id"];
+                                $user_found = true;
+                            }
+                        }
+                    }
+                        //Check the next_users conditions.
+                    if($user_found){
+                        $processed = update_conditions_from_user($user_id);
+                        if($processed){
+                            //The conditions are succesfully checked.
+                            //There isn't anything else that this page needs to process right now.
                             //Insert future implementations here.
+                        } else {
+                            $errors[] = "Er heeft zich een fout voorgedaan. Details: ".$processed;
+                        }
                     } else {
-                        $errors[] = "Er heeft zich een fout voorgedaan. Details: ".$processed;
+                        $errors[] = "Het systeem had moeilijkheden de volgende user aan te duiden. Overweeg een refresh en geef de IT-mensen nog een goede koffie. They'll need it.";
                     }
             } else {
                 $errors[] = "Er heeft zich een fout voorgedaan tijdens het wegschrijven naar de database in http_next_turn.";
