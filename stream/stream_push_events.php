@@ -54,10 +54,12 @@ while ($script_beginning >= (microtime(true) - 280)) {
         $last_ping = microtime(true);
     }
     //Set the new events to the following arrays.
+    $uid = $_GET["user_id"];
     $new_events = array();
-    $new_events["basic_data"] = get_basic_data_users($timestamp); //Returns the basic data for the users.
-    $new_events["condition_data"] = get_condition_data_user($_GET["user_id"], $timestamp);  //Returns the condition data for the users.
-    $new_events["inventory_data"] = get_inventory_data_user($_GET["user_id"], $timestamp); //Returns the inventory data for the user.
+    $new_events["basic"] = get_basic_data($uid, $timestamp);
+    //$new_events["levelling"] = get_levelling_data($uid, $timestamp);
+    //$new_events["skill"] = get_skill_data($uid, $timestamp);
+    //$new_events["general"] = get_general_data($uid, $timestamp);
 
     //Check if the new events don't return false:
     $new_data = false;

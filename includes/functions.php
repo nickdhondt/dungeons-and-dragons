@@ -143,196 +143,6 @@ function delete_user($user_id) {
     }
 }
 
-function get_basic_data_user($user_id, $current_timestamp){
-    //This function gets the basic data for a user.
-    global $connection;
-
-    //Check the basic Timestamp to determine whether or not the basic info is needed.
-    $sql = $connection->query("SELECT basic_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
-
-    if(!$sql){
-        return $connection->error;
-    } else {
-        $basic_timestamp = $sql->fetch_assoc();
-    }
-
-    if($basic_timestamp["basic_timestamp"] >= $current_timestamp) {
-        //This code is gathers the new data.
-        $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '".$user_id."'");
-
-        if(!$sql){
-            return $connection->error;
-        } else {
-            $rows = array();    //Declare empty array to avoid problems
-            while($row = $sql->fetch_array(MYSQLI_ASSOC))
-            {
-                $rows[] = $row;
-            }
-            return $rows;   //This array contains the name and the value of the basic information.
-        }
-
-    } else {
-        //If no new data is found, this function returns false
-        return false;
-    }
-}
-
-function get_basic_data_users($current_timestamp){
-    //This function will get the basic data for all the listed users.
-    //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
-
-    $users = get_user_list();
-
-    $basic_data_users = array();
-    foreach($users as $user){
-        $username = $user["username"];
-        $user_id = $user["user_id"];
-
-        $basic_data_user = get_basic_data_user($user_id, $current_timestamp);
-
-        if ($basic_data_user != false) {
-
-            $basic_data_users_entry["user_id"] = $user_id;
-            $basic_data_users_entry["username"] = $username;
-            $basic_data_users_entry["basic_data"] = $basic_data_user;
-
-            $basic_data_users[] = $basic_data_users_entry;
-
-        }
-    }
-
-    return $basic_data_users;
-}
-
-
-function get_condition_data_user($user_id, $current_timestamp){
-    //This function gets the condition data for a user.
-        //Condition data is described in the database-table "condition".
-    global $connection;
-
-    //Check the condition timestamp to determine wheter or not the condition info is needed.
-    $sql = $connection->query("SELECT condition_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
-
-    if(!$sql){
-        return $connection->error;
-    } else {
-        $condition_timestamp = $sql->fetch_assoc();
-    }
-
-    if($condition_timestamp["condition_timestamp"] >= $current_timestamp){
-        $sql = $connection->query("SELECT ucd.condition_id, ucd.condition_value as 'turns', a.advantage_value as 'damage', b.name as 'damage on', c.name as 'condition' FROM user_condition_data ucd
-        INNER JOIN advantages a ON ucd.condition_id = a.condition_id
-        INNER JOIN basic b ON a.basic_id = b.basic_id
-        INNER JOIN `condition` c ON ucd.condition_id = c.condition_id
-        WHERE ucd.user_id = '".$user_id."'");
-
-        if(!$sql){
-            return $connection->error;
-        } else {
-            $rows = array();
-            while($row = $sql->fetch_array(MYSQLI_ASSOC)){
-                if($row["turns"] != 0) $rows[] = $row;
-                    //Delete any 'finished' conditions if there were accidentally some in the database.
-                    //These are already executed when written to the database, so they are discarted without any action.
-            }
-
-            //Set the ID on the rows:
-            $condition_data = array();
-            $condition_data["user_id"] = $user_id;
-            $condition_data["condition_data"] = $rows;
-
-            return $condition_data;   //This array contains the condition_id, the turns left for the condition, the damage, the object were there is damage on and the name of the condition.
-        }
-    } else {
-        //if no new data is found, this function returns false
-        return false;
-    }
-    //This function returns an array containing:
-        //"condition_id, turns left, damage, damage_on, condition"-values.
-}
-
-function get_inventory_data_user($user_id, $current_timestamp){
-    //This function gets the inventory data for a user.
-    //Inventory data is described in the database-table "inventory".
-    global $connection;
-
-    //Check the basic Timestamp to determine whether or not the inventory info is up-to-date.
-    $sql=$connection->query("SELECT inventory_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
-
-    if(!$sql){
-        return $connection->error;
-    } else {
-        $inventory_timestamp = $sql->fetch_assoc();
-    }
-
-    //Get the inventory Data
-    if($inventory_timestamp["inventory_timestamp"] >= $current_timestamp){
-        $sql = $connection->query("SELECT uid.item_id, uid.item_value as 'item_count', i.name as 'name', t.name as 'type', i.condition as 'condition'
-        FROM user_inventory_data uid INNER JOIN inventory i ON uid.item_id = i.item_id
-        INNER JOIN types t ON i.type = t.type_id WHERE uid.user_id = '".$user_id."'");
-
-        if(!$sql){
-            return $connection->error;
-        } else {
-            $rows = array();
-            while($row = $sql->fetch_array(MYSQLI_ASSOC)){
-                //Get the condition data
-                $condition_id = $row["condition"];
-                $conditions = get_condition_data_from_id($condition_id);
-
-                //Check if the condition data is fetched errorless.
-                if($conditions["error"] == true){
-                    return $conditions["error_data"];
-                }
-
-                //Add all data to the $rows
-                $rows["item_id"] = $row["item_id"];
-                $rows["item_count"] = $row["item_count"];
-                $rows["name"] = $row["name"];
-                $rows["type"] = $row["type"];
-                $rows["condition_data"] = $conditions["condition_data"];
-
-            }
-
-            $inventory_data = array();
-            $inventory_data["user_id"] = $user_id;
-            $inventory_data["inventory_data"] = $rows;
-
-            return $inventory_data; //This array contains the item id, the number of items, the name of the item, the type of the item and the condition_id of the item.
-        }
-    } else {
-        //If no new data is found, this function returns false
-        return false;
-    }
-}
-
-function get_condition_data_from_id($condition_id){
-    //This function will get the conditions that are given in the $condition_id_array.
-    //Conditions are described in the table 'conditions' and their advantages are described in 'advantages'
-    global $connection;
-
-    $sql = $connection->query("SELECT c.condition_id, b.basic_id, c.duration as 'turns', a.advantage_value as 'damage', b.name as 'damage_on', c.name as 'condition' FROM `condition` C
-            INNER JOIN advantages a ON c.condition_id = a.condition_id
-            INNER JOIN basic b ON a.basic_id = b.basic_id WHERE c.condition_id = '".$condition_id."'");
-
-    $conditions = array();
-    if(!$sql){
-        $conditions["error"] = true;
-        $conditions["error_data"] = $connection->error;
-    } else {
-        $rows = array();
-        $conditions["error"] = false;
-        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
-            $rows[] = $row;
-        }
-        $conditions["condition_data"] = $rows;
-    }
-
-    return $conditions;
-    //If failed, this contains "error"=>true.
-    //If succeeded, this contains "error"=>false, "condition_data"=>actual data
-}
-
 function get_races() {
     global $connection;
 
@@ -391,4 +201,128 @@ function prepare_fields ($fields) {
     }
 
     return implode (", ", $single_values);
+}
+
+function get_basic_data($user_id, $current_timestamp){
+    //This function gets the basic data. This includes all the basic info of all the players
+    global $connection;
+    $basic_data = array();
+
+    //Check the basic Timestamp to determine whether or not the basic info is needed.
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', condition_timestamp as 'condition' FROM timestamps WHERE user_id = '".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
+    if(($timestamps["basic"] >= $current_timestamp) ||(($timestamps["condition"]) >= $current_timestamp)){
+        //Get the list of users
+        $user_list = get_user_list();
+        foreach($user_list as $user){
+            $data = array();
+            if($timestamps["basic"] >= $current_timestamp){
+                $data["basic_data"] = get_user_basic_data($user["user_id"])["data"];
+                if($data["basic_data"]["error"] != false)
+                    return $data["basic_data"]["error"];
+            }
+
+            if($timestamps["condition"] >= $current_timestamp) {
+                $data["condition_data"] = get_user_condition_data($user["user_id"])["data"];
+                if($data["condition_data"]["error"] != false)
+                    return $data["condition_data"]["error"];
+            }
+
+            //Fill the main array
+            $rows = array();
+                //Get the user ID
+            $rows["user_id"] = $user["user_id"];
+                //Get the associated username
+            if(get_user_name($user["user_id"]) != false) $rows["username"] = get_user_name($user["user_id"]);
+            else return false;
+                //Determine if you are this user
+            if($user_id === $user["user_id"]) $rows["is_you"] = true;
+            else $rows["is_you"] = false;
+                //Add data to the main array
+            $rows["data"] = $data;
+
+            //Fill the gathered data in the array
+            $basic_data[] = $rows;
+        }
+    } else {
+        //If no new data is found, return false;
+        return false;
+    }
+    return $basic_data;
+}
+
+function get_user_basic_data($user_id){
+    global $connection;
+    $basic_data = array();
+
+    $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '" . $user_id . "'");
+
+    if (!$sql) {
+        $basic_data["error"] = $connection->error;
+    } else {
+        $basic_data["error"] = false;
+        $rows = array();    //Declare empty array to avoid problems
+
+        while ($row = $sql->fetch_array(MYSQLI_ASSOC)) {
+            $rows[] = $row;
+        }
+        $basic_data["data"] = $rows;
+    }
+
+    return $basic_data;
+}
+
+function get_user_condition_data($user_id){
+    global $connection;
+    $condition_data = array();
+
+    $sql = $connection->query("SELECT ucd.condition_id, ucd.condition_value as 'turns', a.advantage_value as 'damage', b.name as 'damage on', c.name as 'condition' FROM user_condition_data ucd
+      INNER JOIN advantages a ON ucd.condition_id = a.condition_id
+      INNER JOIN basic b ON a.basic_id = b.basic_id
+      INNER JOIN `condition` c ON ucd.condition_id = c.condition_id
+      WHERE ucd.user_id = '" . $user_id . "'");
+
+    if (!$sql) {
+        $condition_data["error"] = $connection->error;
+    } else {
+        $condition_data["error"] = false;
+        $rows = array();    //Declare empty array to avoid problems
+
+        while ($row = $sql->fetch_array(MYSQLI_ASSOC)) {
+            if ($row["turns"] != 0) $rows[] = $row;
+            //Delete any 'finished' conditions if there were accidentally some in the database.
+            $rows[] = $row;
+        }
+        $condition_data["data"] = $rows;
+    }
+    return $condition_data;
+}
+
+function get_user_name($user_id){
+    global $connection;
+
+    $sql = $connection->query("SELECT username FROM user WHERE user_id = '".$user_id."'");
+    $user_data = $sql->fetch_array(MYSQLI_ASSOC);
+    $username = $user_data["username"];
+
+    if(!empty($username)) return $username;
+    else return "username not resolved";
+}
+
+function get_levelling_data($user_id, $current_timestamp){
+
+}
+
+function get_skill_data($user_id, $current_timestamp){
+
+}
+
+function get_general_data($user_id, $current_timestamp){
+
 }
