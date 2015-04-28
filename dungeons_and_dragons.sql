@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 27 apr 2015 om 17:50
+-- Gegenereerd op: 28 apr 2015 om 09:36
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -64,13 +64,52 @@ INSERT INTO `advantages` (`advantage_id`, `condition_id`, `basic_id`, `advantage
 (23, 16, 3, '1'),
 (24, 17, 10, 'Valstrikken hebben geen Effect'),
 (25, 18, 3, '3'),
-(26, 19, 4, '-1'),
+(26, 19, 4, '-2'),
 (27, 20, 10, 'Wissel met een andere speler in de beurtvolgorde'),
 (28, 21, 10, 'Verplaats een monster naar keuze in de huidige kamer.'),
 (29, 22, 10, 'Elke held in de kamer mag zich eenmaal vrij verplaatsen'),
 (30, 23, 3, '4'),
 (31, 23, 4, '4'),
-(32, 24, 4, '3');
+(32, 24, 4, '3'),
+(33, 25, 10, 'The DM skips his next turn'),
+(34, 26, 3, '4'),
+(35, 27, 10, 'Val onmiddellijk aan (zelfs als het je beurt niet is.)'),
+(36, 28, 4, '4'),
+(37, 29, 4, '5'),
+(38, 29, 3, '1'),
+(39, 30, 3, '5'),
+(40, 30, 4, '1'),
+(41, 31, 10, 'Gooi je laatste dobbelsteenworp opnieuw'),
+(42, 32, 10, 'Voer onmiddellijk een andere combo aanval uit'),
+(43, 33, 10, 'Vind dubbel zoveel ingredienten'),
+(44, 34, 2, '2'),
+(45, 35, 10, 'Alle aanvallen op jou komen op de aanvaller terecht'),
+(46, 36, 12, '2'),
+(47, 37, 2, '-5'),
+(48, 38, 4, '-1'),
+(49, 39, 10, 'Laat het slachtoffer gooien met de conditiedobbelsteen'),
+(50, 40, 10, 'Het monster  dicht bij je veranderd in een monster willekeurig getrokken uit de stapel monsterkaarten'),
+(51, 41, 1, '1'),
+(52, 42, 2, '1'),
+(53, 43, 1, '2'),
+(54, 44, 2, '2'),
+(55, 45, 1, '3'),
+(56, 46, 2, '3'),
+(57, 47, 3, '1'),
+(58, 48, 3, '1'),
+(59, 48, 12, '2'),
+(60, 49, 1, '1'),
+(61, 49, 2, '1'),
+(62, 50, 1, '2'),
+(63, 50, 2, '2'),
+(64, 51, 1, '3'),
+(65, 51, 2, '3'),
+(66, 52, 1, '2'),
+(67, 52, 2, '1'),
+(68, 53, 1, '2'),
+(69, 53, 2, '3'),
+(70, 54, 1, '1'),
+(71, 54, 2, '-1');
 
 -- --------------------------------------------------------
 
@@ -101,6 +140,34 @@ INSERT INTO `basic` (`basic_id`, `name`) VALUES
 (10, 'Plain Text Message'),
 (11, 'EXP'),
 (12, 'EXP Multiplier');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `classes`
+--
+
+CREATE TABLE IF NOT EXISTS `classes` (
+  `class_id` int(11) NOT NULL,
+  `name` text NOT NULL,
+  `attack` int(11) NOT NULL,
+  `defence` int(11) NOT NULL,
+  `walking` int(11) NOT NULL,
+  `mana` int(11) NOT NULL,
+  `health` int(11) NOT NULL,
+  `available_skills` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `classes`
+--
+
+INSERT INTO `classes` (`class_id`, `name`, `attack`, `defence`, `walking`, `mana`, `health`, `available_skills`) VALUES
+(1, 'Rogue', 1, 1, 1, 2, 2, '15;16;18;19;14;27;28;29;31'),
+(2, 'Mage', 0, 1, 1, 3, 1, '24;25;13;14;26'),
+(3, 'Cleric', 1, 1, 1, 2, 2, '23;24;34;13;32;33'),
+(4, 'Palladin', 1, 1, 1, 1, 2, '17;18;15;19;20;22;23;32;28'),
+(5, 'Warrior', 2, 1, 1, 0, 4, '17;18;19;22;23');
 
 -- --------------------------------------------------------
 
@@ -138,7 +205,7 @@ INSERT INTO `condition` (`condition_id`, `name`, `duration`) VALUES
 (16, 'Strenthening', 0),
 (17, 'Blessed', 5),
 (18, 'Strenthening', 0),
-(19, 'Poisoned', 1),
+(19, 'Poisoned', 0),
 (20, 'Blessed', 0),
 (21, 'Fortified', 0),
 (22, 'Light feeted', 0),
@@ -167,7 +234,13 @@ INSERT INTO `condition` (`condition_id`, `name`, `duration`) VALUES
 (45, 'Strongly Fortyfied Defence', 20),
 (46, 'Strongly Fastened Walking', 20),
 (47, 'Mana Restoration', 20),
-(48, 'Wizard Guide', 20);
+(48, 'Wizard Guide', 20),
+(49, 'Slight Fortified Defence and Speed', 20),
+(50, 'Fortified Defence and Walking', 20),
+(51, 'Strongly Fortified Defence and Walking', 20),
+(52, 'Fortified Defence and Swift Walking', 20),
+(53, 'Fortified Defence of the Winds', 20),
+(54, 'Very heavy useless clothing', 20);
 
 -- --------------------------------------------------------
 
@@ -262,44 +335,44 @@ INSERT INTO `inventory` (`item_id`, `name`, `type`, `condition`) VALUES
 (72, 'Extract of Doom', 14, '39'),
 (73, 'Potion From Hell', 14, '40'),
 (74, 'VeruungsDrang (Level 1)', 16, '41'),
-(75, 'VeruungsDrang (Level 2)', 16, '41;42'),
-(76, 'VeruungsDrang (Level 3)', 16, '43;44'),
+(75, 'VeruungsDrang (Level 2)', 16, '49'),
+(76, 'VeruungsDrang (Level 3)', 16, '50'),
 (77, 'Halfaginer''s Kuras (Level 1)', 17, '41'),
-(78, 'Halfaginer''s Kuras (Level 2)', 17, '41;42\r\n'),
-(79, 'Halfaginer''s Kuras (Level 3)', 17, '43;44'),
+(78, 'Halfaginer''s Kuras (Level 2)', 17, '49'),
+(79, 'Halfaginer''s Kuras (Level 3)', 17, '50'),
 (80, 'Krugas'' Utoq (Level 1)', 18, '42'),
-(81, 'Krugas'' Utoq (Level 2)', 18, '41;42'),
-(82, 'Krugas'' Utoq (Level 3)', 18, '43;44'),
+(81, 'Krugas'' Utoq (Level 2)', 18, '49'),
+(82, 'Krugas'' Utoq (Level 3)', 18, '50'),
 (83, 'Defilerskiln (Level 1)', 19, '41'),
 (84, 'Defilerskiln (Level 2)', 19, '43'),
-(85, 'Defilerskiln (Level 3)', 19, '43;44'),
+(85, 'Defilerskiln (Level 3)', 19, '50'),
 (86, 'Rootserfaxl (Level 1)', 20, '41'),
-(87, 'Rootserfaxl (Level 2)', 20, '41;42'),
-(88, 'Rootserfaxl (Level 3)', 20, '42;43'),
+(87, 'Rootserfaxl (Level 2)', 20, '49'),
+(88, 'Rootserfaxl (Level 3)', 20, '52'),
 (89, 'Devine''s Cloak (Level 1)', 21, '0'),
 (90, 'Devine''s Cloak (Level 2)', 21, '41'),
-(91, 'Devine''s Cloak (Level 3)', 21, '43;44'),
+(91, 'Devine''s Cloak (Level 3)', 21, '50'),
 (92, 'Merlin''s Japron (Level 1)', 22, '0'),
 (93, 'Merlin''s Japron (Level 2)', 22, '41'),
 (94, 'Merlin''s Japron (Level 3)', 22, '45'),
-(95, 'Protagonas Pjottr (Level 1)', 23, '41;42'),
-(96, 'Protagonas Pjottr (Level 2)', 23, '43;44'),
-(97, 'Protagonas Pjottr (Level 3)', 23, '45;46'),
+(95, 'Protagonas Pjottr (Level 1)', 23, '49'),
+(96, 'Protagonas Pjottr (Level 2)', 23, '50'),
+(97, 'Protagonas Pjottr (Level 3)', 23, '52'),
 (98, 'Ikraos Halfaagirn (Level 1)', 24, '0'),
 (99, 'Ikraos Halfaagirn (Level 2)', 24, '41'),
-(100, 'Ikraos Halfaagirn (Level 3)', 24, '45;46'),
+(100, 'Ikraos Halfaagirn (Level 3)', 24, '51'),
 (101, 'Refugee''s Cape (Level 1)', 25, '0\r\n'),
-(102, 'Refugee''s Cape (Level 2)', 25, '41;42\r\n'),
-(103, 'Refugee''s Cape (Level 3)', 25, '43;44'),
+(102, 'Refugee''s Cape (Level 2)', 25, '49'),
+(103, 'Refugee''s Cape (Level 3)', 25, '50'),
 (104, 'Cupper Curas (Level 1)', 26, '41'),
 (105, 'Cupper Curas (Level 2)', 26, '43'),
 (106, 'Cupper Curas (Level 3)', 26, '45'),
-(107, 'Mitryl Matriach (Level 1)', 26, '41;42'),
-(108, 'Mitryl Matriach (Level 2)', 26, '43;44'),
-(109, 'Mitryl Matriach (Level 3)', 26, '45;46'),
-(110, 'Yeti Armor (Level 1)', 27, '41;3'),
-(111, 'Yeti Armor (Level 2)', 27, '41;42'),
-(112, 'Yeti Armor (Level 3)', 27, '43;42'),
+(107, 'Mitryl Matriach (Level 1)', 26, '49'),
+(108, 'Mitryl Matriach (Level 2)', 26, '50'),
+(109, 'Mitryl Matriach (Level 3)', 26, '51'),
+(110, 'Yeti Armor (Level 1)', 27, '54'),
+(111, 'Yeti Armor (Level 2)', 27, '49'),
+(112, 'Yeti Armor (Level 3)', 27, '52'),
 (113, 'Shammaan Armor (Level 1)', 27, '47'),
 (114, 'Shammaan Armor (Level 2)', 27, '48'),
 (115, 'Speer', 28, '0'),
@@ -439,7 +512,7 @@ CREATE TABLE IF NOT EXISTS `races` (
   `attack` int(11) NOT NULL,
   `defence` int(11) NOT NULL,
   `walking` int(11) NOT NULL,
-  `intelligence` int(11) NOT NULL,
+  `mana` int(11) NOT NULL,
   `health` int(11) NOT NULL,
   `available_skills` text NOT NULL COMMENT 'refers to the table skills, divided by ;'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -448,17 +521,12 @@ CREATE TABLE IF NOT EXISTS `races` (
 -- Gegevens worden geëxporteerd voor tabel `races`
 --
 
-INSERT INTO `races` (`race_id`, `name`, `attack`, `defence`, `walking`, `intelligence`, `health`, `available_skills`) VALUES
-(0, 'Human', 1, 1, 1, 3, 3, '1;2;3;4;5;6;7;8;9;10;11;12;26;27;33;19;28'),
+INSERT INTO `races` (`race_id`, `name`, `attack`, `defence`, `walking`, `mana`, `health`, `available_skills`) VALUES
 (1, 'Elf', 1, 1, 1, 4, 2, '1;2;3;4;5;6;7;8;9;10;11;12;26;19;28;29;33;13;15;16;21'),
 (2, 'Dwarf', 1, 1, 0, 2, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;30;23'),
 (3, 'Dragonborn', 1, 1, 1, 3, 4, '1;2;3;4;5;6;7;8;9;10;11;12;17;26'),
 (4, 'Halfling', 1, 1, 1, 2, 3, '1;2;3;4;5;6;7;8;9;10;11;12;16;18;28;27;29'),
-(5, 'Warrior', 2, 1, 1, 0, 4, '17;18;19;22;23'),
-(6, 'Rogue', 1, 1, 1, 2, 2, '15;16;18;19;14;27;28;29;31'),
-(7, 'Mage', 0, 1, 1, 3, 1, '24;25;13;14;26'),
-(8, 'Cleric', 1, 1, 1, 2, 2, '23;24;34;13;32;33'),
-(9, 'Palladin', 1, 1, 1, 1, 2, '17;18;15;19;20;22;23;32;28');
+(5, 'Human', 1, 1, 1, 3, 3, '1;2;3;4;5;6;7;8;9;10;11;12;26;27;33;19;28');
 
 -- --------------------------------------------------------
 
@@ -683,19 +751,20 @@ INSERT INTO `skills` (`skill_id`, `name`, `type`, `subtype`, `levels`, `level_ad
 --
 
 CREATE TABLE IF NOT EXISTS `timestamps` (
-  `user_id` int(11) NOT NULL,
-  `basic_timestamp` text NOT NULL,
-  `skill_timestamp` text NOT NULL,
-  `inventory_timestamp` text NOT NULL,
-  `condition_timestamp` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+`timestamp_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `basic_timestamp` varchar(16) NOT NULL,
+  `skill_timestamp` varchar(16) NOT NULL,
+  `inventory_timestamp` varchar(16) NOT NULL,
+  `condition_timestamp` varchar(16) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `timestamps`
 --
 
-INSERT INTO `timestamps` (`user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
-(1, '0', '0', '0', '0');
+INSERT INTO `timestamps` (`timestamp_id`, `user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
+(1, 1, '10', '10', '10', '10');
 
 -- --------------------------------------------------------
 
@@ -764,7 +833,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`, `class`, `general_timestamp`) VALUES
-(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 1, 1, 0);
+(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 0, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -773,18 +842,19 @@ INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`
 --
 
 CREATE TABLE IF NOT EXISTS `user_basic_data` (
+`ubd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `basic_id` int(11) NOT NULL,
   `basic_value` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user_basic_data`
 --
 
-INSERT INTO `user_basic_data` (`user_id`, `basic_id`, `basic_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_basic_data` (`ubd_id`, `user_id`, `basic_id`, `basic_value`) VALUES
+(1, 1, 1, 1),
+(2, 1, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -793,18 +863,19 @@ INSERT INTO `user_basic_data` (`user_id`, `basic_id`, `basic_value`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `user_condition_data` (
+`ucd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `condition_id` int(11) NOT NULL,
   `condition_value` int(11) NOT NULL COMMENT 'Dit bevat hoeveel beurten de conditie nog actief is'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user_condition_data`
 --
 
-INSERT INTO `user_condition_data` (`user_id`, `condition_id`, `condition_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_condition_data` (`ucd_id`, `user_id`, `condition_id`, `condition_value`) VALUES
+(1, 1, 1, 1),
+(2, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -813,18 +884,19 @@ INSERT INTO `user_condition_data` (`user_id`, `condition_id`, `condition_value`)
 --
 
 CREATE TABLE IF NOT EXISTS `user_inventory_data` (
+`uid_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `item_id` int(11) NOT NULL,
   `item_value` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user_inventory_data`
 --
 
-INSERT INTO `user_inventory_data` (`user_id`, `item_id`, `item_value`) VALUES
-(1, 1, 1),
-(1, 2, 1);
+INSERT INTO `user_inventory_data` (`uid_id`, `user_id`, `item_id`, `item_value`) VALUES
+(1, 1, 1, 1),
+(2, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -833,18 +905,19 @@ INSERT INTO `user_inventory_data` (`user_id`, `item_id`, `item_value`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `user_skill_data` (
+`usd_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `skill_id` int(11) NOT NULL,
   `skill_value` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user_skill_data`
 --
 
-INSERT INTO `user_skill_data` (`user_id`, `skill_id`, `skill_value`) VALUES
-(1, 2, 1),
-(1, 1, 1);
+INSERT INTO `user_skill_data` (`usd_id`, `user_id`, `skill_id`, `skill_value`) VALUES
+(1, 1, 1, 1),
+(2, 1, 2, 1);
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -861,6 +934,12 @@ ALTER TABLE `advantages`
 --
 ALTER TABLE `basic`
  ADD PRIMARY KEY (`basic_id`);
+
+--
+-- Indexen voor tabel `classes`
+--
+ALTER TABLE `classes`
+ ADD PRIMARY KEY (`class_id`);
 
 --
 -- Indexen voor tabel `condition`
@@ -905,6 +984,12 @@ ALTER TABLE `skills`
  ADD PRIMARY KEY (`skill_id`);
 
 --
+-- Indexen voor tabel `timestamps`
+--
+ALTER TABLE `timestamps`
+ ADD PRIMARY KEY (`timestamp_id`);
+
+--
 -- Indexen voor tabel `types`
 --
 ALTER TABLE `types`
@@ -917,6 +1002,30 @@ ALTER TABLE `user`
  ADD PRIMARY KEY (`user_id`);
 
 --
+-- Indexen voor tabel `user_basic_data`
+--
+ALTER TABLE `user_basic_data`
+ ADD PRIMARY KEY (`ubd_id`);
+
+--
+-- Indexen voor tabel `user_condition_data`
+--
+ALTER TABLE `user_condition_data`
+ ADD PRIMARY KEY (`ucd_id`);
+
+--
+-- Indexen voor tabel `user_inventory_data`
+--
+ALTER TABLE `user_inventory_data`
+ ADD PRIMARY KEY (`uid_id`);
+
+--
+-- Indexen voor tabel `user_skill_data`
+--
+ALTER TABLE `user_skill_data`
+ ADD PRIMARY KEY (`usd_id`);
+
+--
 -- AUTO_INCREMENT voor geëxporteerde tabellen
 --
 
@@ -926,10 +1035,35 @@ ALTER TABLE `user`
 ALTER TABLE `permission`
 MODIFY `permission_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
+-- AUTO_INCREMENT voor een tabel `timestamps`
+--
+ALTER TABLE `timestamps`
+MODIFY `timestamp_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+--
 -- AUTO_INCREMENT voor een tabel `user`
 --
 ALTER TABLE `user`
 MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT voor een tabel `user_basic_data`
+--
+ALTER TABLE `user_basic_data`
+MODIFY `ubd_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+--
+-- AUTO_INCREMENT voor een tabel `user_condition_data`
+--
+ALTER TABLE `user_condition_data`
+MODIFY `ucd_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT voor een tabel `user_inventory_data`
+--
+ALTER TABLE `user_inventory_data`
+MODIFY `uid_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT voor een tabel `user_skill_data`
+--
+ALTER TABLE `user_skill_data`
+MODIFY `usd_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -145,7 +145,11 @@ function delete_user($user_id) {
 
 function get_basic_data_user($user_id, $current_timestamp){
     //This function gets the basic data for a user.
+<<<<<<< HEAD
         //Basic data is described in the database-table "Basic"
+=======
+    //Basic data is described in the database-table "Basic"
+>>>>>>> origin/master
     global $connection;
 
     //Check the basic Timestamp to determine whether or not the basic info is needed.
@@ -180,7 +184,11 @@ function get_basic_data_user($user_id, $current_timestamp){
 
 function get_basic_data_users($current_timestamp){
     //This function will get the basic data for all the listed users.
+<<<<<<< HEAD
         //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
+=======
+    //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
+>>>>>>> origin/master
     $users = get_user_list();
 
     $basic_data_users = array();
@@ -204,6 +212,55 @@ function get_basic_data_users($current_timestamp){
     return $basic_data_users;
 }
 
+<<<<<<< HEAD
+=======
+function get_condition_data_user($user_id, $current_timestamp){
+    //This function gets the condition data for a user.
+        //Condition data is described in the database-table "condition".
+    global $connection;
+
+    //Check the condition timestamp to determine wheter or not the condition info is needed.
+    $sql = $connection->query("SELECT condition_timestamp FROM timestamps WHERE user_id = '".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $condition_timestamp = $sql->fetch_assoc();
+    }
+
+    if($condition_timestamp["condition_timestamp"] >= $current_timestamp){
+        $sql = $connection->query("SELECT ucd.condition_id, ucd.condition_value as 'turns', a.advantage_value as 'damage', b.name as 'damage on', c.name as 'condition' FROM user_condition_data ucd
+        INNER JOIN advantages a ON ucd.condition_id = a.condition_id
+        INNER JOIN basic b ON a.basic_id = b.basic_id
+        INNER JOIN `condition` c ON ucd.condition_id = c.condition_id
+        WHERE ucd.user_id = '".$user_id."'");
+
+        if(!$sql){
+            return $connection->error;
+        } else {
+            $rows = array();
+            while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+                if($row["turns"] != 0) $rows[] = $row;
+                    //Delete any 'finished' conditions if there were accidentally some in the database.
+                    //These are already executed when written to the database, so they are discarted without any action.
+            }
+
+            //Set the ID on the rows:
+            $condition_data = array();
+            $condition_data["user_id"] = $user_id;
+            $condition_data["condition_data"] = $rows;
+
+            return $condition_data;   //This array contains the condition_id, the turns left for the condition, the damage, the object were there is damage on and the name of the condition.
+        }
+    } else {
+        //if no new data is found, this function returns false
+        return false;
+    }
+    //This function returns an array containing:
+        //"condition_id, turns left, damage, damage_on, condition"-values.
+}
+
+>>>>>>> origin/master
 function get_races() {
     global $connection;
 
