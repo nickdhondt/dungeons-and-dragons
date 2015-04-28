@@ -102,6 +102,33 @@ function get_user_list() {
     return $rows;
 }
 
+function get_number_of_users(){
+    global $connection;
+
+    $sql = $connection->query("SELECT COUNT(user_id) as 'id' FROM user");
+
+    if(!$sql) {
+        return $connection->connect_error;
+    } else {
+        $number = $sql->fetch_assoc();
+    }
+    return $number["id"];
+}
+
+function update_turn_in_db($turn){
+    global $connection;
+
+    $stmt = $connection->prepare("UPDATE turn SET turn VALUES (?) WHERE turn_id = 0");
+    $stmt->bind_param('i', $turn);
+    $stmt->execute();
+
+    if(!empty($stmt->error)){
+        return $stmt->error;
+    } else {
+        return true;
+    }
+}
+
 function register_user($username, $password) {
     global $connection;
 
