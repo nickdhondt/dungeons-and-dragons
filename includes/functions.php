@@ -319,7 +319,7 @@ function get_condition_data_from_id($condition_id){
         while($row = $sql->fetch_array(MYSQLI_ASSOC)){
             $rows[] = $row;
         }
-        $rows["condition_data"] = $rows;
+        $conditions["condition_data"] = $rows;
     }
 
     return $conditions;
