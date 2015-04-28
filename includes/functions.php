@@ -209,7 +209,7 @@ function get_basic_data($user_id, $current_timestamp){
     $basic_data = array();
 
     //Check the basic Timestamp to determine whether or not the basic info is needed.
-    $sql = $connection->query("SELECT basic_timestamp as 'basic', condition_timestamp as 'condition' FROM timestamps WHERE user_id = '".$user_id."'");
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', condition_timestamp as 'condition', inventory_timestamp as 'inventory' FROM timestamps WHERE user_id = '".$user_id."'");
 
     if(!$sql){
         return $connection->error;
@@ -217,7 +217,7 @@ function get_basic_data($user_id, $current_timestamp){
         $timestamps = $sql->fetch_assoc();
     }
 
-    if(($timestamps["basic"] >= $current_timestamp) ||(($timestamps["condition"]) >= $current_timestamp)){
+    if(($timestamps["basic"] >= $current_timestamp) ||(($timestamps["condition"]) >= $current_timestamp) ||($timestamps["inventory"] >= $current_timestamp)){
         //Get the list of users
         $user_list = get_user_list();
         foreach($user_list as $user){
@@ -232,6 +232,13 @@ function get_basic_data($user_id, $current_timestamp){
                 $data["condition_data"] = get_user_condition_data($user["user_id"])["data"];
                 if($data["condition_data"]["error"] != false)
                     return $data["condition_data"]["error"];
+            }
+
+            if($timestamps["inventory"] >= $current_timestamp){
+                $data["inventory_data"] = get_user_inventory_data($user["user_id"])["data"];
+                if($data["inventory_data"]["error"] != false){
+                    return $data["inventory_data"]["error"];
+                }
             }
 
             //Fill the main array
@@ -297,11 +304,45 @@ function get_user_condition_data($user_id){
         while ($row = $sql->fetch_array(MYSQLI_ASSOC)) {
             if ($row["turns"] != 0) $rows[] = $row;
             //Delete any 'finished' conditions if there were accidentally some in the database.
-            $rows[] = $row;
         }
         $condition_data["data"] = $rows;
     }
     return $condition_data;
+}
+
+function get_user_inventory_data($user_id){
+    global $connection;
+    $inventory_data = array();
+
+    $sql = $connection->query("SELECT uid.item_id, i.name as 'name', uid.item_value as 'count', t.name as 'type', i.condition as 'condition_id'
+        FROM user_inventory_data uid
+        INNER JOIN inventory i ON uid.item_id = i.item_id
+        INNER JOIN types t ON i.type = t.type_id
+        WHERE uid.user_id = '" . $user_id . "'");
+
+    if (!$sql) {
+        return $connection->error;
+    } else {
+        $rows = array();
+        $inventory = array();
+        while ($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            //Get the different conditions for the condition ID.
+            $conditions = get_conditions_by_id($row["condition_id"]);
+                if($conditions["error"] != false)
+                    $inventory_data["error"] = $conditions["error"];
+
+            //Fill the array
+            $rows["item_id"] = $row["item_id"];
+            $rows["name"] = $row["name"];
+            $rows["count"] = $row["count"];
+            $rows["type"] = $row["type"];
+            $rows["conditions"] = $conditions["data"];
+
+            $inventory[] = $rows;
+        }
+        $inventory_data["data"] = $inventory;
+    }
+    return $inventory_data;
 }
 
 function get_user_name($user_id){
@@ -313,6 +354,30 @@ function get_user_name($user_id){
 
     if(!empty($username)) return $username;
     else return "username not resolved";
+}
+
+function get_conditions_by_id($condition_id){
+    global $connection;
+    $conditions = array();
+
+    $sql = $connection->query("SELECT c.condition_id, c.duration as 'turns', a.advantage_value as 'damage', b.name as 'damage_on', b.basic_id as 'damage_on_id', c.name as 'condition'
+      FROM `condition` c
+      INNER JOIN advantages a ON c.condition_id = a.condition_id
+      INNER JOIN basic b ON a.basic_id = b.basic_id
+      WHERE c.condition_id = '" . $condition_id . "'");
+
+    if (!$sql) {
+        $conditions["error"] = $connection->error;
+    } else {
+        $rows = array();
+        $conditions["error"] = false;
+        while ($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+        $conditions["condition_data"] = $rows;
+    }
+
+    return $conditions;
 }
 
 function get_levelling_data($user_id, $current_timestamp){
