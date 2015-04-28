@@ -53,14 +53,20 @@ while ($script_beginning >= (microtime(true) - 280)) {
 
         $last_ping = microtime(true);
     }
-
     //Set the new events to the following arrays.
-    $new_events = get_basic_data_users($timestamp); //Returns the basic data for the users.
-    $new_events[] = get_basic_data_users($timestamp); //Returns the basic data for the users.
-    $new_events[] = get_condition_data_user($_GET["user_id"], $timestamp);  //Returns the condition data for the users.
+    $new_events = array();
+    $new_events["basic_data"] = get_basic_data_users($timestamp); //Returns the basic data for the users.
+    $new_events["condition_data"] = get_condition_data_user($_GET["user_id"], $timestamp);  //Returns the condition data for the users.
+    $new_events["inventory_data"] = get_inventory_data_user($_GET["user_id"], $timestamp); //Returns the inventory data for the user.
+
+    //Check if the new events don't return false:
+    $new_data = false;
+    foreach($new_events as $new_event){
+        if($new_event != false) $new_data = true;
+    }
 
     //Stream the $new_events
-    if ($new_events != false) {
+    if ($new_data != false) {
         // JSON encode
         $json_game_data = json_encode($new_events);
 
