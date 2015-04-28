@@ -284,7 +284,6 @@ function get_inventory_data_user($user_id, $current_timestamp){
                 $rows["item_count"] = $row["item_count"];
                 $rows["name"] = $row["name"];
                 $rows["type"] = $row["type"];
-                $rows["condition_id"] = $row["condition"];
                 $rows["condition_data"] = $conditions["condition_data"];
 
             }
@@ -306,8 +305,9 @@ function get_condition_data_from_id($condition_id){
         //Conditions are described in the table 'conditions' and their advantages are described in 'advantages'
     global $connection;
 
-    $sql = $connection->query("SELECT a.advantage_id, a.advantage_value as 'damage', b.name as 'damage_on' FROM advantages a
-        INNER JOIN basic b ON a.basic_id = b.basic_id WHERE a.condition_id = '".$condition_id."'");
+    $sql = $connection->query("SELECT c.condition_id, b.basic_id, c.duration as 'turns', a.advantage_value as 'damage', b.name as 'damage_on', c.name as 'condition' FROM `condition` C
+            INNER JOIN advantages a ON c.condition_id = a.condition_id
+            INNER JOIN basic b ON a.basic_id = b.basic_id WHERE c.condition_id = '".$condition_id."'");
 
     $conditions = array();
     if(!$sql){
