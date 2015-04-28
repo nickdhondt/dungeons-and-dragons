@@ -460,6 +460,7 @@ function processRegisterClassRace(jsonData) {
             requestUserData();
             disableRaceClassPrompt();
             enableGameArea();
+            openStream();
         }
     }
 }

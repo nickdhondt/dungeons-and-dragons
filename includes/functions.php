@@ -112,7 +112,7 @@ function register_user($username, $password) {
     $hash = password_hash($password, PASSWORD_BCRYPT, $options);
 
     $sql = $connection->query("INSERT INTO user (username, password, permission_type) VALUES ('$username', '$hash', 0)");
-    
+
     $user_id = $connection->insert_id;
     $now = microtime(true);
 
