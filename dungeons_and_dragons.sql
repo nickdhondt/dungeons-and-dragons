@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: 127.0.0.1
--- Gegenereerd op: 28 apr 2015 om 09:36
+-- Gegenereerd op: 28 apr 2015 om 22:51
 -- Serverversie: 5.6.21
 -- PHP-versie: 5.6.3
 
@@ -752,7 +752,7 @@ INSERT INTO `skills` (`skill_id`, `name`, `type`, `subtype`, `levels`, `level_ad
 
 CREATE TABLE IF NOT EXISTS `timestamps` (
 `timestamp_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
   `basic_timestamp` varchar(16) NOT NULL,
   `skill_timestamp` varchar(16) NOT NULL,
   `inventory_timestamp` varchar(16) NOT NULL,
@@ -765,6 +765,24 @@ CREATE TABLE IF NOT EXISTS `timestamps` (
 
 INSERT INTO `timestamps` (`timestamp_id`, `user_id`, `basic_timestamp`, `skill_timestamp`, `inventory_timestamp`, `condition_timestamp`) VALUES
 (1, 1, '10', '10', '10', '10');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `turn`
+--
+
+CREATE TABLE IF NOT EXISTS `turn` (
+  `turn_id` int(11) NOT NULL,
+  `turn` int(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `turn`
+--
+
+INSERT INTO `turn` (`turn_id`, `turn`) VALUES
+(0, 1);
 
 -- --------------------------------------------------------
 
@@ -833,7 +851,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`user_id`, `username`, `password`, `permission_type`, `race`, `class`, `general_timestamp`) VALUES
-(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 0, 1, 0);
+(1, 'Wheatley', '$2a$10$t1pFRJNqG33OUKhCyDj3fuph.w5KTVypm5/3jrOKJ0HmiB1M4f0uy', 1, 1, 4, 0);
 
 -- --------------------------------------------------------
 
@@ -846,7 +864,7 @@ CREATE TABLE IF NOT EXISTS `user_basic_data` (
   `user_id` int(11) NOT NULL,
   `basic_id` int(11) NOT NULL,
   `basic_value` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `user_basic_data`
@@ -895,7 +913,7 @@ CREATE TABLE IF NOT EXISTS `user_inventory_data` (
 --
 
 INSERT INTO `user_inventory_data` (`uid_id`, `user_id`, `item_id`, `item_value`) VALUES
-(1, 1, 1, 1),
+(1, 1, 84, 1),
 (2, 1, 2, 1);
 
 -- --------------------------------------------------------
@@ -990,6 +1008,12 @@ ALTER TABLE `timestamps`
  ADD PRIMARY KEY (`timestamp_id`);
 
 --
+-- Indexen voor tabel `turn`
+--
+ALTER TABLE `turn`
+ ADD PRIMARY KEY (`turn_id`), ADD UNIQUE KEY `turn` (`turn`);
+
+--
 -- Indexen voor tabel `types`
 --
 ALTER TABLE `types`
@@ -1048,7 +1072,7 @@ MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT voor een tabel `user_basic_data`
 --
 ALTER TABLE `user_basic_data`
-MODIFY `ubd_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+MODIFY `ubd_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT voor een tabel `user_condition_data`
 --
