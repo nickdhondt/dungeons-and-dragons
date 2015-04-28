@@ -20,6 +20,7 @@ function init() {
     document.getElementById("txt_new_password").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("show_admin").addEventListener("click", function() { toggleAdminPanel(); });
     window.matchMedia("(orientation: portrait)").addListener(handleOrientationChange);
+    document.getElementById("btn_race_class").addEventListener("click", function() { requestChoiceRaceClass(); });
 
     requestUserData();
 }
@@ -225,6 +226,12 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processDeleteUser":
                     processDeleteUser(response);
                     break;
+                case "processRacesAndClasses":
+                    processRacesAndClasses(response);
+                    break;
+                case "processRegisterClassRace":
+                    processRegisterClassRace(response);
+                    break;
             }
         }
     };
@@ -287,32 +294,182 @@ function processUserData(jsonData) {
 
     if (responseParse !== null) {
         if (responseParse.request_accepted === "true") {
-            var user_info = document.getElementById("user_info");
             disableLogin();
 
-            user_info.innerHTML = "Welkom " + responseParse.data.username + " <span>(" + responseParse.data.permission_name + ")</span>";
-            userId = responseParse.data.user_id;
-            permissionId = responseParse.data.permission_type;
-            admin = responseParse.data.admin;
+
             if (admin === "true") {
                 ownUserId = responseParse.data.admin_data.user_id;
             } else {
                 ownUserId = responseParse.data.user_id;
             }
 
-            if (admin === "true") {
-                showAdminPanel();
-                var adminPanelName = document.getElementById("admin_user");
+            userId = responseParse.data.user_id;
 
-                adminPanelName.innerHTML = responseParse.data.admin_data.username;
-                requestUserList();
+            if(responseParse.data.class !== "0" && responseParse.data.race !== "0") {
+                var user_info = document.getElementById("user_info");
+
+                user_info.innerHTML = "Welkom " + responseParse.data.username + " <span>(" + responseParse.data.permission_name + ")</span>";
+                userId = responseParse.data.user_id;
+                permissionId = responseParse.data.permission_type;
+                admin = responseParse.data.admin;
+
+                if (admin === "true") {
+                    showAdminPanel();
+                    var adminPanelName = document.getElementById("admin_user");
+
+                    adminPanelName.innerHTML = responseParse.data.admin_data.username;
+                    requestUserList();
+                }
+
+                enableGameArea();
+            } else {
+                enableRaceClassPrompt();
             }
-
-            enableGameArea();
         } else {
             displayErrors(responseParse.errors);
         }
     }
+}
+
+function enableRaceClassPrompt() {
+    var chooseRaceAndClass = document.getElementById("choose_race_class");
+
+    chooseRaceAndClass.style.opacity = "1";
+    chooseRaceAndClass.style.pointerEvents = "all";
+
+    requestRacesAndClasses();
+}
+
+function requestRacesAndClasses() {
+    var requestClassAndRaceData = {};
+
+    requestClassAndRaceData.user_id = ownUserId;
+
+    var jsonData = JSON.stringify(requestClassAndRaceData);
+
+    sendXHR("", "http/http_classes_and_races_list.php", "get", "processRacesAndClasses");
+}
+
+function processRacesAndClasses(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal === "true") {
+            var racesAmount = responseParse.data.races.length;
+            var classesAmount = responseParse.data.classes.length;
+
+            var racesList = document.getElementById("race");
+            var classesList = document.getElementById("class");
+
+            for (var i = 0; i < racesAmount; i++) {
+                var raceNode = document.createElement("li");
+                var raceNodeText = document.createTextNode(responseParse.data.races[i].name);
+                raceNode.appendChild(raceNodeText);
+                raceNode.setAttribute("id", "race" + responseParse.data.races[i].race_id);
+
+                raceNode.addEventListener("click", function(e) { processRaceClick(e); });
+
+                racesList.appendChild(raceNode);
+            }
+
+            for (var j = 0; j < racesAmount; j++) {
+                var classNode = document.createElement("li");
+                var classNodeText = document.createTextNode(responseParse.data.classes[j].name);
+                classNode.appendChild(classNodeText);
+                classNode.setAttribute("id", "class" + responseParse.data.classes[j].class_id);
+
+                classNode.addEventListener("click", function(e) { processClassClick(e); });
+
+                classesList.appendChild(classNode);
+            }
+        } else {
+            displayErrors(responseParse.errors);
+        }
+    }
+}
+
+function processRaceClick(e) {
+    var raceClicked = document.getElementById(e.target.id);
+
+    var racesButtons = document.getElementById("race").childNodes;
+    var raceButtonsAmount = racesButtons.length;
+
+    for (var i = 0; i < raceButtonsAmount; i++) {
+        racesButtons[i].setAttribute("class", "");
+    }
+
+    raceClicked.setAttribute("class", "race_class_active");
+}
+
+function processClassClick(e) {
+    var classClicked = document.getElementById(e.target.id);
+
+    var classButtons = document.getElementById("class").childNodes;
+    var classButtonsAmount = classButtons.length;
+
+    for (var i = 0; i < classButtonsAmount; i++) {
+        classButtons[i].setAttribute("class", "");
+    }
+
+    classClicked.setAttribute("class", "race_class_active");
+}
+
+function requestChoiceRaceClass() {
+    var chosenClass, chosenRace;
+
+    var classButtons = document.getElementById("class").childNodes;
+    var racesButtons = document.getElementById("race").childNodes;
+
+    var classButtonsAmount = classButtons.length;
+    var raceButtonsAmount = racesButtons.length;
+
+    for (var i = 0; i < classButtonsAmount; i++) {
+        if (classButtons[i].className === "race_class_active") {
+            chosenClass = classButtons[i].id.substr(5,1);
+        }
+    }
+
+    for (var j = 0; j < raceButtonsAmount; j++) {
+        if (racesButtons[j].className === "race_class_active") {
+            chosenRace = racesButtons[j].id.substr(4,1);
+        }
+    }
+
+    if (typeof (chosenClass) === "undefined" || typeof (chosenRace) === "undefined") {
+        var notif = new Notification("Je moet een ras en klasse selecteren", false);
+    } else {
+        var chosenClassAndRace = {};
+
+        chosenClassAndRace.user_id = userId;
+        chosenClassAndRace.race = chosenRace;
+        chosenClassAndRace.class = chosenClass;
+
+        sendXHR(JSON.stringify(chosenClassAndRace), "http/http_register_class_and_race.php", "post", "processRegisterClassRace");
+    }
+}
+
+function processRegisterClassRace(jsonData) {
+    console.log(jsonData);
+
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            requestUserData();
+            disableRaceClassPrompt();
+            enableGameArea();
+            openStream();
+        }
+    }
+}
+
+function disableRaceClassPrompt() {
+    var chooseRaceAndClass = document.getElementById("choose_race_class");
+
+    chooseRaceAndClass.style.opacity = "0";
+    chooseRaceAndClass.style.pointerEvents = "none";
 }
 
 function requestUserList() {

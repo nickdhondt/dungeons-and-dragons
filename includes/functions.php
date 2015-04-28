@@ -113,7 +113,12 @@ function register_user($username, $password) {
 
     $sql = $connection->query("INSERT INTO user (username, password, permission_type) VALUES ('$username', '$hash', 0)");
 
-    if (!$sql) {
+    $user_id = $connection->insert_id;
+    $now = microtime(true);
+
+    $timestamps = $connection->query("INSERT INTO timestamps (user_id, basic_timestamp, skill_timestamp, inventory_timestamp, condition_timestamp) VALUES ($user_id, $now, $now, $now, $now)");
+
+    if (!$sql || !$timestamps) {
         return $connection->connect_error;
     } else {
         return true;
@@ -245,5 +250,62 @@ function get_condition_data_user($user_id, $current_timestamp){
         //"condition_id, turns left, damage, damage_on, condition"-values.
 }
 
+function get_races() {
+    global $connection;
 
+    $sql = $connection->query("SELECT name, race_id FROM races");
 
+    if(!$sql) {
+        return $connection->error;
+    } else {
+        $races = array();
+
+        while ($row = $sql->fetch_assoc()) {
+            $races[] = $row;
+        }
+        return $races;
+    }
+}
+
+function get_classes() {
+    global $connection;
+
+    $sql = $connection->query("SELECT name, class_id FROM classes");
+
+    if(!$sql) {
+        return $connection->error;
+    } else {
+        $classes = array();
+
+        while ($row = $sql->fetch_assoc()) {
+            $classes[] = $row;
+        }
+        return $classes;
+    }
+}
+
+function update_user($user_id, $fields) {
+    global $connection;
+
+    $values = prepare_fields($fields);
+
+    if ($connection->query("UPDATE user SET $values WHERE user_id=$user_id")) {
+        return true;
+    } else {
+        return $connection->error;
+    }
+}
+
+function prepare_fields ($fields) {
+    $single_values = array();
+
+    foreach ($fields as $field => $value) {
+        if (gettype($value) === "integer" || gettype($field) === "double") {
+            $single_values[] = $field . "=" . $value;
+        } else {
+            $single_values[] = $field . "='" . $value . "'";
+        }
+    }
+
+    return implode (", ", $single_values);
+}
