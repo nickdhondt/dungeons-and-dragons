@@ -374,7 +374,7 @@ function get_conditions_by_id($condition_id){
         while ($row = $sql->fetch_array(MYSQLI_ASSOC)){
             $rows[] = $row;
         }
-        $conditions["condition_data"] = $rows;
+        $conditions["data"] = $rows;
     }
 
     return $conditions;
