@@ -55,13 +55,9 @@ while ($script_beginning >= (microtime(true) - 280)) {
     }
 
     //Set the new events to the following arrays.
-<<<<<<< HEAD
     $new_events = get_basic_data_users($timestamp); //Returns the basic data for the users.
-=======
-    $new_events = array();
     $new_events[] = get_basic_data_users($timestamp); //Returns the basic data for the users.
     $new_events[] = get_condition_data_user($_GET["user_id"], $timestamp);  //Returns the condition data for the users.
->>>>>>> origin/master
 
     //Stream the $new_events
     if ($new_events != false) {

@@ -145,11 +145,6 @@ function delete_user($user_id) {
 
 function get_basic_data_user($user_id, $current_timestamp){
     //This function gets the basic data for a user.
-<<<<<<< HEAD
-        //Basic data is described in the database-table "Basic"
-=======
-    //Basic data is described in the database-table "Basic"
->>>>>>> origin/master
     global $connection;
 
     //Check the basic Timestamp to determine whether or not the basic info is needed.
@@ -184,11 +179,8 @@ function get_basic_data_user($user_id, $current_timestamp){
 
 function get_basic_data_users($current_timestamp){
     //This function will get the basic data for all the listed users.
-<<<<<<< HEAD
-        //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
-=======
     //The architecture is: Array(1=>(user_id,username,basic_data), 2=>...);
->>>>>>> origin/master
+
     $users = get_user_list();
 
     $basic_data_users = array();
@@ -212,8 +204,7 @@ function get_basic_data_users($current_timestamp){
     return $basic_data_users;
 }
 
-<<<<<<< HEAD
-=======
+
 function get_condition_data_user($user_id, $current_timestamp){
     //This function gets the condition data for a user.
         //Condition data is described in the database-table "condition".
@@ -260,7 +251,6 @@ function get_condition_data_user($user_id, $current_timestamp){
         //"condition_id, turns left, damage, damage_on, condition"-values.
 }
 
->>>>>>> origin/master
 function get_races() {
     global $connection;
 
