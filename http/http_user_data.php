@@ -28,7 +28,7 @@ if ($user_id != false) {
         // Get the user data based on the user id.
         // posted user id => false => get user data based on session
         // posted user id => "id integer" => get user data based on the sent id
-        $fields = array("user_id", "username", "permission_type");
+        $fields = array("user_id", "username", "permission_type", "race", "class");
         if ($post_data["user_id"] === "false") {
             $user_data = user_data($user_id, $fields);
 
