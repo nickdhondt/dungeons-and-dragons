@@ -4,8 +4,7 @@
         "next_turn", "user_id"
     This page will execute the following:
         - Set the next turn to the incremented or resetted number.
-        - Check the conditions of the next player.
-
+        - Check the conditions of the next player and process them.
 */
 
 require_once "../includes/functions.php";
@@ -50,7 +49,14 @@ if(empty($_POST["data"])){
             if($succes){
                 //The turn has been updated in the database, but we must re-evaluate all the conditions for the user at next turn.
                 //Determine which user can play in the next turn.
-                    /* INSERT LOGIC HERE */
+                    $processed = update_conditions_from_user($user_id);
+                    if($processed){
+                        //The conditions are succesfully checked.
+                        //There isn't anything else that this page needs to process right now.
+                            //Insert future implementations here.
+                    } else {
+                        $errors[] = "Er heeft zich een fout voorgedaan. Details: ".$processed;
+                    }
             } else {
                 $errors[] = "Er heeft zich een fout voorgedaan tijdens het wegschrijven naar de database in http_next_turn.";
             }

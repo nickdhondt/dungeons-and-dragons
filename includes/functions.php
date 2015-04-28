@@ -129,6 +129,42 @@ function update_turn_in_db($turn){
     }
 }
 
+function update_conditions_from_user($user_id){
+    //We will go through all the conditions of the hero, and substract them all with 1.
+    global $connection;
+    $errors =  array();
+
+    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data");
+    $conditions = array();
+    while($row = $sql_get->fetch_array(MYSQLI_ASSOC)){
+        $conditions["id"] = $row["id"];
+        $conditions["value"] = $row["value"] - 1;
+    }
+
+    foreach($conditions as $condition){
+        $value = $condition["value"];
+        if($value <= 0){
+            //If the value <= 0, it means that the condition is expired.
+            $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
+            $sql->bind_param('i', $condition["id"]);
+            $sql->execute();
+        } else{
+            $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
+        }
+
+        if(!$sql){
+            $errors[] = $connection->error;
+        }
+    }
+
+    //Check if everything went succesfull
+    if(!empty($errors)){
+        return $errors;
+    } else {
+        return true;
+    }
+}
+
 function register_user($username, $password) {
     global $connection;
 
