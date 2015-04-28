@@ -752,7 +752,7 @@ INSERT INTO `skills` (`skill_id`, `name`, `type`, `subtype`, `levels`, `level_ad
 
 CREATE TABLE IF NOT EXISTS `timestamps` (
 `timestamp_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `basic_timestamp` varchar(16) NOT NULL,
   `skill_timestamp` varchar(16) NOT NULL,
   `inventory_timestamp` varchar(16) NOT NULL,
