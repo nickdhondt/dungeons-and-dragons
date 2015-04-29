@@ -21,8 +21,17 @@ function init() {
     document.getElementById("show_admin").addEventListener("click", function() { toggleAdminPanel(); });
     window.matchMedia("(orientation: portrait)").addListener(handleOrientationChange);
     document.getElementById("btn_race_class").addEventListener("click", function() { requestChoiceRaceClass(); });
+    document.getElementById("next_turn").addEventListener("click", function(e) { requestNextTurn(); e.stopPropagation(); });
 
     requestUserData();
+}
+
+function requestNextTurn() {
+    var nextTurn = {
+        next_turn: "true"
+    };
+
+    sendXHR(JSON.stringify(nextTurn), "http/http_next_turn.php", "post", "processNextTurn");
 }
 
 function handleOrientationChange() {
@@ -30,7 +39,7 @@ function handleOrientationChange() {
         if (window.matchMedia("screen and (max-device-width: 640px)").matches) {
             document.getElementById("show_admin").style.right = "-90%";
         } else {
-            document.getElementById("show_admin").style.right = "-22em";
+            document.getElementById("show_admin").style.right = "-32em";
         }
     }
 }
@@ -44,7 +53,7 @@ function toggleAdminPanel() {
             document.getElementById("show_admin").style.right = "-90%";
             adminPanelOpen = false;
         } else {
-            document.getElementById("show_admin").style.right = "-22em";
+            document.getElementById("show_admin").style.right = "-32em";
             adminPanelOpen = false;
         }
     }
@@ -110,8 +119,6 @@ function openStream() {
         var parsedGameEvent = parseJSON(e.data);
 
         for (var i = 0; i < parsedGameEvent.basic.length; i++) {
-            console.log(parsedGameEvent.basic[i]);
-
             if (parsedGameEvent.basic[i].is_you === true) {
                 var basicDataList = document.getElementById("basic_data_list");
                 basicDataList.innerHTML = "";
@@ -123,60 +130,9 @@ function openStream() {
                     basicDataList.appendChild(basicValueNode);
                 }
 
-                var basicConditions = document.getElementById("conditions_list");
-                basicConditions.innerHTML = "";
+                var conditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.condition_data);
 
-                var conditionsOrder = parsedGameEvent.basic[i].data.condition_data;
-                conditionsOrder.sort();
-
-                var conditionsFormatted = [];
-
-                for (var k = 0; k < conditionsOrder.length; k++) {
-                    var found = false;
-
-                    for (var m = 0; m < conditionsFormatted.length; m++) {
-                        if (conditionsFormatted[m].condition_id == conditionsOrder[k].condition_id) {
-                            found = true;
-
-                            conditionsFormatted[m].affects[conditionsFormatted[m].affects.length] = {
-                                damage_on: conditionsOrder[k].damage_on,
-                                damage: conditionsOrder[k].damage
-                            };
-                        }
-                    }
-
-                    if (found === false) {
-                        conditionsFormatted[conditionsFormatted.length] = {
-                            name: conditionsOrder[k].condition,
-                            condition_id: conditionsOrder[k].condition_id,
-                            turns: conditionsOrder[k].turns,
-                            affects: [
-                                {
-                                    damage_on: conditionsOrder[k].damage_on,
-                                    damage: conditionsOrder[k].damage
-                                }
-                            ]
-                        };
-                    }
-                }
-
-                for (var n = 0; n < conditionsFormatted.length; n++) {
-                    var conditionNode = document.createElement("li");
-                    var conditionTextNode = document.createTextNode(conditionsFormatted[n].name + " (aantal beurten: " + conditionsFormatted[n].turns + ")");
-                    conditionNode.appendChild(conditionTextNode);
-                    var affectsNode = document.createElement("ul");
-
-                    for (var o = 0; o < conditionsFormatted[n].affects.length; o++) {
-                        var effectNode = document.createElement("li");
-                        var effectTextNode = document.createTextNode(conditionsFormatted[n].affects[o].damage + " schade aan: " + conditionsFormatted[n].affects[o].damage_on);
-
-                        effectNode.appendChild(effectTextNode);
-                        affectsNode.appendChild(effectNode);
-                    }
-
-                    conditionNode.appendChild(affectsNode);
-                    basicConditions.appendChild(conditionNode);
-                }
+                makeListConditions(conditionsFormatted, "conditions_list");
 
                 var inventoryList = document.getElementById("inventory_list");
                 inventoryList.innerHTML = "";
@@ -186,20 +142,15 @@ function openStream() {
                     var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
                     var infoNode = document.createElement("ul");
                     infoNode.setAttribute("class", "hover_show");
+                    infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
 
-                    for (var p = 0; p < parsedGameEvent.basic[i].data.inventory_data[l].conditions.length; p++) {
-                        console.log(parsedGameEvent.basic[i].data.inventory_data[l].conditions[p]);
-
-                        var infoItemConditionNode = document.createElement("li");
-                        var infoItemConditionTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].conditions[p].condition);
-
-                        infoItemConditionNode.appendChild(infoItemConditionTextNode);
-                        infoNode.appendChild(infoItemConditionNode);
-                    }
+                    var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
 
                     inventoryItemNode.appendChild(inventoryItemTextNode);
                     inventoryItemNode.appendChild(infoNode);
                     inventoryList.appendChild(inventoryItemNode);
+
+                    makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
                 }
             }
         }
@@ -216,6 +167,66 @@ function openStream() {
             connectionLost = true;
         }
     }, 1000);
+}
+
+function makeListConditions(conditionsCollection, appendTo) {
+    var appendToElement = document.getElementById(appendTo);
+    appendToElement.innerHTML = "";
+
+    for (var n = 0; n < conditionsCollection.length; n++) {
+        var conditionNode = document.createElement("li");
+        var conditionTextNode = document.createTextNode(conditionsCollection[n].name + " (aantal beurten: " + conditionsCollection[n].turns + ")");
+        conditionNode.appendChild(conditionTextNode);
+        var affectsNode = document.createElement("ul");
+
+        for (var o = 0; o < conditionsCollection[n].affects.length; o++) {
+            var effectNode = document.createElement("li");
+            var effectTextNode = document.createTextNode(conditionsCollection[n].affects[o].damage + " effect op: " + conditionsCollection[n].affects[o].damage_on);
+
+            effectNode.appendChild(effectTextNode);
+            affectsNode.appendChild(effectNode);
+        }
+
+        conditionNode.appendChild(affectsNode);
+        appendToElement.appendChild(conditionNode);
+    }
+}
+
+function prepareConditions(conditionsArray) {
+    conditionsArray.sort();
+
+    var conditionsFormatted = [];
+
+    for (var k = 0; k < conditionsArray.length; k++) {
+        var found = false;
+
+        for (var m = 0; m < conditionsFormatted.length; m++) {
+            if (conditionsFormatted[m].condition_id == conditionsArray[k].condition_id) {
+                found = true;
+
+                conditionsFormatted[m].affects[conditionsFormatted[m].affects.length] = {
+                    damage_on: conditionsArray[k].damage_on,
+                    damage: conditionsArray[k].damage
+                };
+            }
+        }
+
+        if (found === false) {
+            conditionsFormatted[conditionsFormatted.length] = {
+                name: conditionsArray[k].condition,
+                condition_id: conditionsArray[k].condition_id,
+                turns: conditionsArray[k].turns,
+                affects: [
+                    {
+                        damage_on: conditionsArray[k].damage_on,
+                        damage: conditionsArray[k].damage
+                    }
+                ]
+            };
+        }
+    }
+
+    return conditionsFormatted;
 }
 
 function showAdminTab(tab) {
@@ -548,8 +559,6 @@ function requestChoiceRaceClass() {
 }
 
 function processRegisterClassRace(jsonData) {
-    console.log(jsonData);
-
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
@@ -630,14 +639,10 @@ function requestDeleteUser(deleteUserId) {
 
     var deleteData = JSON.stringify(userDeleteData);
 
-    //console.log(deleteData);
-
     sendXHR(deleteData, "http/http_delete_user.php", "post", "processDeleteUser");
 }
 
 function processDeleteUser(jsonData) {
-    console.log(jsonData);
-
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
