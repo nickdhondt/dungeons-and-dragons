@@ -106,6 +106,105 @@ function openStream() {
         document.getElementById("ping_info").innerHTML = JSON.parse(e.data).time;
     }, false);
 
+    eventSource.addEventListener("game_event", function(e) {
+        var parsedGameEvent = parseJSON(e.data);
+
+        for (var i = 0; i < parsedGameEvent.basic.length; i++) {
+            console.log(parsedGameEvent.basic[i]);
+
+            if (parsedGameEvent.basic[i].is_you === true) {
+                var basicDataList = document.getElementById("basic_data_list");
+                basicDataList.innerHTML = "";
+
+                for (var j = 0; j < parsedGameEvent.basic[i].data.basic_data.length; j++) {
+                    var basicValueNode = document.createElement("li");
+                    var basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
+                    basicValueNode.appendChild(basicValueTextNode);
+                    basicDataList.appendChild(basicValueNode);
+                }
+
+                var basicConditions = document.getElementById("conditions_list");
+                basicConditions.innerHTML = "";
+
+                var conditionsOrder = parsedGameEvent.basic[i].data.condition_data;
+                conditionsOrder.sort();
+
+                var conditionsFormatted = [];
+
+                for (var k = 0; k < conditionsOrder.length; k++) {
+                    var found = false;
+
+                    for (var m = 0; m < conditionsFormatted.length; m++) {
+                        if (conditionsFormatted[m].condition_id == conditionsOrder[k].condition_id) {
+                            found = true;
+
+                            conditionsFormatted[m].affects[conditionsFormatted[m].affects.length] = {
+                                damage_on: conditionsOrder[k].damage_on,
+                                damage: conditionsOrder[k].damage
+                            };
+                        }
+                    }
+
+                    if (found === false) {
+                        conditionsFormatted[conditionsFormatted.length] = {
+                            name: conditionsOrder[k].condition,
+                            condition_id: conditionsOrder[k].condition_id,
+                            turns: conditionsOrder[k].turns,
+                            affects: [
+                                {
+                                    damage_on: conditionsOrder[k].damage_on,
+                                    damage: conditionsOrder[k].damage
+                                }
+                            ]
+                        };
+                    }
+                }
+
+                for (var n = 0; n < conditionsFormatted.length; n++) {
+                    var conditionNode = document.createElement("li");
+                    var conditionTextNode = document.createTextNode(conditionsFormatted[n].name + " (aantal beurten: " + conditionsFormatted[n].turns + ")");
+                    conditionNode.appendChild(conditionTextNode);
+                    var affectsNode = document.createElement("ul");
+
+                    for (var o = 0; o < conditionsFormatted[n].affects.length; o++) {
+                        var effectNode = document.createElement("li");
+                        var effectTextNode = document.createTextNode(conditionsFormatted[n].affects[o].damage + " schade aan: " + conditionsFormatted[n].affects[o].damage_on);
+
+                        effectNode.appendChild(effectTextNode);
+                        affectsNode.appendChild(effectNode);
+                    }
+
+                    conditionNode.appendChild(affectsNode);
+                    basicConditions.appendChild(conditionNode);
+                }
+
+                var inventoryList = document.getElementById("inventory_list");
+                inventoryList.innerHTML = "";
+
+                for (var l = 0; l < parsedGameEvent.basic[i].data.inventory_data.length; l++) {
+                    var inventoryItemNode = document.createElement("li");
+                    var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
+                    var infoNode = document.createElement("ul");
+                    infoNode.setAttribute("class", "hover_show");
+
+                    for (var p = 0; p < parsedGameEvent.basic[i].data.inventory_data[l].conditions.length; p++) {
+                        console.log(parsedGameEvent.basic[i].data.inventory_data[l].conditions[p]);
+
+                        var infoItemConditionNode = document.createElement("li");
+                        var infoItemConditionTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].conditions[p].condition);
+
+                        infoItemConditionNode.appendChild(infoItemConditionTextNode);
+                        infoNode.appendChild(infoItemConditionNode);
+                    }
+
+                    inventoryItemNode.appendChild(inventoryItemTextNode);
+                    inventoryItemNode.appendChild(infoNode);
+                    inventoryList.appendChild(inventoryItemNode);
+                }
+            }
+        }
+    }, false);
+
     eventSource.onerror = function(e) {
         console.log("connection error [time: " + microtime(true) + "]");
         connectionErrors++;
