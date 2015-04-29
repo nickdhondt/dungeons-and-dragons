@@ -409,6 +409,22 @@ div#tab_one > div.col > div > ul > li {
     margin-bottom: .5em;
 }
 
+div#tab_one > div.col > div > ul > li > div.use_item_button {
+    display: inline-block;
+    background: #ceb9ff;
+    padding: .3em;
+    margin-left: .5em;
+    cursor: pointer;
+}
+
+div#tab_one > div.col > div > ul > li > div.use_item_button:hover {
+    background: rgba(208, 183, 255, .7);
+}
+
+div#tab_one > div.col > div > ul > li > div.use_item_button:active {
+    background: rgba(208, 183, 255, .45);
+}
+
 div#tab_one > div.col > div > ul > li:last-child {
     margin-bottom: 0;
 }

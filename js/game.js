@@ -26,6 +26,25 @@ function init() {
     requestUserData();
 }
 
+function catchUseItemEvent() {
+    var useItemButtons = document.getElementsByClassName("use_item_button");
+
+    for (var i = 0; i < useItemButtons.length; i++) {
+        useItemButtons[i].addEventListener("click", function(e) { requestUseItem(e); })
+    }
+}
+
+function requestUseItem(e) {
+    var useItem = e.target.id.substr(3, 1);
+
+    var requestData = {
+        "use_item": useItem,
+        "user_id": userId
+    };
+
+    sendXHR(JSON.stringify(requestData), "http/http_use_item.php", "post", "processUseItem");
+}
+
 function requestNextTurn() {
     var nextTurn = {
         next_turn: "true"
@@ -140,6 +159,11 @@ function openStream() {
                 for (var l = 0; l < parsedGameEvent.basic[i].data.inventory_data.length; l++) {
                     var inventoryItemNode = document.createElement("li");
                     var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
+                    var useItemButtonNode = document.createElement("div");
+                    useItemButtonNode.setAttribute("class", "use_item_button");
+                    useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                    var useItemButtonTextNode = document.createTextNode("Gebruiken");
+                    useItemButtonNode.appendChild(useItemButtonTextNode);
                     var infoNode = document.createElement("ul");
                     infoNode.setAttribute("class", "hover_show");
                     infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
@@ -147,11 +171,13 @@ function openStream() {
                     var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
 
                     inventoryItemNode.appendChild(inventoryItemTextNode);
+                    inventoryItemNode.appendChild(useItemButtonNode);
                     inventoryItemNode.appendChild(infoNode);
                     inventoryList.appendChild(inventoryItemNode);
 
                     makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
                 }
+                catchUseItemEvent();
             }
         }
     }, false);
@@ -174,21 +200,24 @@ function makeListConditions(conditionsCollection, appendTo) {
     appendToElement.innerHTML = "";
 
     for (var n = 0; n < conditionsCollection.length; n++) {
-        var conditionNode = document.createElement("li");
-        var conditionTextNode = document.createTextNode(conditionsCollection[n].name + " (aantal beurten: " + conditionsCollection[n].turns + ")");
-        conditionNode.appendChild(conditionTextNode);
-        var affectsNode = document.createElement("ul");
 
-        for (var o = 0; o < conditionsCollection[n].affects.length; o++) {
-            var effectNode = document.createElement("li");
-            var effectTextNode = document.createTextNode(conditionsCollection[n].affects[o].damage + " effect op: " + conditionsCollection[n].affects[o].damage_on);
+        if (conditionsCollection[n].condition_id != 0) {
+            var conditionNode = document.createElement("li");
+            var conditionTextNode = document.createTextNode(conditionsCollection[n].name + " (aantal beurten: " + conditionsCollection[n].turns + ")");
+            conditionNode.appendChild(conditionTextNode);
+            var affectsNode = document.createElement("ul");
 
-            effectNode.appendChild(effectTextNode);
-            affectsNode.appendChild(effectNode);
+            for (var o = 0; o < conditionsCollection[n].affects.length; o++) {
+                var effectNode = document.createElement("li");
+                var effectTextNode = document.createTextNode(conditionsCollection[n].affects[o].damage + " effect op: " + conditionsCollection[n].affects[o].damage_on);
+
+                effectNode.appendChild(effectTextNode);
+                affectsNode.appendChild(effectNode);
+            }
+
+            conditionNode.appendChild(affectsNode);
+            appendToElement.appendChild(conditionNode);
         }
-
-        conditionNode.appendChild(affectsNode);
-        appendToElement.appendChild(conditionNode);
     }
 }
 
@@ -342,6 +371,9 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processRegisterClassRace":
                     processRegisterClassRace(response);
                     break;
+                case "processNextTurn":
+                    processNextTurn(response);
+                    break;
             }
         }
     };
@@ -355,6 +387,19 @@ function sendXHR(data, url, type, executeFunction) {
         xhr.send("data=" + data);
     } else {
         xhr.send();
+    }
+}
+
+function processNextTurn(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_accepted === "true") {
+            new Notification("Beurt doorgegeven aan" + responseParse.next_turn, false);
+        }
+        else {
+            displayErrors(responseParse.errors);
+        }
     }
 }
 
