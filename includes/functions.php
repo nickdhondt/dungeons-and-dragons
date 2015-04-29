@@ -487,5 +487,55 @@ function get_skill_data($user_id, $current_timestamp){
 }
 
 function get_general_data($user_id, $current_timestamp){
+    //This function gets the general data. This includes all the general info such as current user and the turn logic.
+    global $connection;
+    $general_data = array();
 
+    //Check the timestamps that are active for general data.
+    $sql = $connection->query("SELECT basic_timestamp as 'basic' FROM timestamps WHERE user_id='".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
+    if($timestamps["basic"] >= $current_timestamp){
+        //Get current user data
+        $fields = array("user_id", "username");
+        $current_user = user_data($user_id, $fields);
+        $general_data["current_user"] = $current_user;
+
+        //Get turns until user has his turn.
+        $turns_left = 0;
+        $current_turn = get_turn();
+        $user_turn_list = get_user_turn_list();
+        if($user_turn_list != false){
+            foreach($user_turn_list as $user_turn_data){
+                if($user_turn_data["id"] === $user_id){
+                    $user_turn = $user_turn_data["turn"];
+                }
+            }
+            if(!empty($user_turn)){
+                if($user_turn < $current_turn){
+                    $max_turn = get_number_of_users();
+                    $dist_to_max = $max_turn - $current_turn;
+                    $turns_left = $user_turn + $dist_to_max + 1;    //+1 because the 0th step must count too.
+                } elseif($user_turn > $current_turn){
+                    $turns_left = $user_turn - $current_turn;
+                } else {
+                    $turns_left = 0;
+                }
+                $general_data["turns_left"] = $turns_left;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        //if no new data is found, return false;
+        return false;
+    }
+    return $general_data;
 }
