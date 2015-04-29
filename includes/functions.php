@@ -102,6 +102,88 @@ function get_user_list() {
     return $rows;
 }
 
+function get_number_of_users(){
+    global $connection;
+
+    $sql = $connection->query("SELECT COUNT(user_id) as 'id' FROM user");
+
+    if(!$sql) {
+        return $connection->connect_error;
+    } else {
+        $number = $sql->fetch_assoc();
+    }
+    return $number["id"];
+}
+
+function update_turn_in_db($turn){
+    global $connection;
+
+    $stmt = $connection->prepare("UPDATE turn SET turn VALUES (?) WHERE turn_id = 0");
+    $stmt->bind_param('i', $turn);
+    $stmt->execute();
+
+    if(!empty($stmt->error)){
+        return $stmt->error;
+    } else {
+        return true;
+    }
+}
+
+function update_conditions_from_user($user_id){
+    //We will go through all the conditions of the hero, and substract them all with 1.
+    global $connection;
+    $errors =  array();
+
+    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data");
+    $conditions = array();
+    while($row = $sql_get->fetch_array(MYSQLI_ASSOC)){
+        $conditions["id"] = $row["id"];
+        $conditions["value"] = $row["value"] - 1;
+    }
+
+    foreach($conditions as $condition){
+        $value = $condition["value"];
+        if($value <= 0){
+            //If the value <= 0, it means that the condition is expired.
+            $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
+            $sql->bind_param('i', $condition["id"]);
+            $sql->execute();
+        } else{
+            $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
+        }
+
+        if(!$sql){
+            $errors[] = $connection->error;
+        }
+    }
+
+    //Check if everything went succesfull
+    if(!empty($errors)){
+        return $errors;
+    } else {
+        return true;
+    }
+}
+
+function get_user_turn_list(){
+    global $connection;
+
+    $sql = $connection->query("SELECT ubd.user_id as 'id', ubd.basic_value as 'turn'
+            FROM user_basic_data ubd
+            INNER JOIN basic b ON ubd.basic_id = b.basic_id
+            WHERE ubd.basic_id = '8'");
+
+    if(!$sql){
+        return false;
+    } else {
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+    }
+    return $rows;
+}
+
 function register_user($username, $password) {
     global $connection;
 
