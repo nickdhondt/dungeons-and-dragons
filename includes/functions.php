@@ -115,10 +115,24 @@ function get_number_of_users(){
     return $number["id"];
 }
 
+function get_turn(){
+    global $connection;
+
+    $sql = $connection->query("SELECT turn FROM turn WHERE turn_id = 0");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $turn = $sql->fetch_assoc()["turn"];
+    }
+
+    return $turn;
+}
+
 function update_turn_in_db($turn){
     global $connection;
 
-    $stmt = $connection->prepare("UPDATE turn SET turn VALUES (?) WHERE turn_id = 0");
+    $stmt = $connection->prepare("UPDATE turn SET turn=? WHERE turn_id = 0");
     $stmt->bind_param('i', $turn);
     $stmt->execute();
 
@@ -134,14 +148,16 @@ function update_conditions_from_user($user_id){
     global $connection;
     $errors =  array();
 
-    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data");
+    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data WHERE user_id = '".$user_id."'");
     $conditions = array();
+    $rows = array();
     while($row = $sql_get->fetch_array(MYSQLI_ASSOC)){
         $conditions["id"] = $row["id"];
         $conditions["value"] = $row["value"] - 1;
+        $rows[] = $conditions;
     }
 
-    foreach($conditions as $condition){
+    foreach($rows as $condition){
         $value = $condition["value"];
         if($value <= 0){
             //If the value <= 0, it means that the condition is expired.
