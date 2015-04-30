@@ -486,23 +486,6 @@ function get_skill_data($user_id, $current_timestamp){
 
 }
 
-function get_general_data($user_id, $current_timestamp){
-    //This function gets the general data. This includes all the general info such as current user and the turn logic.
-    global $connection;
-    $general_data = array();
-
-    //Check the timestamps that are active for general data.
-    $sql = $connection->query("SELECT basic_timestamp as 'basic' FROM timestamps WHERE user_id='".$user_id."'");
-
-    if(!$sql){
-        return $connection->error;
-    } else {
-        $timestamps = $sql->fetch_assoc();
-    }
-
-<<<<<<< HEAD
-}
-
 function list_basic_skillitems() {
     global $connection;
 
@@ -519,7 +502,22 @@ function list_basic_skillitems() {
 
         return $basics;
     }
-=======
+}
+
+function get_general_data($user_id, $current_timestamp){
+    //This function gets the general data. This includes all the general info such as current user and the turn logic.
+    global $connection;
+    $general_data = array();
+
+    //Check the timestamps that are active for general data.
+    $sql = $connection->query("SELECT basic_timestamp as 'basic' FROM timestamps WHERE user_id='".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
     if($timestamps["basic"] >= $current_timestamp){
         //Get current user data
         $fields = array("user_id", "username");
@@ -558,5 +556,4 @@ function list_basic_skillitems() {
         return false;
     }
     return $general_data;
->>>>>>> 4fe6c52cd95ce312455cacfcc64c8b69201b9381
 }
