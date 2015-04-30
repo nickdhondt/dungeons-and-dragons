@@ -15,6 +15,7 @@ function init() {
     document.getElementById("three").addEventListener("click", function() { showTab("three"); });
     document.getElementById("admin_one").addEventListener("click", function(e) { showAdminTab("one"); e.stopPropagation(); });
     document.getElementById("admin_two").addEventListener("click", function(e) { showAdminTab("two"); e.stopPropagation(); });
+    document.getElementById("admin_three").addEventListener("click", function(e) { showAdminTab("three"); e.stopPropagation(); });
     document.getElementById("btn_register").addEventListener("click", function(e) { requestUserRegister(); e.stopPropagation(); });
     document.getElementById("txt_new_username").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("txt_new_password").addEventListener("click", function(e) { e.stopPropagation(); });
@@ -58,7 +59,7 @@ function handleOrientationChange() {
         if (window.matchMedia("screen and (max-device-width: 640px)").matches) {
             document.getElementById("show_admin").style.right = "-90%";
         } else {
-            document.getElementById("show_admin").style.right = "-32em";
+            document.getElementById("show_admin").style.right = "-40em";
         }
     }
 }
@@ -72,7 +73,7 @@ function toggleAdminPanel() {
             document.getElementById("show_admin").style.right = "-90%";
             adminPanelOpen = false;
         } else {
-            document.getElementById("show_admin").style.right = "-32em";
+            document.getElementById("show_admin").style.right = "-40em";
             adminPanelOpen = false;
         }
     }
@@ -261,20 +262,34 @@ function prepareConditions(conditionsArray) {
 function showAdminTab(tab) {
     var tabOne = document.getElementById("admin_tab_one");
     var tabTwo = document.getElementById("admin_tab_two");
+    var tabThree = document.getElementById("admin_tab_three");
+
 
     var one = document.getElementById("admin_one");
     var two = document.getElementById("admin_two");
+    var three = document.getElementById("admin_three");
 
     if (tab === "one") {
         tabOne.style.display = "block";
         tabTwo.style.display = "none";
+        tabThree.style.display = "none";
         one.setAttribute("class", "active");
         two.setAttribute("class", "");
+        three.setAttribute("class", "");
     } else if (tab === "two") {
         tabOne.style.display = "none";
         tabTwo.style.display = "block";
+        tabThree.style.display = "none";
         one.setAttribute("class", "");
         two.setAttribute("class", "active");
+        three.setAttribute("class", "");
+    } else if (tab === "three") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "none";
+        tabThree.style.display = "block";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "");
+        three.setAttribute("class", "active");
     }
 }
 
@@ -373,6 +388,9 @@ function sendXHR(data, url, type, executeFunction) {
                     break;
                 case "processNextTurn":
                     processNextTurn(response);
+                    break;
+                case "processBasics":
+                    processBasics(response);
                     break;
             }
         }
@@ -659,6 +677,7 @@ function processUserList(jsonData) {
     userListTab.appendChild(userListNode);
 
     openStream();
+    requestBasics();
 
     var changeUserview = document.getElementsByClassName("change_userview");
     var deleteUser = document.getElementsByClassName("delete_user");
@@ -675,6 +694,80 @@ function processUserList(jsonData) {
             else if (confirm("De gebruiker verwijderen?") === true) requestDeleteUser(this.id);
         });
     }
+}
+
+function requestBasics() {
+    sendXHR("", "http/http_list_basic.php", "get", "processBasics");
+}
+
+function processBasics(jsonData){
+    console.log(parseJSON(jsonData));
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            console.log(responseParse.data);
+
+            var basicControls = document.getElementById("basic_controls");
+
+            for (var i = 0; i < responseParse.data.length; i++) {
+                var basicControlsNode = document.createElement("li");
+                var basicControlsButtonNode = document.createElement("div");
+                basicControlsButtonNode.setAttribute("class", "no_pointer");
+                var basisControlsTextNode = document.createTextNode(responseParse.data[i].name);
+                basicControlsButtonNode.appendChild(basisControlsTextNode);
+                basicControlsNode.appendChild(basicControlsButtonNode);
+
+                var plusOneNode = document.createElement("div");
+                var plusOneTextNode = document.createTextNode("+1");
+                plusOneNode.appendChild(plusOneTextNode);
+                plusOneNode.setAttribute("class", "basic_control_button");
+                plusOneNode.setAttribute("id", "plus" + responseParse.data[i].basic_id);
+                basicControlsNode.appendChild(plusOneNode);
+
+                var minuOneNode = document.createElement("div");
+                var minuOneTextNode = document.createTextNode("-1");
+                minuOneNode.appendChild(minuOneTextNode);
+                minuOneNode.setAttribute("class", "basic_control_button");
+                minuOneNode.setAttribute("id", "minu" + responseParse.data[i].basic_id);
+                basicControlsNode.appendChild(minuOneNode);
+
+                basicControls.appendChild(basicControlsNode);
+            }
+
+            catchBasicControlEvent();
+        }
+    }
+}
+
+function catchBasicControlEvent() {
+    var basicControlButtons = document.getElementsByClassName("basic_control_button");
+
+    for(var i = 0; i < basicControlButtons.length; i++) {
+        basicControlButtons[i].addEventListener("click", function(e) { requestBasic(e); e.stopPropagation(); });
+    }
+}
+
+function requestBasic(e) {
+    var eventId = e.target.id;
+    var action = eventId.substr(0, 4);
+    var basicId = eventId.substr(4, 1);
+    var performAction;
+
+    if (action === "plus") {
+        performAction = "add";
+    } else {
+        performAction = "substract";
+    }
+
+    var requestBasicData = {
+        "basic_id": basicId,
+        "action": performAction
+    };
+
+    sendXHR(JSON.stringify(requestBasicData), "http/http_.php", "post", "processBasicResponse");
 }
 
 function requestDeleteUser(deleteUserId) {

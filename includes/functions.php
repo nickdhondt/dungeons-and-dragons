@@ -473,3 +473,21 @@ function get_skill_data($user_id, $current_timestamp){
 function get_general_data($user_id, $current_timestamp){
 
 }
+
+function list_basic_skillitems() {
+    global $connection;
+
+    $sql = $connection->query("SELECT basic_id, name FROM basic WHERE basic_id=0 OR basic_id=1 OR basic_id=2 OR basic_id=3 OR basic_id=4 OR basic_id=5 OR basic_id=6 OR basic_id=7 OR basic_id=9");
+
+    if (!$sql) {
+        return $connection->error;
+    } else {
+        $basics = array();
+
+        while($row = $sql->fetch_assoc()) {
+            $basics[] = $row;
+        }
+
+        return $basics;
+    }
+}
