@@ -737,6 +737,34 @@ function processBasics(jsonData){
                 basicControls.appendChild(basicControlsNode);
             }
 
+            var basicAdminTab = document.getElementById("admin_tab_three");
+            var basicMessageNode = document.createElement("div");
+            var basicMessageTextNode = document.createTextNode("Bericht:");
+            basicMessageNode.appendChild(basicMessageTextNode);
+
+            var messageTextFieldNode = document.createElement("input");
+            messageTextFieldNode.setAttribute("type", "text");
+            messageTextFieldNode.setAttribute("placeholder", "Bericht aan speler");
+            messageTextFieldNode.setAttribute("id", "txt_message");
+
+            basicAdminTab.appendChild(basicMessageNode);
+            basicAdminTab.appendChild(messageTextFieldNode);
+
+            var expNode = document.createElement("div");
+            var expTextNode = document.createTextNode("Exp:");
+            expNode.setAttribute("id", "exp_slider_value");
+
+            expNode.appendChild(expTextNode);
+            var expSlider = document.createElement("input");
+            expSlider.setAttribute("type", "range");
+            expSlider.setAttribute("id", "exp_slider");
+            expSlider.setAttribute("max", "10000");
+            expSlider.setAttribute("min", "0");
+            expSlider.setAttribute("step", "100");
+
+            basicAdminTab.appendChild(expNode);
+            basicAdminTab.appendChild(expSlider);
+
             catchBasicControlEvent();
         }
     }
@@ -744,6 +772,17 @@ function processBasics(jsonData){
 
 function catchBasicControlEvent() {
     var basicControlButtons = document.getElementsByClassName("basic_control_button");
+    var basicExpSlider = document.getElementById("exp_slider");
+
+    var expSliderValue = document.getElementById("exp_slider_value");
+    expSliderValue.innerHTML = "Exp: " + basicExpSlider.value;
+
+    basicExpSlider.addEventListener("input", function(e) {
+        e.stopPropagation();
+        expSliderValue.innerHTML = "Exp: " + e.target.value;
+    });
+
+    basicExpSlider.addEventListener("click", function(e) {  e.stopPropagation(); });
 
     for(var i = 0; i < basicControlButtons.length; i++) {
         basicControlButtons[i].addEventListener("click", function(e) { requestBasic(e); e.stopPropagation(); });
@@ -764,10 +803,11 @@ function requestBasic(e) {
 
     var requestBasicData = {
         "basic_id": basicId,
-        "action": performAction
+        "action": performAction,
+        "user_id": userId
     };
 
-    sendXHR(JSON.stringify(requestBasicData), "http/http_.php", "post", "processBasicResponse");
+    sendXHR(JSON.stringify(requestBasicData), "http/http_add_basic.php", "post", "processBasicResponse");
 }
 
 function requestDeleteUser(deleteUserId) {
