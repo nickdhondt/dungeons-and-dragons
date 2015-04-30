@@ -46,6 +46,10 @@ div#ping_info {
     pointer-events: none;
 }
 
+.no_pointer {
+    cursor: default !important;
+}
+
 /*
 *
 * Form
@@ -272,10 +276,10 @@ div#game_area > header > div.button:active {
 div#game_area > div#show_admin {
     display: none;
     position: absolute;
-    right: -32em;
+    right: -40em;
     top: 6em;
     padding: 1em;
-    width: 32em;
+    width: 40em;
     background: #f8f7d0;
     z-index: 997;
     transition: right .3s;
@@ -313,7 +317,7 @@ div#game_area > div#show_admin > div#admin_panel {
     border-top: 1px solid #000000;
 }
 
-div#game_area > div#show_admin > div#admin_panel > div#admin_tab_two {
+div#game_area > div#show_admin > div#admin_panel > div#admin_tab_two, div#game_area > div#show_admin > div#admin_panel > div#admin_tab_three {
     display: none;
 }
 
