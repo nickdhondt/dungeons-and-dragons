@@ -551,12 +551,8 @@ function get_levelling_data($user_id, $current_timestamp){
         //Check the skill timestamp
         if($timestamps["skill"] >= $current_timestamp){
             $monsters = get_monster_data();
-            $skill_data = get_user_skill_data($user_id);
 
             if($monsters["errors"] != false){
-                return false;
-            }
-            if($skill_data["errors"] != false){
                 return false;
             }
         }
@@ -579,8 +575,6 @@ function get_levelling_data($user_id, $current_timestamp){
             }
             //Get the monsters
             $levelling_data["monster_data"] = $monsters["data"];
-            //Get the skill data
-            $levelling_data["skill_data"] = $skill_data["data"];
     } else {
         //If no new data is found, return false;
         return false;
@@ -589,7 +583,10 @@ function get_levelling_data($user_id, $current_timestamp){
 }
 
 function get_skill_data($user_id, $current_timestamp){
-
+    $skill_data = get_user_skill_data($user_id);
+    if($skill_data["errors"] != false){
+        return false;
+    }
 }
 
 function list_basic_skillitems() {
