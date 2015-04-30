@@ -663,3 +663,72 @@ function get_general_data($user_id, $current_timestamp){
     }
     return $general_data;
 }
+
+function find_basic_id_for_basic_name($basic_name){
+    //This function will return the id for a given basic name.
+    global $connection;
+    $basic_id = 0;
+
+    $sql = $connection->query("SELECT basic_id FROM basic WHERE name ='".$basic_name."'");
+    $basic_id = $sql->fetch_array(MYSQLI_BOTH)[0];
+
+    if(count($basic_id) === 1){
+        return $basic_id;
+    } else {
+        return "10";    //This will ensure that, IF THERE WAS A FAULT, the data would be displayed to the user, which can be used for debugging.
+    }
+}
+
+function get_maximum_basic_values($user_id){
+    //This function will get the race and class from the user and calculate his maximum basic values
+    global $connection;
+    $basic_values = array();
+    $basic_values["error"] = false;
+    $basic_values["user_id"] = $user_id;
+
+    //Get the user's race and class
+    $fields = array("user_id, race, class");
+    $user_data = user_data($user_id, $fields);
+
+    //Get the maximum data for the race
+    $sqlrace = $connection->query("SELECT attack, defence, walking, mana, health FROM races WHERE race_id='".$user_data["race"]."'");
+
+    if(!$sqlrace){
+        $basic_values["error"] = true;
+        return $connection->error;
+    } else {
+        $racedata = array();
+        while($row = $sqlrace->fetch_array(MYSQLI_ASSOC)){
+            $r[] = $row;
+        }
+    }
+
+    //Get the maximum data for the class
+    $sqlclass = $connection->query("SELECT attack as 'a', defence, walking, mana, health FROM classes WHERE class_id='".$user_data["class"]."'");
+
+    if(!$sqlclass){
+        $basic_values["error"] = true;
+        return $connection->error;
+    } else {
+        $classdata = array();
+        while($rows = $sqlclass->fetch_array(MYSQLI_ASSOC)){
+            $c[] = $rows;
+        }
+    }
+
+    //Calculate basic values
+    $attack = intval($c[0]["attack"]) + intval($r[0]["attack"]);
+    $defence = intval($c[0]["defence"]) + intval($r[0]["defence"]);
+    $walking =  intval($c[0]["walking"]) + intval($r[0]["walking"]);
+    $mana = intval($c[0]["mana"]) + intval($r[0]["mana"]);
+    $health =  intval($c[0]["health"]) + intval($r[0]["health"]);
+
+    //Write calculations to array
+    $basic_values["attack"] = array("id"=>find_basic_id_for_basic_name("attack"), "name"=>"attack", "max"=>$attack);
+    $basic_values["defence"] = array("id"=>find_basic_id_for_basic_name("defence"), "name"=>"defence", "max"=>$defence);
+    $basic_values["walking"] = array("id"=>find_basic_id_for_basic_name("walking"), "name"=>"walking", "max"=>$walking);
+    $basic_values["mana"] = array("id"=>find_basic_id_for_basic_name("mana"), "name"=>"mana", "max"=>$mana);
+    $basic_values["health"] = array("id"=>find_basic_id_for_basic_name("health"), "name"=>"health", "max"=>$health);
+
+    return $basic_values;
+}
