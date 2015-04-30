@@ -351,7 +351,7 @@ div#game_area > div#show_admin > div#admin_panel ul {
     list-style: none;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div#game_area > div#show_admin > div#admin_panel ul > li > input[type=password] {
+div#game_area > div#show_admin > div#admin_panel input[type=text], div#game_area > div#show_admin > div#admin_panel input[type=password], div#game_area > div#show_admin > div#admin_panel input[type=range] {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
@@ -359,7 +359,11 @@ div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div
     margin-bottom: .5em;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > input[type=button] {
+#txt_message {
+    margin: 1em 0;
+}
+
+div#game_area > div#show_admin > div#admin_panel input[type=button] {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;

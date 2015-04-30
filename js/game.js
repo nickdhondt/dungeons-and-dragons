@@ -739,8 +739,6 @@ function processBasics(jsonData){
 
             var basicAdminTab = document.getElementById("admin_tab_three");
             var basicMessageNode = document.createElement("div");
-            var basicMessageTextNode = document.createTextNode("Bericht:");
-            basicMessageNode.appendChild(basicMessageTextNode);
 
             var messageTextFieldNode = document.createElement("input");
             messageTextFieldNode.setAttribute("type", "text");
@@ -760,10 +758,17 @@ function processBasics(jsonData){
             expSlider.setAttribute("id", "exp_slider");
             expSlider.setAttribute("max", "10000");
             expSlider.setAttribute("min", "0");
-            expSlider.setAttribute("step", "100");
+            expSlider.setAttribute("step", "20");
 
             basicAdminTab.appendChild(expNode);
             basicAdminTab.appendChild(expSlider);
+
+            var sendExpNode = document.createElement("input");
+            sendExpNode.setAttribute("type", "button");
+            sendExpNode.setAttribute("value", "Verstuur Exp");
+            sendExpNode.setAttribute("id", "txt_exp");
+
+            basicAdminTab.appendChild(sendExpNode);
 
             catchBasicControlEvent();
         }
@@ -787,6 +792,18 @@ function catchBasicControlEvent() {
     for(var i = 0; i < basicControlButtons.length; i++) {
         basicControlButtons[i].addEventListener("click", function(e) { requestBasic(e); e.stopPropagation(); });
     }
+
+    document.getElementById("txt_message").addEventListener("click", function (e) { e.stopPropagation(); });
+    document.getElementById("txt_message").addEventListener("keydown", function (e) {
+        if (e.keyCode === 13) {
+            var userMessage = {
+                "message": e.target.value,
+                "user_id": userId
+            };
+
+            sendXHR(JSON.stringify(userMessage), "http/http_user_message.php", "post", "processUserMessage");
+        }
+    });
 }
 
 function requestBasic(e) {
