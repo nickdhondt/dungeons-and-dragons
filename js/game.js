@@ -708,8 +708,7 @@ function processBasics(jsonData){
         if (responseParse.request_legal !== "true") {
             displayErrors(responseParse.errors);
         } else {
-            console.log(responseParse.data);
-
+            document.getElementById("admin_tab_three").innerHTML = "<ul id=\"basic_controls\"></ul>";
             var basicControls = document.getElementById("basic_controls");
 
             for (var i = 0; i < responseParse.data.length; i++) {
@@ -766,7 +765,7 @@ function processBasics(jsonData){
             var sendExpNode = document.createElement("input");
             sendExpNode.setAttribute("type", "button");
             sendExpNode.setAttribute("value", "Verstuur Exp");
-            sendExpNode.setAttribute("id", "txt_exp");
+            sendExpNode.setAttribute("id", "btn_exp");
 
             basicAdminTab.appendChild(sendExpNode);
 
@@ -801,9 +800,24 @@ function catchBasicControlEvent() {
                 "user_id": userId
             };
 
+            document.getElementById("txt_message").value = "";
+
             sendXHR(JSON.stringify(userMessage), "http/http_user_message.php", "post", "processUserMessage");
         }
     });
+
+    document.getElementById("btn_exp").addEventListener("click", function(e) {e.stopPropagation(); requestExpAddition(); });
+}
+
+function requestExpAddition() {
+    var exp = document.getElementById("exp_slider").value;
+
+    var expInfo = {
+        "exp": exp,
+        "user_id": userId
+    };
+
+    sendXHR(JSON.stringify(expInfo), "http/http_exp_add.php", "post", "processExpAdd");
 }
 
 function requestBasic(e) {
