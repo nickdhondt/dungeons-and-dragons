@@ -663,3 +663,21 @@ function get_general_data($user_id, $current_timestamp){
     }
     return $general_data;
 }
+
+function list_basic_conditions() {
+    global $connection;
+
+    $sql = $connection->query("SELECT condition_id, name FROM `condition`");
+
+    if (!$sql) {
+        return $connection->error;
+    } else {
+        $conditions = array();
+
+        while($row = $sql->fetch_assoc()) {
+            $conditions[] = $row;
+        }
+
+        return $conditions;
+    }
+}

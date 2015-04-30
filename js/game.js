@@ -16,6 +16,7 @@ function init() {
     document.getElementById("admin_one").addEventListener("click", function(e) { showAdminTab("one"); e.stopPropagation(); });
     document.getElementById("admin_two").addEventListener("click", function(e) { showAdminTab("two"); e.stopPropagation(); });
     document.getElementById("admin_three").addEventListener("click", function(e) { showAdminTab("three"); e.stopPropagation(); });
+    document.getElementById("admin_four").addEventListener("click", function(e) { showAdminTab("four"); e.stopPropagation(); });
     document.getElementById("btn_register").addEventListener("click", function(e) { requestUserRegister(); e.stopPropagation(); });
     document.getElementById("txt_new_username").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("txt_new_password").addEventListener("click", function(e) { e.stopPropagation(); });
@@ -263,33 +264,50 @@ function showAdminTab(tab) {
     var tabOne = document.getElementById("admin_tab_one");
     var tabTwo = document.getElementById("admin_tab_two");
     var tabThree = document.getElementById("admin_tab_three");
+    var tabFour = document.getElementById("admin_tab_four");
 
 
     var one = document.getElementById("admin_one");
     var two = document.getElementById("admin_two");
     var three = document.getElementById("admin_three");
+    var four = document.getElementById("admin_four");
 
     if (tab === "one") {
         tabOne.style.display = "block";
         tabTwo.style.display = "none";
         tabThree.style.display = "none";
+        tabFour.style.display = "none";
         one.setAttribute("class", "active");
         two.setAttribute("class", "");
         three.setAttribute("class", "");
+        four.setAttribute("class", "");
     } else if (tab === "two") {
         tabOne.style.display = "none";
         tabTwo.style.display = "block";
         tabThree.style.display = "none";
+        tabFour.style.display = "none";
         one.setAttribute("class", "");
         two.setAttribute("class", "active");
         three.setAttribute("class", "");
+        four.setAttribute("class", "");
     } else if (tab === "three") {
         tabOne.style.display = "none";
         tabTwo.style.display = "none";
         tabThree.style.display = "block";
+        tabFour.style.display = "none";
         one.setAttribute("class", "");
         two.setAttribute("class", "");
         three.setAttribute("class", "active");
+        four.setAttribute("class", "");
+    } else if (tab === "four") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "none";
+        tabThree.style.display = "none";
+        tabFour.style.display = "block";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "");
+        three.setAttribute("class", "");
+        four.setAttribute("class", "active");
     }
 }
 
@@ -391,6 +409,9 @@ function sendXHR(data, url, type, executeFunction) {
                     break;
                 case "processBasics":
                     processBasics(response);
+                    break;
+                case "processConditions":
+                    processConditions(response);
                     break;
             }
         }
@@ -678,6 +699,7 @@ function processUserList(jsonData) {
 
     openStream();
     requestBasics();
+    requestConditions();
 
     var changeUserview = document.getElementsByClassName("change_userview");
     var deleteUser = document.getElementsByClassName("delete_user");
@@ -696,12 +718,90 @@ function processUserList(jsonData) {
     }
 }
 
+function requestConditions() {
+    sendXHR("", "http/http_list_conditions.php", "get", "processConditions");
+}
+
+function processConditions(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            var conditions = document.getElementById("conditions");
+            conditions.innerHTML = "<h3>Conditions</h3>";
+            var selectNode = document.createElement("select");
+            selectNode.setAttribute("id", "lst_conditions");
+
+            for(var i = 0; i < responseParse.data.length; i++) {
+                var optionNode = document.createElement("option");
+                var optionTextNode = document.createTextNode(responseParse.data[i].name);
+                optionNode.setAttribute("value", responseParse.data[i].condition_id);
+
+                optionNode.appendChild(optionTextNode);
+                selectNode.appendChild(optionNode);
+            }
+
+            conditions.appendChild(selectNode);
+
+            var addButtonNode = document.createElement("div");
+            var addButtonTextNode = document.createTextNode("+1");
+            addButtonNode.setAttribute("id", "add_condition");
+            addButtonNode.setAttribute("class", "condition_button");
+            addButtonNode.appendChild(addButtonTextNode);
+
+            conditions.appendChild(addButtonNode);
+
+            var subButtonNode = document.createElement("div");
+            var subButtonTextNode = document.createTextNode("-1");
+            subButtonNode.setAttribute("id", "sub_condition");
+            subButtonNode.setAttribute("class", "condition_button");
+            subButtonNode.appendChild(subButtonTextNode);
+
+            conditions.appendChild(subButtonNode);
+
+            document.getElementById("lst_conditions").addEventListener("click", function (e){ e.stopPropagation(); });
+
+            catchConditionEvents();
+        }
+    }
+}
+
+function catchConditionEvents() {
+    var conditionButton = document.getElementsByClassName("condition_button");
+
+    for (var i = 0; i < conditionButton.length; i++) {
+        conditionButton[i].addEventListener("click", function(e) {
+            e.stopPropagation();
+
+            var action;
+
+            if (e.target.id === "add_condition") action = "add";
+            else action = "substract";
+
+            requestAddCondition(action);
+        });
+    }
+}
+
+function requestAddCondition(action) {
+    var conditionsList = document.getElementById("lst_conditions");
+    var condition = conditionsList.options[conditionsList.selectedIndex].value;
+
+    var requestCondition = {
+        "action": action,
+        "user_id": userId,
+        "condition": condition
+    };
+    sendXHR(JSON.stringify(requestCondition), "http/http_add_condition.php", "post", "processAddCondition");
+}
+
 function requestBasics() {
     sendXHR("", "http/http_list_basic.php", "get", "processBasics");
 }
 
 function processBasics(jsonData){
-    console.log(parseJSON(jsonData));
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
