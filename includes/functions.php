@@ -366,7 +366,7 @@ function get_user_basic_data($user_id){
     global $connection;
     $basic_data = array();
 
-    $sql = $connection->query("SELECT b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '" . $user_id . "'");
+    $sql = $connection->query("SELECT ubd.basic_id as 'id', b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '" . $user_id . "'");
 
     if (!$sql) {
         $basic_data["error"] = $connection->error;
@@ -381,6 +381,50 @@ function get_user_basic_data($user_id){
     }
 
     return $basic_data;
+}
+
+function get_monster_data(){
+    global $connection;
+    $monster_data = array();
+
+    $sql = $connection->query("SELECT monster_id as 'monster_id', name as 'name', multiplier as 'multiplier' FROM monsters");
+
+    if(!$sql){
+        $monster_data["errors"] = true;
+        return $connection->error;
+    } else {
+        $monster_data["errors"] = false;
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+        $monster_data["data"] = $rows;
+    }
+    return $monster_data;
+}
+
+function get_user_skill_data($user_id){
+    //This function gets the skill data of the user
+    global $connection;
+    $skill_data = array();
+
+    $sql = $connection->query("SELECT usd.skill_value as 'value', s.name as 'name', s.type as 'type', s.subtype as 'subtype', s.levels as 'max_levels', s.level_advantages as 'advantages'
+            FROM user_skill_data usd
+            INNER JOIN skills s ON usd.skill_id = s.skill_id
+            WHERE usd.user_id ='".$user_id."'");
+
+    if(!$sql){
+        $skill_data["errors"] = true;
+        return $connection->error;
+    } else {
+        $skill_data["errors"] = false;
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+        $skill_data["data"] = $rows;
+    }
+    return $skill_data;
 }
 
 function get_user_condition_data($user_id){
@@ -479,7 +523,69 @@ function get_conditions_by_id($condition_id){
 }
 
 function get_levelling_data($user_id, $current_timestamp){
+    //This function gets the levelling data. This includes all the levelling info of the hero, and the available monsters.
+    global $connection;
+    $levelling_data = array();
 
+    //Check the basic and skill timestamp, needed for this data.
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill' FROM timestamps WHERE user_id='".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
+    if(($timestamps["basic"] >= $current_timestamp) || ($timestamps["skill"] >= $current_timestamp)){
+        //Check the basic timestamp
+        if($timestamps["basic"] >= $current_timestamp){
+            $raw_basic_data = get_user_basic_data($user_id);
+
+            if($raw_basic_data["error"] != "false"){
+                $basic_data = $raw_basic_data["data"];
+            } else {
+                return false;
+            }
+        }
+
+        //Check the skill timestamp
+        if($timestamps["skill"] >= $current_timestamp){
+            $monsters = get_monster_data();
+            $skill_data = get_user_skill_data($user_id);
+
+            if($monsters["errors"] != false){
+                return false;
+            }
+            if($skill_data["errors"] != false){
+                return false;
+            }
+        }
+
+        //Fill the main array
+            if(!empty($basic_data)){
+                //Get the users_id
+                    $levelling_data["user_id"] = $user_id;
+                //Get the users current EXP
+                foreach($basic_data as $basic){
+                    if($basic["id"] === "11"){
+                        $levelling_data["user_exp"] = $basic["value"];
+                    }
+                    if($basic["id"] === "12"){
+                        $levelling_data["user_exp_multiplier"] = $basic["value"];
+                    }
+                }
+            } else {
+                return false;
+            }
+            //Get the monsters
+            $levelling_data["monster_data"] = $monsters["data"];
+            //Get the skill data
+            $levelling_data["skill_data"] = $skill_data["data"];
+    } else {
+        //If no new data is found, return false;
+        return false;
+    }
+    return $levelling_data;
 }
 
 function get_skill_data($user_id, $current_timestamp){
