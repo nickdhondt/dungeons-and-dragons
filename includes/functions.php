@@ -223,6 +223,41 @@ function register_user($username, $password) {
     }
 }
 
+function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
+    //This function alters the timestamps in the database
+    global $connection;
+
+    //THE SELECT QUERY
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill', inventory_timestamp as 'inventory',
+        condition_timestamp as 'condition' FROM timestamps WHERE user_id='".$user_id."'");
+    $rows = array();
+    while($row = $sql->fetch_assoc());
+    {
+        $rows[] = $row;
+    }
+
+    //Set the default values:
+    $nbasic = $rows[0]["basic"];
+    $nskill = $rows[0]["skill"];
+    $ninventory = $rows[0]["inventory"];
+    $ncondition = $rows[0]["condition"];
+
+    if(!empty($basic)) $nbasic = $basic;
+    if(!empty($skill)) $nskill = $skill;
+    if(!empty($ninventory)) $ninventory = $inventory;
+    if(!empty($ncondition)) $ncondition = $condition;
+
+    //THE UPDATE QUERY
+    $timestamps = $connection->prepare("UPDATE timestamps SET (basic_timestamp, skill_timestamp, inventory_timestamp, condition_timestamp)
+         VALUES(".$nbasic.",".$nskill.",".$ninventory.",".$ncondition.") WHERE user_id='".$user_id."'");
+
+    if (!$sql || !$timestamps) {
+        return $connection->connect_error;
+    } else {
+        return true;
+    }
+}
+
 function delete_user($user_id) {
     global $connection;
 
@@ -234,10 +269,34 @@ function delete_user($user_id) {
         $num_rows = $connection->affected_rows;
 
         if ($num_rows >= 1) {
-            return true;
+
+            $success = clean_user_crumbles($user_id);
+
+            if($success != true){
+                return false;
+            } else {
+                return true;
+            }
+
         } else {
             return false;
         }
+    }
+}
+
+function clean_user_crumbles($user_id){
+    global $connection;
+
+    $sql1 = $connection->query("DELETE FROM timestamps WHERE user_id='$user_id'");
+    $sql2 = $connection->query("DELETE FROM user_basic_data WHERE user_id='$user_id'");
+    $sql3 = $connection->query("DELETE FROM user_condition_data WHERE user_id='$user_id'");
+    $sql4 = $connection->query("DELETE FROM user_inventory_data WHERE user_id='$user_id'");
+    $sql5 = $connection->query("DELETE FROM user_skill_data WHERE user_id='$user_id'");
+
+    if ((!$sql1) || (!$sql2) || (!$sql3) || (!$sql4) || (!$sql5)) {
+        return $connection->connect_error;
+    } else {
+        return true;
     }
 }
 
@@ -701,7 +760,7 @@ function get_maximum_basic_values($user_id){
     }
 
     //Get the maximum data for the class
-    $sqlclass = $connection->query("SELECT attack as 'a', defence, walking, mana, health FROM classes WHERE class_id='".$user_data["class"]."'");
+    $sqlclass = $connection->query("SELECT attack, defence, walking, mana, health FROM classes WHERE class_id='".$user_data["class"]."'");
 
     if(!$sqlclass){
         $basic_values["error"] = true;
@@ -721,11 +780,81 @@ function get_maximum_basic_values($user_id){
     $health =  intval($c[0]["health"]) + intval($r[0]["health"]);
 
     //Write calculations to array
-    $basic_values["attack"] = array("id"=>find_basic_id_for_basic_name("attack"), "name"=>"attack", "max"=>$attack);
-    $basic_values["defence"] = array("id"=>find_basic_id_for_basic_name("defence"), "name"=>"defence", "max"=>$defence);
-    $basic_values["walking"] = array("id"=>find_basic_id_for_basic_name("walking"), "name"=>"walking", "max"=>$walking);
-    $basic_values["mana"] = array("id"=>find_basic_id_for_basic_name("mana"), "name"=>"mana", "max"=>$mana);
-    $basic_values["health"] = array("id"=>find_basic_id_for_basic_name("health"), "name"=>"health", "max"=>$health);
+    $basic_values[] = array("id"=>find_basic_id_for_basic_name("attack"), "name"=>"attack", "max"=>$attack);
+    $basic_values[] = array("id"=>find_basic_id_for_basic_name("defence"), "name"=>"defence", "max"=>$defence);
+    $basic_values[] = array("id"=>find_basic_id_for_basic_name("walking"), "name"=>"walking", "max"=>$walking);
+    $basic_values[] = array("id"=>find_basic_id_for_basic_name("mana"), "name"=>"mana", "max"=>$mana);
+    $basic_values[] = array("id"=>find_basic_id_for_basic_name("health"), "name"=>"health", "max"=>10);
 
     return $basic_values;
+}
+
+function initialize_user_basic_data($user_id){
+    //This function will initialize the basic user data
+    global $connection;
+    $response = array();
+
+    //Get all the basic data.
+    $sqldata = $connection->query("SELECT basic_id FROM basic");
+
+    if (!$sqldata) {
+        $response["errors"] = $connection->error;
+        return $response;
+    } else {
+        $response["errors"] = false;
+    }
+
+    $basics = array();
+    while($row = $sqldata->fetch_array(MYSQLI_ASSOC)){
+        $basics[] = $row["basic_id"];
+    }
+
+    //Loop through all the basics and write the default value for the user
+    for($i=0; $i<=count($basics); $i++){
+        $max_basics = get_maximum_basic_values($user_id);
+        $value = 0;
+        foreach($max_basics as $max_basic){
+            if(isset($max_basic["id"])) {
+                //The ID Must be set
+                if($max_basic["id"] == $i) {
+                    //The first five basics get their max value
+                    $value = $max_basic["max"];
+                }
+            }
+            if($i === 8){
+                //The turn must be the ...th user.
+                $value = get_number_of_users();
+            }
+            if($i === 10){
+                //To start, there are no user messages
+                $value = "";
+            }
+            if($i === 12){
+                //The multiplier is traditionally 1.
+                $value = 1;
+            }
+        }
+
+        $stmt = $connection->prepare("INSERT INTO user_basic_data (user_id, basic_id, basic_value) VALUES(?,?,?)");
+        $stmt->bind_param('iii', $user_id, $i, $value);
+        $stmt->execute();
+
+        if(!$stmt){
+            $response["errors"] = $connection->error;
+        } else {
+            $response["errors"] = false;
+        }
+    }
+
+    //Update the timestamps for the basics.
+    $now = microtime(true);
+    $success = alter_timestamps($user_id, $now, "", "", "");
+
+    if($success != true){
+        $response["errors"] = $success;
+    } else {
+        $response["errors"] = false;
+    }
+
+    return $response;
 }
