@@ -28,9 +28,15 @@ if ($user_id != false) {
             $request_legal = "false";
         } else {
             $status = update_user($post_data["user_id"], array("class" => $post_data["class"], "race" => $post_data["race"]));
-
             if ($status === true) {
-                $request_legal = "true";
+                $succeeded = initialize_user_basic_data($user_id);
+                if($succeeded){
+                    $request_legal = "true";
+                } else {
+                    $request_legal = "false";
+                    $errors[] = "Er is een fout opgetreden bij het toewijzen van de standaardwaarden.";
+                    $errors[] = "PHP-says: ".$succeeded["errors"];
+                }
             } else {
                 $request_legal = "false";
                 $errors[] = "Er is een fout opgetreden bij het opslaan van je ras (no racism)";
