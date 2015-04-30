@@ -223,6 +223,41 @@ function register_user($username, $password) {
     }
 }
 
+function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
+    //This function alters the timestamps in the database
+    global $connection;
+
+    //THE SELECT QUERY
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill', inventory_timestamp as 'inventory',
+        condition_timestamp as 'condition' FROM timestamps WHERE user_id='".$user_id."'");
+    $rows = array();
+    while($row = $sql->fetch_assoc());
+    {
+        $rows[] = $row;
+    }
+
+    //Set the default values:
+    $nbasic = $rows[0]["basic"];
+    $nskill = $rows[0]["skill"];
+    $ninventory = $rows[0]["inventory"];
+    $ncondition = $rows[0]["condition"];
+
+    if(!empty($basic)) $nbasic = $basic;
+    if(!empty($skill)) $nskill = $skill;
+    if(!empty($ninventory)) $ninventory = $inventory;
+    if(!empty($ncondition)) $ncondition = $condition;
+
+    //THE UPDATE QUERY
+    $timestamps = $connection->prepare("UPDATE timestamps SET (basic_timestamp, skill_timestamp, inventory_timestamp, condition_timestamp)
+         VALUES(".$nbasic.",".$nskill.",".$ninventory.",".$ncondition.") WHERE user_id='".$user_id."'");
+
+    if (!$sql || !$timestamps) {
+        return $connection->connect_error;
+    } else {
+        return true;
+    }
+}
+
 function delete_user($user_id) {
     global $connection;
 
@@ -815,7 +850,14 @@ function initialize_user_basic_data($user_id){
     }
 
     //Update the timestamps for the basics.
+    $now = microtime(true);
+    $success = alter_timestamps($user_id, $now, "", "", "");
 
+    if($success != true){
+        $response["errors"] = $success;
+    } else {
+        $response["errors"] = false;
+    }
 
     return $response;
 }
