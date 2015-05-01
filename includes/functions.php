@@ -915,10 +915,115 @@ function get_shop_data($user_id, $current_timestamp){
 
     if(($timestamps["basic"] >= $current_timestamp) && ($timestamps["skill"] >= $current_timestamp) & ($timestamps["inventory"]) >= $current_timestamp){
         //All of the above timestamps are needed for the calculations.
-        
+        //Get all the shop items
+        $shop_items = get_shop_items();
+        if(!empty($shop_items)){
+            foreach($shop_items as $shop_item){
+                //Gather the $price_data
+                $price_data = array();
+                $price_values = explode(';', $shop_item["price_value"]);
+                $price_items = explode(';', $shop_item["price_item"]);
+                for($i=0;$i<=count($price_items); $i++){
+                    $pd = array();
+                    $pd["value"] = $price_values[$i];
+                    $pd["item"] = $price_items[$i];
+                    $price_data[] = $pd;
+                }
+
+                //Gather the $skill_data
+                $skill_data = array();
+                $skill_values = explode(';', $shop_item["skill_value"]);
+                $skill_item = explode(';', $shop_item["skill_requirement"]);
+                for($j=0;$j<=count($skill_item);$j++){
+                    $sd = array();
+                    $sd["value"] = $skill_item[$j];
+                    $sd["name"] = $skill_item[$j];
+                    $skill_data[] = $sd;
+                }
+
+                //Check if the upgrade is present in the user's inventory
+                $upgrade_present = false;
+                if($shop_item["upgrade"] == 0) $upgrade_present = true; //If the items hasn't got an upgrade, display it.
+                else {
+                    //Display the item ONLY if the user has got the previous version.
+                    $sql = $connection->query("SELECT item_id as 'id' FROM user_inventory_data WHERE item_id='".$shop_item["upgrade"]."'");
+                    $row = $sql->fetch_assoc();
+                    if(count($row) < 1){
+                        //The user hasn't got a signle item with the previous upgrade ID.
+                        $upgrade_present = false;
+                    } else {
+                        //If there are multiple ID's found, the user can upgrade for sure.
+                        $upgrade_present = true;
+                    }
+                }
+
+                //Fill the main array
+                $item_data = array();
+                $item_data["item_id"] = $shop_item["item_id"];
+                $item_data["can_buy"] = check_item_requirements($user_id, $item_data["item_id"], $upgrade_present);
+                if($item_data["can_buy"]["errors"] != false) return $item_data["can_buy"]["errors"];
+                $item_data["item_data"] = get_item_data($item_data["item_id"]);
+                $item_data["price_data"] = $price_data;
+                $item_data["skill_data"] = $skill_data;
+                $item_data["upgrade"] = $shop_item["upgrade"];
+
+                $shop_data[] = $item_data;
+            }
+        } else {
+            //If no data is found, return false;
+            return false;
+        }
     } else {
         //if no new data if found, return false;
         return false;
     }
     return $shop_data;
+}
+
+function check_item_requirements($user_id, $item_id, $upgrade_present){
+    //This function will check whether the conditions for buying an item are fulfilled.
+    //["errors"] must be false if everything is owkay
+    return true;
+}
+
+function get_shop_items(){
+    //This function will get all the shop items.
+    global $connection;
+    $shop_items = array();
+
+    $sql = $connection->query("SELECT * FROM shop");
+
+    if(!$sql){
+        return false;
+    } else {
+        $row = $sql->fetch_assoc();
+        $shop_items = $row;
+    }
+    return $shop_items;
+}
+
+function get_item_data($item_id){
+    //This function will get the name, type and conditions of an item.
+    global $connection;
+    $item_data = array();
+
+    $sql = $connection->query("SELECT name, type, condition as 'id' FROM inventory WHERE item_id='".$item_id."'");
+
+    if(!$sql){
+        $item_data["errors"] = $connection->error;
+        return $item_data;
+    } else {
+        $row = $sql->fetch_array(MYSQLI_ASSOC);
+        $item_data["name"] = $row["name"];
+        $item_data["type"] = $row["type"];
+        $condition_id = $row["id"];
+        $conditions = get_conditions_by_id($condition_id);
+
+        if($conditions["error"] != false){
+            $item_data["errors"] = $conditions["error"];
+        } else {
+            $item_data["condition"] = $conditions["data"];
+        }
+    }
+    return $item_data;
 }
