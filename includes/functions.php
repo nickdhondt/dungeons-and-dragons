@@ -587,7 +587,13 @@ function get_tabtwo_data($user_id, $current_timestamp){
     $exp_data["levelling"] = get_levelling_data($user_id, $current_timestamp);
     $exp_data["skills"] = get_skill_data($user_id, $current_timestamp);
 
-    return $exp_data;
+    $new_data = false;
+    foreach($exp_data as $pod){
+        if($pod != false) $new_data = true;
+    }
+
+    if($new_data == true) return $exp_data;
+    else return false;
 }
 
 function get_levelling_data($user_id, $current_timestamp){
