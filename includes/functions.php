@@ -904,7 +904,7 @@ function get_shop_data($user_id, $current_timestamp){
 
     //Check the needed timestamps for the $shop_data
         //What is needed? Money -> basic_array, Price -> inventory, skill_reqs -> skill
-    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill'
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill',
             inventory_timestamp as 'inventory' FROM timestamps WHERE user_id = '".$user_id."'");
 
     if(!$sql){
@@ -1007,7 +1007,7 @@ function get_item_data($item_id){
     global $connection;
     $item_data = array();
 
-    $sql = $connection->query("SELECT name, type, condition as 'id' FROM inventory WHERE item_id='".$item_id."'");
+    $sql = $connection->query("SELECT name, type, `condition` as 'id' FROM inventory WHERE item_id='".$item_id."'");
 
     if(!$sql){
         $item_data["errors"] = $connection->error;
