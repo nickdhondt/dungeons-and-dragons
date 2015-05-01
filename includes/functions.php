@@ -748,14 +748,15 @@ function list_inventory_items() {
     } else {
         $conditions = array();
 
-        while($row = $sql->fetch_assoc()) {
+        while ($row = $sql->fetch_assoc()) {
             $conditions[] = $row;
         }
 
         return $conditions;
     }
+}
 
-function find_basic_id_for_basic_name($basic_name){
+function find_basic_id_for_basic_name($basic_name) {
     //This function will return the id for a given basic name.
     global $connection;
     $basic_id = 0;
