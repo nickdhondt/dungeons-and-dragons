@@ -46,6 +46,10 @@ div#ping_info {
     cursor: default !important;
 }
 
+#game_area {
+    overflow-y: scroll;
+}
+
 /*
 *
 * Form
@@ -387,23 +391,23 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
     margin-top: 0;
 }
 
-div#tab_one > div.col {
+div.col {
     width: calc(50% - .5em);
     margin-right: 1em;
     float: left;
 }
 
-div#tab_one > div.col > div {
+div.col > div {
     padding: 1em;
     margin-bottom: 1em;
     background: #87cdff;
 }
 
-div#tab_one > div.col > div:last-child {
+div.col > div:last-child {
     margin: 0;
 }
 
-div#tab_one > div.col#last {
+div.col#last, #last_two {
     margin-right: 0;
 }
 
