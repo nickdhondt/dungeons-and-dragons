@@ -894,3 +894,7 @@ function initialize_user_basic_data($user_id){
 
     return $response;
 }
+
+function get_shop_data($user_id, $current_timestamp){
+    return false;
+}
