@@ -505,6 +505,7 @@ div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
     background: rgba(0, 0, 255, 0.1);
     padding: .5em;
     margin: 0 .5em .5em 0;
+    cursor: pointer;
 }
 
 #shop_listing > ul > li:last-of-type {
