@@ -49,13 +49,16 @@ if(empty($_POST["data"])){
                     case "substract":
                         //Get the ucd_id for the condition.
                         global $connection;
-                        $sql = $connection->query("SELECT ucd_id FROM user_condition_data WHERE (user_id='".$user_id."') AND (condition_id='."$condition".')");
+                        $sql = $connection->query("SELECT ucd_id FROM user_condition_data WHERE (user_id='".$user_id."') AND (condition_id='".$condition."')");
                         $rows = $sql->fetch_array(MYSQLI_ASSOC);
                         $row = $rows[0];
 
                         if(count($row) == 1){
-                            
+                            $ucd = $row["ucd_id"];
                         }
+
+                        //If the admin requested a deletion, delete the condition.
+                        delete_condition($ucd);
                         break;
                     default:
                         $request_completed = "false";
