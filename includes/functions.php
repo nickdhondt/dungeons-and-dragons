@@ -1090,7 +1090,7 @@ function get_item_data($item_id){
     global $connection;
     $item_data = array();
 
-    $sql = $connection->query("SELECT name, type, `condition` as 'id' FROM inventory WHERE item_id='".$item_id."'");
+    $sql = $connection->query("SELECT name, type, `condition` as 'id' FROM inventory WHERE item_id='".$item_id."' ORDER BY type");
 
     if(!$sql){
         $item_data["errors"] = $connection->error;
