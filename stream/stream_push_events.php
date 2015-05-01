@@ -58,10 +58,9 @@ while ($script_beginning >= (microtime(true) - 280)) {
     $new_events = array();
 
     $new_events["basic"] = get_basic_data($uid, $timestamp);
-    $new_events["levelling"] = get_levelling_data($uid, $timestamp);
-    $new_events["skill"] = get_skill_data($uid, $timestamp);
-    $new_events["general"] = get_general_data($uid, $timestamp);
+    $new_events["levelling"] = get_tabtwo_data($uid, $timestamp);
     $new_events["shop"] = get_shop_data($uid, $timestamp);
+    $new_events["general"] = get_general_data($uid, $timestamp);
 
     //Check if the new events don't return false:
     $new_data = false;
