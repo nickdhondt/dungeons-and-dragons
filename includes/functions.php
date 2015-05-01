@@ -143,17 +143,26 @@ function update_turn_in_db($turn){
     }
 }
 
+function delete_condition($ucd_id){
+    global $connection;
+
+    $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
+    $sql->bind_param('i', $ucd_id);
+    $sql->execute();
+}
+
 function update_conditions_from_user($user_id){
     //We will go through all the conditions of the hero, and substract them all with 1.
     global $connection;
     $errors =  array();
 
-    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data WHERE user_id = '".$user_id."'");
+    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value', condition_id as 'cid' FROM user_condition_data WHERE user_id = '".$user_id."'");
     $conditions = array();
     $rows = array();
     while($row = $sql_get->fetch_array(MYSQLI_ASSOC)){
         $conditions["id"] = $row["id"];
         $conditions["value"] = $row["value"] - 1;
+        $conditions["cid"] = $row["cid"];
         $rows[] = $conditions;
     }
 
@@ -161,9 +170,15 @@ function update_conditions_from_user($user_id){
         $value = $condition["value"];
         if($value <= 0){
             //If the value <= 0, it means that the condition is expired.
-            $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
-            $sql->bind_param('i', $condition["id"]);
-            $sql->execute();
+            delete_condition($condition["id"]);
+
+            //When the condition is deleted, restore the condition
+            $success = validate_condition($user_id, $condition["cid"], true);
+
+            //Controle
+            if(!$success){
+                $errors[] = $success;
+            }
         } else{
             $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
         }
@@ -1152,4 +1167,133 @@ function write_to_user_basic($user_id, $basic_id, $value){
     } else {
         return "true";
     }
+}
+
+function add_condition($user_id, $condition_id){
+    //This function will add a requested condition to the users condition.
+    global $connection;
+    $condition_data = array();
+    $condition_data["error"] = false;
+
+    //Select condition
+    $sql = $connection->query("SELECT duration FROM `condition` WHERE condition_id='".$condition_id."'");
+
+    if(!$sql){
+        $condition_data["error"] = $connection->error;
+    } else{
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+
+        //Check if the array has the expected lentgh
+        if(count($rows) <= 0){
+            $condition_data["error"] = "Er werd meer dan 1 ID gevonden!!! SATAN IS AAN HET WERK. HIDE YOUR WIFE, HIDE YOUR KIDS!";
+        } else {
+            $condition_value = $rows[0]["duration"];
+        }
+    }
+
+    //Divide the conditions in two different sorts
+    if($condition_value == 0){
+        $success = validate_condition($user_id, $condition_id);
+    } else {
+        $stmt = $connection->prepare("INSERT INTO user_condition_data(user_id, condition_id, condition_value) VALUES (?,?,?)");
+        $stmt->bind_param('iii',$user_id, $condition_id, $condition_value);
+        $stmt->execute();
+
+        if(!$stmt){
+            $condition_data["error"] = $connection->error;
+        } else {
+            //The condition has been added to the database
+            $success = validate_condition($user_id, $condition_id);
+        }
+
+        if(!$success){
+            $condition_data["error"] = $success;
+        }
+    }
+
+    //Alter Timestamps
+    $now = microtime(true);
+    $success = alter_timestamps($user_id, $now, "", "", "");
+
+    if(!$success){
+        $condition_data["error"] = $success;
+    }
+
+    return $condition_data;
+}
+
+function validate_condition($user_id, $condition_id, $devalidate = false){
+    //This will add/substract the values when assigning a condition.
+    global $connection;
+    $validate = array();
+
+    $sql = $connection->query("SELECT advantage_value as 'value', basic_id as 'id', advantage_id as 'aid' FROM advantages WHERE condition_id='".$condition_id."'");
+
+    if(!$sql){
+        $validate["error"] = $connection->error;
+    } else {
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+    }
+
+    foreach($rows as $advantage){
+        //Get the value info.
+        $id = $advantage["id"];
+        $change = $advantage["value"];
+
+        //Get the current values
+        $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id."')");
+        $rows = $sql->fetch_assoc();
+        $current_value = $rows["basic_value"];
+
+        //Calculate the new value
+        if($devalidate === false){
+            $new_value = $current_value + $change;
+        } else {
+            $new_value = $current_value - $change;
+        }
+
+        //Get the maximum value possible
+        $maximum_basic_values = get_maximum_basic_values($user_id);
+        foreach($maximum_basic_values as $maximum_basic_value){
+            if(isset($max_basic["id"])) {
+                //The ID Must be set
+                if($maximum_basic_value["id"] === $id){
+                    $max_value = $maximum_basic_value["max"];
+                    $min_value = 0;
+                }
+            }
+        }
+
+        if((isset($max_value)) && (isset($min_value))){
+            //The code is safe
+            if($new_value > $max_value){
+                $new_value = $max_value;
+            }
+            if($new_value < $min_value){
+                $new_value = $min_value;
+            }
+
+            //Write the new value to the database
+            $stmt = $connection->prepare("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '?' WHERE (`user_basic_data`.`basic_id`='".$id."') AND (`user_basic_data`.`user_id`='".$user_id."')");
+            $stmt->prepare('i', $new_value);
+            $stmt->execute();
+
+            //update the timestamp
+            $now = microtime(true);
+            $success = alter_timestamps($user_id, $now, "", "", "");
+
+            if(!$success){
+                $validate["error"] = $success;
+            }
+        }
+    }
+
+    if(empty($validate["error"])) $validate = true;
+    return $validate;
 }
