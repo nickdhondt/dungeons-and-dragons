@@ -1005,7 +1005,7 @@ function get_shop_data($user_id, $current_timestamp){
                 $price_data = array();
                 $price_values = explode(';', $shop_item["price_value"]);
                 $price_items = explode(';', $shop_item["price_item"]);
-                for($i=0;$i<=count($price_items); $i++){
+                for($i=0;$i<count($price_items); $i++){
                     $pd = array();
                     $pd["value"] = $price_values[$i];
                     $pd["item"] = $price_items[$i];
@@ -1016,7 +1016,7 @@ function get_shop_data($user_id, $current_timestamp){
                 $skill_data = array();
                 $skill_values = explode(';', $shop_item["skill_value"]);
                 $skill_item = explode(';', $shop_item["skill_requirement"]);
-                for($j=0;$j<=count($skill_item);$j++){
+                for($j=0;$j<count($skill_item);$j++){
                     $sd = array();
                     $sd["value"] = $skill_item[$j];
                     $sd["name"] = $skill_item[$j];
@@ -1078,8 +1078,9 @@ function get_shop_items(){
     if(!$sql){
         return false;
     } else {
-        $row = $sql->fetch_assoc();
-        $shop_items = $row;
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $shop_items[] = $row;
+        }
     }
     return $shop_items;
 }
