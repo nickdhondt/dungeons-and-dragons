@@ -56,70 +56,74 @@
             </div>
             <div class="clearfix"></div>
             <div id="admin_tab_one" class="admin_tab"></div>
-            <div id="admin_tab_two" class="admin_tab">
-                <ul>
-                    <li>
-                        <input type="text" placeholder="Gebruikersnaam" id="txt_new_username"/>
-                    </li>
-                    <li>
-                        <input type="password" placeholder="Wachtwoord" id="txt_new_password"/>
-                    </li>
-                    <li>
-                        <input type="button" value="Registreer" id="btn_register"/>
-                    </li>
-                </ul>
+<div id="admin_tab_two" class="admin_tab">
+    <ul>
+        <li>
+            <input type="text" placeholder="Gebruikersnaam" id="txt_new_username"/>
+        </li>
+        <li>
+            <input type="password" placeholder="Wachtwoord" id="txt_new_password"/>
+        </li>
+        <li>
+            <input type="button" value="Registreer" id="btn_register"/>
+        </li>
+    </ul>
+</div>
+<div id="admin_tab_three" class="admin_tab"></div>
+<div id="admin_tab_four" class="admin_tab">
+    <div id="conditions"></div>
+    <div id="inventory"></div>
+</div>
+</div>
+</div>
+<div id="container">
+    <nav id="tabs">
+        <ul>
+            <li class="active" id="one">Basic</li>
+            <li id="two">Levelling & skills</li>
+            <li id="three">Shop</li>
+        </ul>
+    </nav>
+    <div class="clearfix"></div>
+    <div id="tab_one" class="tab_area">
+        <div class="col">
+            <div>
+                <h1>Basic data</h1>
+                <ul id="basic_data_list"></ul>
             </div>
-            <div id="admin_tab_three" class="admin_tab"></div>
-            <div id="admin_tab_four" class="admin_tab">
-                <div id="conditions"></div>
-                <div id="inventory"></div>
+            <div>
+                <h1>Conditions</h1>
+                <ul id="conditions_list"></ul>
             </div>
         </div>
-    </div>
-    <div id="container">
-        <nav id="tabs">
-            <ul>
-                <li class="active" id="one">Basic</li>
-                <li id="two">Levelling</li>
-                <li id="three">Skill Assigning</li>
-            </ul>
-        </nav>
+        <div class="col" id="last">
+            <div>
+                <h1>Inventory</h1>
+                <ul id="inventory_list"></ul>
+            </div>
+        </div>
         <div class="clearfix"></div>
-        <div id="tab_one" class="tab_area">
-            <div class="col">
-                <div>
-                    <h1>Basic data</h1>
-                    <ul id="basic_data_list"></ul>
-                </div>
-                <div>
-                    <h1>Inventory</h1>
-                    <ul id="inventory_list"></ul>
-                </div>
-            </div>
-            <div class="col" id="last">
-                <div>
-                    <h1>Conditions</h1>
-                    <ul id="conditions_list"></ul>
-                </div>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-        <div id="tab_two" class="tab_area">
-            <div class="col">
-                <div>
-                    <h1>Monsters</h1>
-                </div>
-            </div>
-            <div class="col" id="last_two">
-                <div>
-                </div>
-            </div>
-            <div class="clearfix"></div>
-        </div>
-        <div id="tab_three" class="tab_area">
-            <h1>Drie</h1>
-        </div>
     </div>
+    <div id="tab_two" class="tab_area">
+        <div class="col">
+            <div>
+                <h1>Monsters</h1>
+                <div id="monsters_list">
+
+                </div>
+            </div>
+        </div>
+        <div class="col" id="last_two">
+            <div>
+                <h1>Skills</h1>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div id="tab_three" class="tab_area">
+        <h1>Drie</h1>
+    </div>
+</div>
 </div>
 <div id="ping_info"></div>
 <div id="notifications"></div>
