@@ -63,7 +63,7 @@ if(empty($_POST["data"])){
                                 $user_found = false;
                                 foreach($users_turn_data as $user_turn){
                                     if ($user_turn["turn"] == $next_turn){
-                                        $next_user = $user_turn["id"];
+                                        $next_user = $user_turn["name"];
                                         $user_found = true;
                                     }
                                 }

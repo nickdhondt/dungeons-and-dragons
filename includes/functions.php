@@ -184,9 +184,10 @@ function update_conditions_from_user($user_id){
 function get_user_turn_list(){
     global $connection;
 
-    $sql = $connection->query("SELECT ubd.user_id as 'id', ubd.basic_value as 'turn'
+    $sql = $connection->query("SELECT ubd.user_id as 'id', ubd.basic_value as 'turn', username as 'name'
             FROM user_basic_data ubd
             INNER JOIN basic b ON ubd.basic_id = b.basic_id
+            INNER JOIN user ON ubd.user_id = user.user_id
             WHERE ubd.basic_id = '8'");
 
     if(!$sql){
