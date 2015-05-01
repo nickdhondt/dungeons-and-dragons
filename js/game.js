@@ -184,6 +184,53 @@ function openStream() {
                 catchUseItemEvent();
             }
         }
+
+        var pageMonsterList = document.getElementById("monsters_list");
+        pageMonsterList.innerHTML = "";
+        var monsterList = parsedGameEvent.levelling.levelling.monster_data;
+        var monstersAmount = Math.ceil(monsterList.length / 2);
+        var colOne = document.createElement("div");
+        colOne.setAttribute("id", "monster_column");
+        var colTwo = document.createElement("div");
+        colTwo.setAttribute("id", "monster_column_two");
+
+        for (var k = 0; k < monsterList.length; k++) {
+
+            if ((k + 1) <= monstersAmount) {
+                var monsterButtonNode = document.createElement("div");
+                var monsterButtonTextNode = document.createTextNode(monsterList[k].name);
+                monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
+
+                monsterButtonNode.appendChild(monsterButtonTextNode);
+                colOne.appendChild(monsterButtonNode);
+            } else {
+                monsterButtonNode = document.createElement("div");
+                monsterButtonTextNode = document.createTextNode(monsterList[k].name);
+                monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
+
+                monsterButtonNode.appendChild(monsterButtonTextNode);
+                colTwo.appendChild(monsterButtonNode);
+            }
+        }
+
+        pageMonsterList.appendChild(colOne);
+        pageMonsterList.appendChild(colTwo);
+
+        var multiplierNode = document.createElement("input");
+        multiplierNode.setAttribute("type", "range");
+        multiplierNode.setAttribute("min", 0);
+        multiplierNode.setAttribute("max", 90);
+        multiplierNode.setAttribute("step", 10);
+
+        pageMonsterList.appendChild(multiplierNode);
+
+        var confirmButtonNode = document.createElement("input");
+        confirmButtonNode.setAttribute("type", "button");
+        confirmButtonNode.setAttribute("value", "Toevoegen");
+
+        pageMonsterList.appendChild(confirmButtonNode);
+
+        catchMonsterEvents();
     }, false);
 
     eventSource.onerror = function(e) {
@@ -197,6 +244,10 @@ function openStream() {
             connectionLost = true;
         }
     }, 1000);
+}
+
+function catchMonsterEvents() {
+
 }
 
 function makeListConditions(conditionsCollection, appendTo) {

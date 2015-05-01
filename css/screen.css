@@ -450,6 +450,24 @@ div#tab_one > div.col > div > ul > li > ul.hover_show {
 div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
     display: inherit;
 }
+#monster_column, #monster_column_two {
+    width: calc(50% - .5em);
+    float: left;
+}
+
+#monster_column > div, #monster_column_two > div {
+    background: #67ded4;
+    padding: .5em;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .5);
+    margin-bottom: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+}
+
+#monster_column {
+    margin-right: 1em;
+}
 
 @media screen and (max-device-width: 640px) {
     div#login_holder > div {
