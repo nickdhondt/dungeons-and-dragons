@@ -6,6 +6,7 @@ var admin;
 var lastPing = 0, connectionErrors = 0;
 var connectionLost = false;
 var adminPanelOpen = false;
+var uExp, uExpM, newExp, addExp;
 
 function init() {
     document.getElementById("btn_login").addEventListener("click", function() { tryLogin(); });
@@ -216,15 +217,30 @@ function openStream() {
         pageMonsterList.appendChild(colOne);
         pageMonsterList.appendChild(colTwo);
 
+        var expDisplayNode = document.createElement("div");
+        expDisplayNode.setAttribute("id", "user_multiplier");
+        pageMonsterList.appendChild(expDisplayNode);
+
         var multiplierNode = document.createElement("input");
         multiplierNode.setAttribute("type", "range");
         multiplierNode.setAttribute("min", 0);
         multiplierNode.setAttribute("max", 90);
         multiplierNode.setAttribute("step", 10);
+        multiplierNode.setAttribute("id", "sld_exp");
 
         pageMonsterList.appendChild(multiplierNode);
 
+        uExp = parsedGameEvent.levelling.levelling.user_exp;
+        uExpM = parsedGameEvent.levelling.levelling.user_exp_multiplier;
+
+        var expNode = document.createElement("div");
+        var expTextNode = document.createTextNode("jou exp + ( je multiplier x slider x monster ) = exp");
+        expNode.appendChild(expTextNode);
+        expNode.setAttribute("id", "calc_exp");
+        pageMonsterList.appendChild(expNode);
+
         var confirmButtonNode = document.createElement("input");
+        confirmButtonNode.setAttribute("id", "btn_exp_user");
         confirmButtonNode.setAttribute("type", "button");
         confirmButtonNode.setAttribute("value", "Toevoegen");
 
@@ -247,7 +263,93 @@ function openStream() {
 }
 
 function catchMonsterEvents() {
+    var displayMul = document.getElementById("user_multiplier");
+    var sldValue = document.getElementById("sld_exp");
+    displayMul.innerHTML = "Multiplier: x" + sldValue.value;
 
+    document.getElementById("sld_exp").addEventListener("input", function (e) {
+        displayMul.innerHTML = "Multiplier: x" + e.target.value;
+
+        var activeMonsterButton = document.getElementsByClassName("active_monster");
+        var monsterMultiplier = false;
+
+        for (var k = 0; k < activeMonsterButton.length; k++) {
+            monsterMultiplier = activeMonsterButton[k].id.substr(3, 2);
+        }
+
+        addExp = parseInt(parseInt(uExpM) * parseInt(e.target.value) * parseInt(monsterMultiplier));
+        newExp = parseInt(uExp) + addExp;
+
+        if (monsterMultiplier !== false) {
+            document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + e.target.value + " * " + monsterMultiplier + " ) = " + newExp;
+        }
+    });
+
+    var colOneButtons = document.getElementById("monster_column").childNodes;
+    var colTwoButtons = document.getElementById("monster_column_two").childNodes;
+
+    for (var i = 0; i < colOneButtons.length; i++) {
+        colOneButtons[i].addEventListener("click", function(e) {
+            for (var i = 0; i < colOneButtons.length; i++) {
+                colOneButtons[i].setAttribute("class", "");
+                colTwoButtons[i].setAttribute("class", "");
+            }
+
+            document.getElementById(e.target.id).setAttribute("class", "active_monster");
+
+            var activeMonsterButton = document.getElementsByClassName("active_monster");
+            var monsterMultiplier = false;
+
+            for (var k = 0; k < activeMonsterButton.length; k++) {
+                monsterMultiplier = activeMonsterButton[k].id.substr(3, 2);
+            }
+
+            addExp = parseInt(parseInt(uExpM) * parseInt(sldValue.value) * parseInt(monsterMultiplier));
+            newExp = parseInt(uExp) + addExp;
+
+            if (monsterMultiplier !== false) {
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+            }
+        });
+    }
+
+    for (var j = 0; j < colTwoButtons.length; j++) {
+        colTwoButtons[j].addEventListener("click", function(e) {
+            for (var i = 0; i < colTwoButtons.length; i++) {
+                colTwoButtons[i].setAttribute("class", "");
+                colOneButtons[i].setAttribute("class", "");
+            }
+
+            document.getElementById(e.target.id).setAttribute("class", "active_monster");
+
+            var activeMonsterButton = document.getElementsByClassName("active_monster");
+            var monsterMultiplier = false;
+
+            for (var k = 0; k < activeMonsterButton.length; k++) {
+                monsterMultiplier = activeMonsterButton[k].id.substr(3, 2);
+            }
+
+            addExp = parseInt(parseInt(uExpM) * parseInt(sldValue.value) * parseInt(monsterMultiplier));
+            newExp = parseInt(uExp) + addExp;
+            
+            if (monsterMultiplier !== false) {
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+            }
+        });
+    }
+
+    document.getElementById("btn_exp_user").addEventListener("click", function () {
+        if (typeof newExp !== "undefined") {
+            var monsterExpUser = {
+                "add_exp_value": addExp,
+                "user_id": ownUserId,
+                "basic_id": 11
+            };
+            sendXHR(JSON.stringify(monsterExpUser), "http/http_add_exp.php", "post", "processAddExp");
+        } else {
+            new Notification("Je moet een monster selecteren. (Ps. Sven is gay)", false);
+        }
+    });
 }
 
 function makeListConditions(conditionsCollection, appendTo) {
@@ -993,8 +1095,8 @@ function processBasics(jsonData){
             var expSlider = document.createElement("input");
             expSlider.setAttribute("type", "range");
             expSlider.setAttribute("id", "exp_slider");
-            expSlider.setAttribute("max", "10000");
-            expSlider.setAttribute("min", "0");
+            expSlider.setAttribute("max", "5000");
+            expSlider.setAttribute("min", "-5000");
             expSlider.setAttribute("step", "20");
 
             basicAdminTab.appendChild(expNode);

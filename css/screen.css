@@ -146,7 +146,7 @@ div#login_holder > div > ul > li > input[type=button] {
 */
 
 div#notifications {
-    position: absolute;
+    position: fixed;
     top: 0;
     width: 100vw;
     z-index: 999;
@@ -351,7 +351,7 @@ div#game_area > div#show_admin > div#admin_panel ul {
     list-style: none;
 }
 
-div#game_area > div#show_admin > div#admin_panel input[type=text], div#game_area > div#show_admin > div#admin_panel input[type=password], div#game_area > div#show_admin > div#admin_panel input[type=range], select {
+div#game_area > div#show_admin > div#admin_panel input[type=text], div#game_area > div#show_admin > div#admin_panel input[type=password], div#game_area > div#show_admin > div#admin_panel input[type=range], select, input[type=range] {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
@@ -363,7 +363,7 @@ div#game_area > div#show_admin > div#admin_panel input[type=text], div#game_area
     margin: 1em 0;
 }
 
-div#game_area > div#show_admin > div#admin_panel input[type=button] {
+div#game_area > div#show_admin > div#admin_panel input[type=button], input[type=button] {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
@@ -463,10 +463,32 @@ div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
     cursor: pointer;
     font-weight: bold;
     text-align: center;
+    transition: background .3s;
+}
+
+#monster_column > div:hover, #monster_column_two > div:hover {
+    background: #97e8e1;
+}
+
+#monster_column > div:active, #monster_column_two > div:active {
+    background: #67ded4;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, .5);
+}
+
+.active_monster {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, .5) !important;
+    background: #97e8e1 !important;
 }
 
 #monster_column {
     margin-right: 1em;
+}
+
+#calc_exp {
+    color: #ff0000;
+    font-weight: bold;
+    margin-bottom: 1em;
+    text-shadow:  0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 @media screen and (max-device-width: 640px) {
