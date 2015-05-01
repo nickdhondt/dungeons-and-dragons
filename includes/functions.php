@@ -1139,10 +1139,11 @@ function write_to_user_basic($user_id, $basic_id, $value){
     }
 }
 
-function add_condition($user_id, $condition_id, $current_timestamp){
+function add_condition($user_id, $condition_id){
     //This function will add a requested condition to the users condition.
     global $connection;
     $condition_data = array();
+    $condition_data["error"] = false;
 
     //Select condition
     $sql = $connection->query("SELECT duration WHERE condition_id='".$condition_id."'");
@@ -1165,7 +1166,7 @@ function add_condition($user_id, $condition_id, $current_timestamp){
 
     //Divide the conditions in two different sorts
     if($condition_value == 0){
-        $success = validate_condition($user_id, $condition_id, $current_timestamp);
+        $success = validate_condition($user_id, $condition_id);
     } else {
         $stmt = $connection->prepare("INSERT INTO user_condition_data(user_id, condition_id, condition_value) VALUES (?,?,?)");
         $stmt->bind_param($user_id, $condition_id, $condition_value);
@@ -1175,19 +1176,26 @@ function add_condition($user_id, $condition_id, $current_timestamp){
             $condition_data["error"] = $connection->error;
         } else {
             //The condition has been added to the database
-            $success = validate_condition($user_id, $condition_id, $current_timestamp);
+            $success = validate_condition($user_id, $condition_id);
         }
 
         if(!$success){
             $condition_data["error"] = $success;
-        } else {
-            $condition_data["error"] = false;
         }
     }
+
+    //Alter Timestamps
+    $now = microtime(true);
+    $success = alter_timestamps($user_id, $now, "", "", "");
+
+    if(!$success){
+        $condition_data["error"] = $success;
+    }
+
     return $condition_data;
 }
 
-function validate_condition($user_id, $condition_id, $current_timestamp, $devalidate = false){
+function validate_condition($user_id, $condition_id, $devalidate = false){
     //This will add/substract the values when assigning a condition.
     global $connection;
     $validate = array();
@@ -1204,12 +1212,53 @@ function validate_condition($user_id, $condition_id, $current_timestamp, $devali
     }
 
     foreach($rows as $advantage){
+        //Get the value info.
         $id = $advantage["id"];
         $change = $advantage["value"];
-        $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id"')");
+
+        //Get the current values
+        $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id."')");
         $rows = $sql->fetch_assoc();
         $current_value = $rows[0]["basic_value"];
-        $new_value = $current_value + $change;
-    }
 
+        //Calculate the new value
+        if($devalidate === false){
+            $new_value = $current_value + $change;
+        } else {
+            $new_value = $current_value - $change;
+        }
+
+        //Get the maximum value possible
+        $maximum_basic_values = get_maximum_basic_values($user_id);
+        foreach($maximum_basic_values as $maximum_basic_value){
+            if($maximum_basic_value["id"] === $id){
+                $max_value = $maximum_basic_value["max"];
+                $min_value = 0;
+            }
+        }
+
+        if((isset($max_value)) && (isset($min_value))){
+            //The code is safe
+            if($new_value > $max_value){
+                $new_value = $max_value;
+            }
+            if($new_value < $min_value){
+                $new_value = $min_value;
+            }
+
+            //Write the new value to the database
+            $stmt = $connection->prepare("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '?' WHERE (`user_basic_data`.`basic_id`='".$id."') AND (`user_basic_data`.`user_id`='".$user_id."')");
+            $stmt->prepare('i', $new_value);
+            $stmt->execute();
+
+            //update the timestamp
+            $now = microtime(true);
+            $success = alter_timestamps($user_id, $now, "", "", "");
+
+            if(!$success){
+                $validate["error"] = $success;
+            }
+        }
+    }
+    return $validate;
 }
