@@ -581,6 +581,15 @@ function get_conditions_by_id($condition_id){
     return $conditions;
 }
 
+function get_tabtwo_data($user_id, $current_timestamp){
+    //This function makes the array for the second tab.
+    $exp_data = array();
+    $exp_data["levelling"] = get_levelling_data($user_id, $current_timestamp);
+    $exp_data["skills"] = get_skill_data($user_id, $current_timestamp);
+
+    return $exp_data;
+}
+
 function get_levelling_data($user_id, $current_timestamp){
     //This function gets the levelling data. This includes all the levelling info of the hero, and the available monsters.
     global $connection;
