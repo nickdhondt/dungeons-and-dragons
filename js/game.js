@@ -139,6 +139,8 @@ function openStream() {
     eventSource.addEventListener("game_event", function(e) {
         var parsedGameEvent = parseJSON(e.data);
 
+        console.log(parsedGameEvent);
+
         for (var i = 0; i < parsedGameEvent.basic.length; i++) {
             if (parsedGameEvent.basic[i].is_you === true) {
                 var basicDataList = document.getElementById("basic_data_list");
@@ -728,8 +730,6 @@ function requestInventory() {
 
 function processInventoryItems(jsonData) {
     var responseParse = parseJSON(jsonData);
-
-    console.log(responseParse);
 
     if (responseParse !== null) {
         if (responseParse.request_legal !== "true") {
