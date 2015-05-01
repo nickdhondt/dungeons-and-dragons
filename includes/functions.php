@@ -1090,7 +1090,7 @@ function get_item_data($item_id){
     global $connection;
     $item_data = array();
 
-    $sql = $connection->query("SELECT name, type, `condition` as 'id' FROM inventory WHERE item_id='".$item_id."' ORDER BY type");
+    $sql = $connection->query("SELECT i.name, i.type, t.name as 'tname' , i.`condition` as 'id' FROM inventory i INNER JOIN types t ON t.type_id = i.type WHERE item_id='".$item_id."' ORDER BY i.type");
 
     if(!$sql){
         $item_data["errors"] = $connection->error;
@@ -1098,7 +1098,7 @@ function get_item_data($item_id){
     } else {
         $row = $sql->fetch_array(MYSQLI_ASSOC);
         $item_data["name"] = $row["name"];
-        $item_data["type"] = $row["type"];
+        $item_data["type"] = $row["tname"];
         $condition_id = $row["id"];
         $conditions = get_conditions_by_id($condition_id);
 
