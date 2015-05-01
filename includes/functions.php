@@ -231,8 +231,9 @@ function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
     //THE SELECT QUERY
     $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill', inventory_timestamp as 'inventory',
         condition_timestamp as 'condition' FROM timestamps WHERE user_id='".$user_id."'");
+
     $rows = array();
-    while($row = $sql->fetch_assoc());
+    while($row = $sql->fetch_array(MYSQLI_ASSOC))
     {
         $rows[] = $row;
     }
@@ -245,12 +246,11 @@ function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
 
     if(!empty($basic)) $nbasic = $basic;
     if(!empty($skill)) $nskill = $skill;
-    if(!empty($ninventory)) $ninventory = $inventory;
-    if(!empty($ncondition)) $ncondition = $condition;
+    if(!empty($inventory)) $ninventory = $inventory;
+    if(!empty($condition)) $ncondition = $condition;
 
     //THE UPDATE QUERY
-    $timestamps = $connection->prepare("UPDATE timestamps SET (basic_timestamp, skill_timestamp, inventory_timestamp, condition_timestamp)
-         VALUES(".$nbasic.",".$nskill.",".$ninventory.",".$ncondition.") WHERE user_id='".$user_id."'");
+    $timestamps = $connection->query("UPDATE `dungeons_and_dragons`.`timestamps` SET `basic_timestamp` = '".$nbasic."', `skill_timestamp` = '".$nskill."', `inventory_timestamp` = '".$ninventory."', `condition_timestamp` = '".$ncondition."' WHERE `timestamps`.`user_id` = 1");
 
     if (!$sql || !$timestamps) {
         return $connection->connect_error;
@@ -1116,21 +1116,36 @@ function write_to_user_basic($user_id, $basic_id, $value){
     global $connection;
 
     //Check the current value
-    $sql = $connection->query("SELECT basic_value, ubd_id as 'id' FROM user_basic_data WHERE (user_id='".$user_id."') AND ($basic_id='".$basic_id."')");
+    $sql = $connection->query("SELECT basic_value, ubd_id as 'id' FROM user_basic_data WHERE (user_id='".$user_id."') AND (basic_id='".$basic_id."')");
     $row = $sql->fetch_assoc();
     $current_value = $row["basic_value"];
     $ubd = $row["id"];
     $new_value = $current_value + $value;
 
     //Controle op current value
-    if(($current_value <= 0) && ($value < 0)){
-        return 69;
+    if($new_value <= 0){
+        $new_value = 0;
+    }
+
+    //EXP mag niet boven de 1.000.000 gaan
+    if(($basic_id == 11) && ($new_value >= 1000000)){
+        $new_value = 1000000;        //EXP mag niet boven de 1.000.000 gaan.
     }
 
     //Write the given value
     $stmt = $connection->prepare("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = ? WHERE `user_basic_data`.`ubd_id` = ?");
     $stmt->bind_param('ii', $new_value, $ubd);
     $stmt->execute();
+
+    //After writing, update the timestamps
+    $now = microtime(true);
+    $timestamps = alter_timestamps($user_id, $now, "", "", "");
+
+    if(isset($timestamps["errors"])){
+        if($timestamps["errors"] != false){
+            return "false";
+        }
+    }
 
     if(!$stmt){
         return "false";
