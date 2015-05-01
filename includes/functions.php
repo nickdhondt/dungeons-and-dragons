@@ -473,8 +473,8 @@ function get_user_skill_data($user_id){
             WHERE usd.user_id ='".$user_id."'");
 
     if(!$sql){
-        $skill_data["errors"] = true;
-        return $connection->error;
+        $skill_data["errors"] = $connection->error;
+        return $skill_data;
     } else {
         $skill_data["errors"] = false;
         $rows = array();
@@ -642,10 +642,76 @@ function get_levelling_data($user_id, $current_timestamp){
 }
 
 function get_skill_data($user_id, $current_timestamp){
-    $skill_data = get_user_skill_data($user_id);
-    if($skill_data["errors"] != false){
+    //This function gets the skill data. This includes all the skills and their advantages.
+    global $connection;
+    $skill_data = array();
+
+    //Check the skill timestamp to determine whether or not the skill info is up-to-date
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill' FROM timestamps WHERE user_id='".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
+    if(($timestamps["basic"] >= $current_timestamp) || ($timestamps["skill"] >= $current_timestamp)){
+        //Get the basic data
+        $sql_ap = $connection->query("SELECT ubd.basic_value as 'value', b.name as 'name' FROM user_basic_data ubd
+            INNER JOIN basic b ON b.basic_id = ubd.basic_id
+            WHERE (ubd.basic_id = 5) AND (ubd.user_id = '".$user_id."')");
+
+        $row = $sql_ap->fetch_assoc();
+        $actionpoints = $row["value"];
+
+        //Get the skill data
+        $sdd = get_user_skill_data($user_id);
+        if($sdd["errors"] != false){
+            return $sdd; //This contains the error
+        } else {
+            //The skill_data array contains: "value, name, type, subtype, max_levels, advantages";
+
+            foreach($sdd["data"] as $skill_data_data){
+                //Fetch the level_data
+                $level_data = array();
+                $advantages = explode(';', $skill_data_data["advantages"]);
+                for($i=0;$i<=count($advantages);$i++){
+                    $advantage_data = array();
+                    $advantage = $advantages[$i];
+                    $advantage_data["nr"] = $i + 1;
+                    if($skill_data_data["value"] >= $i){
+                        $advantage_data["is_achieved"] = true;
+                    } else {
+                        $advantage_data["is_achieved"] = false;
+                    }
+                    $advantage_data["advantage"] = $advantage;
+                    $level_data[] = $advantage_data;
+                }
+
+                //Make skill_data["data"] array
+                $subdata = array();
+                $subdata["name"] = $skill_data_data["name"];
+                $subdata["type"] = $skill_data_data["type"];
+                $subdata["subtype"] = $skill_data_data["subtype"];
+                $subdata["number_of_levels"] = $skill_data_data["max_levels"];
+                $subdata["levels"] = $level_data;
+                $data[] = $subdata;
+            }
+        }
+    } else {
+        //If no new data is found, return false;
         return false;
     }
+
+    //Fill the main array
+    if(!empty($skill_data["errors"])){
+        return $skill_data["errors"];
+    } else {
+        $skill_data["user_id"] = $user_id;
+        $skill_data["actionpoints"] = $actionpoints;
+        $skill_data["data"] = $data;
+    }
+    return $skill_data;
 }
 
 function list_basic_skillitems() {
