@@ -720,7 +720,6 @@ function get_general_data($user_id, $current_timestamp){
     return $general_data;
 }
 
-<<<<<<< HEAD
 function list_basic_conditions() {
     global $connection;
 
@@ -755,7 +754,7 @@ function list_inventory_items() {
 
         return $conditions;
     }
-=======
+
 function find_basic_id_for_basic_name($basic_name){
     //This function will return the id for a given basic name.
     global $connection;
@@ -893,5 +892,4 @@ function initialize_user_basic_data($user_id){
     }
 
     return $response;
->>>>>>> origin/master
 }
