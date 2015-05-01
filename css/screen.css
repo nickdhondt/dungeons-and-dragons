@@ -391,6 +391,12 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
     margin-top: 0;
 }
 
+div.big_col {
+    width: calc(100% - 1em);
+    padding: 1em;
+    background: #87cdff;
+}
+
 div.col {
     width: calc(50% - .5em);
     margin-right: 1em;

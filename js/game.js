@@ -247,6 +247,8 @@ function openStream() {
         pageMonsterList.appendChild(confirmButtonNode);
 
         catchMonsterEvents();
+
+        renderShop(parsedGameEvent.shop);
     }, false);
 
     eventSource.onerror = function(e) {
@@ -260,6 +262,12 @@ function openStream() {
             connectionLost = true;
         }
     }, 1000);
+}
+
+function renderShop(shopArrays) {
+    for (var i = 0; i < shopArrays.length; i++) {
+        console.log(shopArrays[i]);
+    }
 }
 
 function catchMonsterEvents() {
