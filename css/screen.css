@@ -392,7 +392,7 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
 }
 
 div.big_col {
-    width: calc(100% - 1em);
+    width: calc(100% - 2em);
     padding: 1em;
     background: #87cdff;
 }
@@ -498,6 +498,11 @@ div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
 }
 
 @media screen and (max-device-width: 640px) {
+    div.col {
+        float: none;
+        width: 100%;
+    }
+
     div#login_holder > div {
         margin: auto 1em;
         width: 100%;

@@ -234,7 +234,7 @@ function openStream() {
         uExpM = parsedGameEvent.levelling.levelling.user_exp_multiplier;
 
         var expNode = document.createElement("div");
-        var expTextNode = document.createTextNode("jou exp + ( je multiplier x slider x monster ) = exp");
+        var expTextNode = document.createTextNode("jou exp + ( je multiplier ✖ slider ✖ monster ) = exp");
         expNode.appendChild(expTextNode);
         expNode.setAttribute("id", "calc_exp");
         pageMonsterList.appendChild(expNode);
@@ -265,9 +265,48 @@ function openStream() {
 }
 
 function renderShop(shopArrays) {
+    var shopItemsPerColumn = Math.ceil(shopArrays.length / 4);
+
+    var shopListing = document.getElementById("shop_listing");
+
+    var shopColOneNode = document.getElementById("shop_one");
+    var shopColTwoNode = document.getElementById("shop_two");
+    var shopColThreeNode = document.getElementById("shop_three");
+    var shopColFourNode = document.getElementById("shop_four");
+    shopColOneNode.innerHTML = "";
+    shopColTwoNode.innerHTML = "";
+    shopColThreeNode.innerHTML = "";
+    shopColFourNode.innerHTML = "";
+
+    shopListing.appendChild(shopColOneNode);
+    shopListing.appendChild(shopColTwoNode);
+    shopListing.appendChild(shopColThreeNode);
+    shopListing.appendChild(shopColFourNode);
+
     for (var i = 0; i < shopArrays.length; i++) {
         console.log(shopArrays[i]);
+
+        if (i < shopItemsPerColumn) {
+            addToShopColumn(shopArrays[i], "shop_one");
+        } else if (i >= shopItemsPerColumn && i < (shopItemsPerColumn * 2)) {
+            addToShopColumn(shopArrays[i], "shop_two");
+        } else if (i >= (shopItemsPerColumn * 2) && i < (shopItemsPerColumn * 3)) {
+            addToShopColumn(shopArrays[i], "shop_three");
+        } else if (i >= (shopItemsPerColumn * 3) && i < (shopItemsPerColumn * 4)) {
+            addToShopColumn(shopArrays[i], "shop_three");
+        }
     }
+}
+
+function addToShopColumn(shopItem, column) {
+    var columnAddTo = document.getElementById(column);
+
+    var shopItemNode = document.createElement("div");
+    var shopItemTextNode = document.createTextNode(shopItem.item_data.name);
+    shopItemNode.setAttribute("id", shopItem.item_id);
+    shopItemNode.appendChild(shopItemTextNode);
+
+    columnAddTo.appendChild(shopItemNode);
 }
 
 function catchMonsterEvents() {
@@ -289,7 +328,7 @@ function catchMonsterEvents() {
         newExp = parseInt(uExp) + addExp;
 
         if (monsterMultiplier !== false) {
-            document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + e.target.value + " * " + monsterMultiplier + " ) = " + newExp;
+            document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ⨯ " + e.target.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
         }
     });
 
@@ -316,7 +355,7 @@ function catchMonsterEvents() {
             newExp = parseInt(uExp) + addExp;
 
             if (monsterMultiplier !== false) {
-                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ✖ " + sldValue.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
             }
         });
     }
@@ -341,7 +380,7 @@ function catchMonsterEvents() {
             newExp = parseInt(uExp) + addExp;
             
             if (monsterMultiplier !== false) {
-                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ✖ " + sldValue.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
             }
         });
     }
