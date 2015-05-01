@@ -12,11 +12,7 @@ body {
     background: #26af00;
 }
 
-h1 {
-    margin-bottom: .75em;
-}
-
-h2 {
+h1, h2, h3 {
     margin-bottom: .75em;
 }
 
@@ -28,7 +24,7 @@ ul > li > ul {
     margin-left: 2em;
 }
 
-div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li {
+div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -317,7 +313,7 @@ div#game_area > div#show_admin > div#admin_panel {
     border-top: 1px solid #000000;
 }
 
-div#game_area > div#show_admin > div#admin_panel > div#admin_tab_two, div#game_area > div#show_admin > div#admin_panel > div#admin_tab_three {
+div#game_area > div#show_admin > div#admin_panel > div#admin_tab_two, div#game_area > div#show_admin > div#admin_panel > div#admin_tab_three, div#game_area > div#show_admin > div#admin_panel > div#admin_tab_four {
     display: none;
 }
 
@@ -351,7 +347,7 @@ div#game_area > div#show_admin > div#admin_panel ul {
     list-style: none;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div#game_area > div#show_admin > div#admin_panel ul > li > input[type=password] {
+div#game_area > div#show_admin > div#admin_panel input[type=text], div#game_area > div#show_admin > div#admin_panel input[type=password], div#game_area > div#show_admin > div#admin_panel input[type=range], select {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
@@ -359,14 +355,18 @@ div#game_area > div#show_admin > div#admin_panel ul > li > input[type=text], div
     margin-bottom: .5em;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > input[type=button] {
+#txt_message {
+    margin: 1em 0;
+}
+
+div#game_area > div#show_admin > div#admin_panel input[type=button] {
     padding: .5em;
     font-family: "Open Sans", sans-serif;
     font-size: .8em;
     width: 100%;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div {
+div#game_area > div#show_admin > div#admin_panel ul > li > div, .condition_button, .inventory_button {
     padding: .5em;
     margin-top: .3em;
     margin-right: .3em;
@@ -375,11 +375,11 @@ div#game_area > div#show_admin > div#admin_panel ul > li > div {
     display: inline-block;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div:hover {
+div#game_area > div#show_admin > div#admin_panel ul > li > div:hover, .condition_button:hover, .inventory_button:hover {
     background: #ea7642;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div:active {
+div#game_area > div#show_admin > div#admin_panel ul > li > div:active, .condition_button:active, .inventory_button:active {
     background: #ff8959;
 }
 

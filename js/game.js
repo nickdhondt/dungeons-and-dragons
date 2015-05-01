@@ -16,6 +16,7 @@ function init() {
     document.getElementById("admin_one").addEventListener("click", function(e) { showAdminTab("one"); e.stopPropagation(); });
     document.getElementById("admin_two").addEventListener("click", function(e) { showAdminTab("two"); e.stopPropagation(); });
     document.getElementById("admin_three").addEventListener("click", function(e) { showAdminTab("three"); e.stopPropagation(); });
+    document.getElementById("admin_four").addEventListener("click", function(e) { showAdminTab("four"); e.stopPropagation(); });
     document.getElementById("btn_register").addEventListener("click", function(e) { requestUserRegister(); e.stopPropagation(); });
     document.getElementById("txt_new_username").addEventListener("click", function(e) { e.stopPropagation(); });
     document.getElementById("txt_new_password").addEventListener("click", function(e) { e.stopPropagation(); });
@@ -263,33 +264,50 @@ function showAdminTab(tab) {
     var tabOne = document.getElementById("admin_tab_one");
     var tabTwo = document.getElementById("admin_tab_two");
     var tabThree = document.getElementById("admin_tab_three");
+    var tabFour = document.getElementById("admin_tab_four");
 
 
     var one = document.getElementById("admin_one");
     var two = document.getElementById("admin_two");
     var three = document.getElementById("admin_three");
+    var four = document.getElementById("admin_four");
 
     if (tab === "one") {
         tabOne.style.display = "block";
         tabTwo.style.display = "none";
         tabThree.style.display = "none";
+        tabFour.style.display = "none";
         one.setAttribute("class", "active");
         two.setAttribute("class", "");
         three.setAttribute("class", "");
+        four.setAttribute("class", "");
     } else if (tab === "two") {
         tabOne.style.display = "none";
         tabTwo.style.display = "block";
         tabThree.style.display = "none";
+        tabFour.style.display = "none";
         one.setAttribute("class", "");
         two.setAttribute("class", "active");
         three.setAttribute("class", "");
+        four.setAttribute("class", "");
     } else if (tab === "three") {
         tabOne.style.display = "none";
         tabTwo.style.display = "none";
         tabThree.style.display = "block";
+        tabFour.style.display = "none";
         one.setAttribute("class", "");
         two.setAttribute("class", "");
         three.setAttribute("class", "active");
+        four.setAttribute("class", "");
+    } else if (tab === "four") {
+        tabOne.style.display = "none";
+        tabTwo.style.display = "none";
+        tabThree.style.display = "none";
+        tabFour.style.display = "block";
+        one.setAttribute("class", "");
+        two.setAttribute("class", "");
+        three.setAttribute("class", "");
+        four.setAttribute("class", "active");
     }
 }
 
@@ -391,6 +409,12 @@ function sendXHR(data, url, type, executeFunction) {
                     break;
                 case "processBasics":
                     processBasics(response);
+                    break;
+                case "processConditions":
+                    processConditions(response);
+                    break;
+                case "processInventoryItems":
+                    processInventoryItems(response);
                     break;
             }
         }
@@ -678,6 +702,8 @@ function processUserList(jsonData) {
 
     openStream();
     requestBasics();
+    requestConditions();
+    requestInventory();
 
     var changeUserview = document.getElementsByClassName("change_userview");
     var deleteUser = document.getElementsByClassName("delete_user");
@@ -696,20 +722,180 @@ function processUserList(jsonData) {
     }
 }
 
-function requestBasics() {
-    sendXHR("", "http/http_list_basic.php", "get", "processBasics");
+function requestInventory() {
+    sendXHR("", "http/http_list_inventory.php", "get", "processInventoryItems");
 }
 
-function processBasics(jsonData){
-    console.log(parseJSON(jsonData));
+function processInventoryItems(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    console.log(responseParse);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            var conditions = document.getElementById("inventory");
+            conditions.innerHTML = "<h3>Inventory</h3>";
+            var selectNode = document.createElement("select");
+            selectNode.setAttribute("id", "lst_inventory");
+
+            for (var i = 0; i < responseParse.data.length; i++) {
+                var optionNode = document.createElement("option");
+                var optionTextNode = document.createTextNode(responseParse.data[i].name);
+                optionNode.setAttribute("value", responseParse.data[i].item_id);
+
+                optionNode.appendChild(optionTextNode);
+                selectNode.appendChild(optionNode);
+            }
+
+            conditions.appendChild(selectNode);
+
+            var addButtonNode = document.createElement("div");
+            var addButtonTextNode = document.createTextNode("+1");
+            addButtonNode.setAttribute("id", "add_inventory");
+            addButtonNode.setAttribute("class", "inventory_button");
+            addButtonNode.appendChild(addButtonTextNode);
+
+            conditions.appendChild(addButtonNode);
+
+            var subButtonNode = document.createElement("div");
+            var subButtonTextNode = document.createTextNode("-1");
+            subButtonNode.setAttribute("id", "sub_inventory");
+            subButtonNode.setAttribute("class", "inventory_button");
+            subButtonNode.appendChild(subButtonTextNode);
+
+            conditions.appendChild(subButtonNode);
+
+            document.getElementById("lst_inventory").addEventListener("click", function (e) {
+                e.stopPropagation();
+            });
+
+            catchInventoryEvent();
+        }
+    }
+}
+
+function catchInventoryEvent() {
+    var conditionButton = document.getElementsByClassName("inventory_button");
+
+    for (var i = 0; i < conditionButton.length; i++) {
+        conditionButton[i].addEventListener("click", function(e) {
+            e.stopPropagation();
+
+            var action;
+
+            if (e.target.id === "add_inventory") action = "add";
+            else action = "substract";
+
+            requestAddInventory(action);
+        });
+    }
+}
+
+function requestAddInventory(action) {
+    var conditionsList = document.getElementById("lst_inventory");
+    var condition = conditionsList.options[conditionsList.selectedIndex].value;
+
+    var requestCondition = {
+        "action": action,
+        "user_id": userId,
+        "condition": condition
+    };
+    sendXHR(JSON.stringify(requestCondition), "http/http_add_inventory.php", "post", "processAddInventory");
+}
+
+function requestConditions() {
+    sendXHR("", "http/http_list_conditions.php", "get", "processConditions");
+}
+
+function processConditions(jsonData) {
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
         if (responseParse.request_legal !== "true") {
             displayErrors(responseParse.errors);
         } else {
-            console.log(responseParse.data);
+            var conditions = document.getElementById("conditions");
+            conditions.innerHTML = "<h3>Conditions</h3>";
+            var selectNode = document.createElement("select");
+            selectNode.setAttribute("id", "lst_conditions");
 
+            for(var i = 0; i < responseParse.data.length; i++) {
+                var optionNode = document.createElement("option");
+                var optionTextNode = document.createTextNode(responseParse.data[i].name);
+                optionNode.setAttribute("value", responseParse.data[i].condition_id);
+
+                optionNode.appendChild(optionTextNode);
+                selectNode.appendChild(optionNode);
+            }
+
+            conditions.appendChild(selectNode);
+
+            var addButtonNode = document.createElement("div");
+            var addButtonTextNode = document.createTextNode("+1");
+            addButtonNode.setAttribute("id", "add_condition");
+            addButtonNode.setAttribute("class", "condition_button");
+            addButtonNode.appendChild(addButtonTextNode);
+
+            conditions.appendChild(addButtonNode);
+
+            var subButtonNode = document.createElement("div");
+            var subButtonTextNode = document.createTextNode("-1");
+            subButtonNode.setAttribute("id", "sub_condition");
+            subButtonNode.setAttribute("class", "condition_button");
+            subButtonNode.appendChild(subButtonTextNode);
+
+            conditions.appendChild(subButtonNode);
+
+            document.getElementById("lst_conditions").addEventListener("click", function (e){ e.stopPropagation(); });
+
+            catchConditionEvents();
+        }
+    }
+}
+
+function catchConditionEvents() {
+    var conditionButton = document.getElementsByClassName("condition_button");
+
+    for (var i = 0; i < conditionButton.length; i++) {
+        conditionButton[i].addEventListener("click", function(e) {
+            e.stopPropagation();
+
+            var action;
+
+            if (e.target.id === "add_condition") action = "add";
+            else action = "substract";
+
+            requestAddCondition(action);
+        });
+    }
+}
+
+function requestAddCondition(action) {
+    var conditionsList = document.getElementById("lst_conditions");
+    var condition = conditionsList.options[conditionsList.selectedIndex].value;
+
+    var requestCondition = {
+        "action": action,
+        "user_id": userId,
+        "condition": condition
+    };
+    sendXHR(JSON.stringify(requestCondition), "http/http_add_condition.php", "post", "processAddCondition");
+}
+
+function requestBasics() {
+    sendXHR("", "http/http_list_basic.php", "get", "processBasics");
+}
+
+function processBasics(jsonData){
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            document.getElementById("admin_tab_three").innerHTML = "<ul id=\"basic_controls\"></ul>";
             var basicControls = document.getElementById("basic_controls");
 
             for (var i = 0; i < responseParse.data.length; i++) {
@@ -739,8 +925,6 @@ function processBasics(jsonData){
 
             var basicAdminTab = document.getElementById("admin_tab_three");
             var basicMessageNode = document.createElement("div");
-            var basicMessageTextNode = document.createTextNode("Bericht:");
-            basicMessageNode.appendChild(basicMessageTextNode);
 
             var messageTextFieldNode = document.createElement("input");
             messageTextFieldNode.setAttribute("type", "text");
@@ -760,10 +944,17 @@ function processBasics(jsonData){
             expSlider.setAttribute("id", "exp_slider");
             expSlider.setAttribute("max", "10000");
             expSlider.setAttribute("min", "0");
-            expSlider.setAttribute("step", "100");
+            expSlider.setAttribute("step", "20");
 
             basicAdminTab.appendChild(expNode);
             basicAdminTab.appendChild(expSlider);
+
+            var sendExpNode = document.createElement("input");
+            sendExpNode.setAttribute("type", "button");
+            sendExpNode.setAttribute("value", "Verstuur Exp");
+            sendExpNode.setAttribute("id", "btn_exp");
+
+            basicAdminTab.appendChild(sendExpNode);
 
             catchBasicControlEvent();
         }
@@ -787,6 +978,33 @@ function catchBasicControlEvent() {
     for(var i = 0; i < basicControlButtons.length; i++) {
         basicControlButtons[i].addEventListener("click", function(e) { requestBasic(e); e.stopPropagation(); });
     }
+
+    document.getElementById("txt_message").addEventListener("click", function (e) { e.stopPropagation(); });
+    document.getElementById("txt_message").addEventListener("keydown", function (e) {
+        if (e.keyCode === 13) {
+            var userMessage = {
+                "message": e.target.value,
+                "user_id": userId
+            };
+
+            document.getElementById("txt_message").value = "";
+
+            sendXHR(JSON.stringify(userMessage), "http/http_user_message.php", "post", "processUserMessage");
+        }
+    });
+
+    document.getElementById("btn_exp").addEventListener("click", function(e) {e.stopPropagation(); requestExpAddition(); });
+}
+
+function requestExpAddition() {
+    var exp = document.getElementById("exp_slider").value;
+
+    var expInfo = {
+        "exp": exp,
+        "user_id": userId
+    };
+
+    sendXHR(JSON.stringify(expInfo), "http/http_exp_add.php", "post", "processExpAdd");
 }
 
 function requestBasic(e) {
