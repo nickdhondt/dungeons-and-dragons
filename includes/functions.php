@@ -595,49 +595,51 @@ function get_levelling_data($user_id, $current_timestamp){
         $timestamps = $sql->fetch_assoc();
     }
 
-    if(($timestamps["basic"] >= $current_timestamp) || ($timestamps["skill"] >= $current_timestamp)){
-        //Check the basic timestamp
-        if($timestamps["basic"] >= $current_timestamp){
-            $raw_basic_data = get_user_basic_data($user_id);
+    //Check the basic timestamp
+    if($timestamps["basic"] >= $current_timestamp){
+        //Get the basic_user's data
+        $raw_basic_data = get_user_basic_data($user_id);
 
-            if($raw_basic_data["error"] != "false"){
-                $basic_data = $raw_basic_data["data"];
-            } else {
-                return false;
-            }
+        if($raw_basic_data["error"] != "false"){
+            $basic_data = $raw_basic_data["data"];
+        } else {
+            return false;
         }
 
-        //Check the skill timestamp
-        if($timestamps["skill"] >= $current_timestamp){
-            $monsters = get_monster_data();
+        //Get the monster data
+        $monsters = get_monster_data();
 
-            if($monsters["errors"] != false){
-                return false;
-            }
+        if($monsters["errors"] != false){
+            return false;
         }
+    }
 
-        //Fill the main array
-            if(!empty($basic_data)){
-                //Get the users_id
-                    $levelling_data["user_id"] = $user_id;
-                //Get the users current EXP
-                foreach($basic_data as $basic){
-                    if($basic["id"] === "11"){
-                        $levelling_data["user_exp"] = $basic["value"];
-                    }
-                    if($basic["id"] === "12"){
-                        $levelling_data["user_exp_multiplier"] = $basic["value"];
-                    }
-                }
-            } else {
-                return false;
-            }
-            //Get the monsters
-            $levelling_data["monster_data"] = $monsters["data"];
+    //Fill the main array
+    if(!empty($monsters)){
+        //Get the monsters
+        $levelling_data["monster_data"] = $monsters["data"];
     } else {
         //If no new data is found, return false;
         return false;
     }
+
+    if(!empty($basic_data)){
+        //Get the users_id
+        $levelling_data["user_id"] = $user_id;
+        //Get the users current EXP
+        foreach($basic_data as $basic){
+            if($basic["id"] === "11"){
+                $levelling_data["user_exp"] = $basic["value"];
+            }
+            if($basic["id"] === "12"){
+                $levelling_data["user_exp_multiplier"] = $basic["value"];
+            }
+        }
+    } else {
+        //If no new data is found, return false;
+        return false;
+    }
+
     return $levelling_data;
 }
 
@@ -896,5 +898,27 @@ function initialize_user_basic_data($user_id){
 }
 
 function get_shop_data($user_id, $current_timestamp){
-    return false;
+    //This function gets the shop data. This includes the check for resources and all the inventory items.
+    global $connection;
+    $shop_data = array();
+
+    //Check the needed timestamps for the $shop_data
+        //What is needed? Money -> basic_array, Price -> inventory, skill_reqs -> skill
+    $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill'
+            inventory_timestamp as 'inventory' FROM timestamps WHERE user_id = '".$user_id."'");
+
+    if(!$sql){
+        return $connection->error;
+    } else {
+        $timestamps = $sql->fetch_assoc();
+    }
+
+    if(($timestamps["basic"] >= $current_timestamp) && ($timestamps["skill"] >= $current_timestamp) & ($timestamps["inventory"]) >= $current_timestamp){
+        //All of the above timestamps are needed for the calculations.
+        
+    } else {
+        //if no new data if found, return false;
+        return false;
+    }
+    return $shop_data;
 }
