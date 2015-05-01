@@ -143,17 +143,26 @@ function update_turn_in_db($turn){
     }
 }
 
+function delete_condition($ucd_id){
+    global $connection;
+
+    $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
+    $sql->bind_param('i', $ucd_id);
+    $sql->execute();
+}
+
 function update_conditions_from_user($user_id){
     //We will go through all the conditions of the hero, and substract them all with 1.
     global $connection;
     $errors =  array();
 
-    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value' FROM user_condition_data WHERE user_id = '".$user_id."'");
+    $sql_get = $connection->query("SELECT ucd_id as 'id', condition_value as 'value', condition_id as 'cid' FROM user_condition_data WHERE user_id = '".$user_id."'");
     $conditions = array();
     $rows = array();
     while($row = $sql_get->fetch_array(MYSQLI_ASSOC)){
         $conditions["id"] = $row["id"];
         $conditions["value"] = $row["value"] - 1;
+        $conditions["cid"] = $row["cid"];
         $rows[] = $conditions;
     }
 
@@ -161,9 +170,15 @@ function update_conditions_from_user($user_id){
         $value = $condition["value"];
         if($value <= 0){
             //If the value <= 0, it means that the condition is expired.
-            $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
-            $sql->bind_param('i', $condition["id"]);
-            $sql->execute();
+            delete_condition($condition["id"]);
+
+            //When the condition is deleted, restore the condition
+            $success = validate_condition($user_id, $condition["cid"], true);
+
+            //Controle
+            if(!$success){
+                $errors[] = $success;
+            }
         } else{
             $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
         }
@@ -1260,5 +1275,7 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
             }
         }
     }
+
+    if(empty($validate["error"])) $validate = true;
     return $validate;
 }
