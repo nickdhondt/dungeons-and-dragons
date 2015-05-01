@@ -1138,3 +1138,78 @@ function write_to_user_basic($user_id, $basic_id, $value){
         return "true";
     }
 }
+
+function add_condition($user_id, $condition_id, $current_timestamp){
+    //This function will add a requested condition to the users condition.
+    global $connection;
+    $condition_data = array();
+
+    //Select condition
+    $sql = $connection->query("SELECT duration WHERE condition_id='".$condition_id."'");
+
+    if(!$sql){
+        $condition_data["error"] = $connection->error;
+    } else{
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+
+        //Check if the array has the expected lentgh
+        if(count($rows) <= 0){
+            $condition_data["error"] = "Er werd meer dan 1 ID gevonden!!! SATAN IS AAN HET WERK. HIDE YOUR WIFE, HIDE YOUR KIDS!";
+        } else {
+            $condition_value = $rows[0]["duration"];
+        }
+    }
+
+    //Divide the conditions in two different sorts
+    if($condition_value == 0){
+        $success = validate_condition($user_id, $condition_id, $current_timestamp);
+    } else {
+        $stmt = $connection->prepare("INSERT INTO user_condition_data(user_id, condition_id, condition_value) VALUES (?,?,?)");
+        $stmt->bind_param($user_id, $condition_id, $condition_value);
+        $stmt->execute();
+
+        if(!$stmt){
+            $condition_data["error"] = $connection->error;
+        } else {
+            //The condition has been added to the database
+            $success = validate_condition($user_id, $condition_id, $current_timestamp);
+        }
+
+        if(!$success){
+            $condition_data["error"] = $success;
+        } else {
+            $condition_data["error"] = false;
+        }
+    }
+    return $condition_data;
+}
+
+function validate_condition($user_id, $condition_id, $current_timestamp, $devalidate = false){
+    //This will add/substract the values when assigning a condition.
+    global $connection;
+    $validate = array();
+
+    $sql = $connection->query("SELECT advantage_value as 'value', basic_id as 'id', advantage_id as 'aid' FROM advantages WHERE condition_id='".$condition_id."'");
+
+    if(!$sql){
+        $validate["error"] = $connection->error;
+    } else {
+        $rows = array();
+        while($row = $sql->fetch_array(MYSQLI_ASSOC)){
+            $rows[] = $row;
+        }
+    }
+
+    foreach($rows as $advantage){
+        $id = $advantage["id"];
+        $change = $advantage["value"];
+        $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id"')");
+        $rows = $sql->fetch_assoc();
+        $current_value = $rows[0]["basic_value"];
+        $new_value = $current_value + $change;
+    }
+
+}
