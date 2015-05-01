@@ -1110,3 +1110,31 @@ function get_item_data($item_id){
     }
     return $item_data;
 }
+
+function write_to_user_basic($user_id, $basic_id, $value){
+    //This function will write the changes to the database.
+    global $connection;
+
+    //Check the current value
+    $sql = $connection->query("SELECT basic_value, ubd_id as 'id' FROM user_basic_data WHERE (user_id='".$user_id."') AND ($basic_id='".$basic_id."')");
+    $row = $sql->fetch_assoc();
+    $current_value = $row["basic_value"];
+    $ubd = $row["id"];
+    $new_value = $current_value + $value;
+
+    //Controle op current value
+    if(($current_value <= 0) && ($value < 0)){
+        return 69;
+    }
+
+    //Write the given value
+    $stmt = $connection->prepare("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = ? WHERE `user_basic_data`.`ubd_id` = ?");
+    $stmt->bind_param('ii', $new_value, $ubd);
+    $stmt->execute();
+
+    if(!$stmt){
+        return "false";
+    } else {
+        return "true";
+    }
+}
