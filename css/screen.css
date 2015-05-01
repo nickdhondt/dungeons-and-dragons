@@ -275,7 +275,7 @@ div#game_area > header > div.button:active {
 
 div#game_area > div#show_admin {
     display: none;
-    position: absolute;
+    position: fixed;
     right: -40em;
     top: 6em;
     padding: 1em;
@@ -391,6 +391,12 @@ div#game_area > div#show_admin > div#admin_panel ul > li:first-of-type > div {
     margin-top: 0;
 }
 
+div.big_col {
+    width: calc(100% - 2em);
+    padding: 1em;
+    background: #87cdff;
+}
+
 div.col {
     width: calc(50% - .5em);
     margin-right: 1em;
@@ -488,10 +494,47 @@ div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
     color: #ff0000;
     font-weight: bold;
     margin-bottom: 1em;
-    text-shadow:  0 0 10px rgba(0, 0, 0, 0.3);
+    text-shadow:  0 0 8px rgba(255, 255, 255, 0.7);
+}
+#shop_listing > ul {
+    width: 25%;
+    float: left;
+}
+
+#shop_listing > ul > li {
+    background: rgba(0, 0, 255, 0.1);
+    padding: .5em;
+    margin: 0 .5em .5em 0;
+    cursor: pointer;
+}
+
+#shop_listing > ul > li:last-of-type {
+    background: rgba(0, 0, 255, 0.1);
+    padding: .5em;
+    margin: 0 .5em 0 0;
+}
+
+#shop_listing > ul#shop_four > li {
+    background: rgba(0, 0, 255, 0.1);
+    padding: .5em;
+    margin: 0 0 .5em 0;
+}
+
+li > li {
+    display: none;
+    margin-left: 1em;
+}
+
+li:hover > li {
+    display: inherit;
 }
 
 @media screen and (max-device-width: 640px) {
+    div.col, #shop_listing > ul {
+        float: none;
+        width: 100%;
+    }
+
     div#login_holder > div {
         margin: auto 1em;
         width: 100%;

@@ -180,6 +180,8 @@ function openStream() {
                     inventoryItemNode.appendChild(infoNode);
                     inventoryList.appendChild(inventoryItemNode);
 
+                    document.getElementById("inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id).innerHTML = "";
+
                     makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
                 }
                 catchUseItemEvent();
@@ -234,7 +236,7 @@ function openStream() {
         uExpM = parsedGameEvent.levelling.levelling.user_exp_multiplier;
 
         var expNode = document.createElement("div");
-        var expTextNode = document.createTextNode("jou exp + ( je multiplier x slider x monster ) = exp");
+        var expTextNode = document.createTextNode("jou exp + ( je multiplier ✖ slider ✖ monster ) = exp");
         expNode.appendChild(expTextNode);
         expNode.setAttribute("id", "calc_exp");
         pageMonsterList.appendChild(expNode);
@@ -247,6 +249,8 @@ function openStream() {
         pageMonsterList.appendChild(confirmButtonNode);
 
         catchMonsterEvents();
+
+        renderShop(parsedGameEvent.shop);
     }, false);
 
     eventSource.onerror = function(e) {
@@ -260,6 +264,73 @@ function openStream() {
             connectionLost = true;
         }
     }, 1000);
+}
+
+function renderShop(shopArrays) {
+    var shopItemsPerColumn = Math.ceil(shopArrays.length / 4);
+
+    var shopListing = document.getElementById("shop_listing");
+
+    var shopColOneNode = document.getElementById("shop_one");
+    var shopColTwoNode = document.getElementById("shop_two");
+    var shopColThreeNode = document.getElementById("shop_three");
+    var shopColFourNode = document.getElementById("shop_four");
+    shopColOneNode.innerHTML = "";
+    shopColTwoNode.innerHTML = "";
+    shopColThreeNode.innerHTML = "";
+    shopColFourNode.innerHTML = "";
+
+    shopListing.appendChild(shopColOneNode);
+    shopListing.appendChild(shopColTwoNode);
+    shopListing.appendChild(shopColThreeNode);
+    shopListing.appendChild(shopColFourNode);
+
+    for (var i = 0; i < shopArrays.length; i++) {
+        if (i < shopItemsPerColumn) {
+            addToShopColumn(shopArrays[i], "shop_one");
+        } else if (i >= shopItemsPerColumn && i < (shopItemsPerColumn * 2)) {
+            addToShopColumn(shopArrays[i], "shop_two");
+        } else if (i >= (shopItemsPerColumn * 2) && i < (shopItemsPerColumn * 3)) {
+            addToShopColumn(shopArrays[i], "shop_three");
+        } else if (i >= (shopItemsPerColumn * 3) && i < (shopItemsPerColumn * 4)) {
+            addToShopColumn(shopArrays[i], "shop_four");
+        }
+    }
+}
+
+function formatNumber(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function addToShopColumn(shopItem, column) {
+    var columnAddTo = document.getElementById(column);
+
+    var shopItemNode = document.createElement("li");
+    var shopItemTextNode = document.createTextNode(shopItem.item_data.name);
+
+    shopItemNode.setAttribute("id", "item" + shopItem.item_id);
+    shopItemNode.appendChild(shopItemTextNode);
+
+    columnAddTo.appendChild(shopItemNode);
+    for (var i = 0; i < shopItem.price_data.length; i++ ) {
+        var priceNode = document.createElement("div");
+        var priceTextNode = document.createTextNode(shopItem.price_data[i].item + ": " + formatNumber(shopItem.price_data[i].value));
+        priceNode.appendChild(priceTextNode);
+        shopItemNode.appendChild(priceNode);
+    }
+
+    for (var j = 0; j < shopItem.skill_data.length; j++ ) {
+        if (shopItem.skill_data[j].name !== "0") {
+            var skillNode = document.createElement("div");
+            var skillTextNode = document.createTextNode(shopItem.skill_data[j].name + " level: " + shopItem.skill_data[j].value);
+            skillNode.appendChild(skillTextNode);
+            shopItemNode.appendChild(skillNode);
+        }
+    }
+
+    var inventoryConditionsFormatted = prepareConditions(shopItem.item_data.condition);
+
+    makeListConditions(inventoryConditionsFormatted, "item" + shopItem.item_id);
 }
 
 function catchMonsterEvents() {
@@ -281,7 +352,7 @@ function catchMonsterEvents() {
         newExp = parseInt(uExp) + addExp;
 
         if (monsterMultiplier !== false) {
-            document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + e.target.value + " * " + monsterMultiplier + " ) = " + newExp;
+            document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ✖ " + e.target.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
         }
     });
 
@@ -308,7 +379,7 @@ function catchMonsterEvents() {
             newExp = parseInt(uExp) + addExp;
 
             if (monsterMultiplier !== false) {
-                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ✖ " + sldValue.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
             }
         });
     }
@@ -333,7 +404,7 @@ function catchMonsterEvents() {
             newExp = parseInt(uExp) + addExp;
             
             if (monsterMultiplier !== false) {
-                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " * " + sldValue.value + " * " + monsterMultiplier + " ) = " + newExp;
+                document.getElementById("calc_exp").innerHTML = uExp + " + ( " + uExpM + " ✖ " + sldValue.value + " ✖ " + monsterMultiplier + " ) = " + newExp;
             }
         });
     }
@@ -354,7 +425,6 @@ function catchMonsterEvents() {
 
 function makeListConditions(conditionsCollection, appendTo) {
     var appendToElement = document.getElementById(appendTo);
-    appendToElement.innerHTML = "";
 
     for (var n = 0; n < conditionsCollection.length; n++) {
 
