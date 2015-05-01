@@ -11,7 +11,7 @@ session_start();
 $errors = array();
 $post_data = array();
 $data_acquired = "false";
-//$_POST["data"] = array("action"=>"add", "user_id"=>"1", "condition"=>"1");
+//$_POST["data"] = array("action"=>"substract", "user_id"=>"1", "condition"=>"1");
 
 if(empty($_POST["data"])){
     //Set the flag to false
@@ -51,10 +51,9 @@ if(empty($_POST["data"])){
                         global $connection;
                         $sql = $connection->query("SELECT ucd_id FROM user_condition_data WHERE (user_id='".$user_id."') AND (condition_id='".$condition."')");
                         $rows = $sql->fetch_array(MYSQLI_ASSOC);
-                        $row = $rows[0];
 
-                        if(count($row) == 1){
-                            $ucd = $row["ucd_id"];
+                        if(count($rows) == 1){
+                            $ucd = $rows["ucd_id"];
                         }
 
                         //If the admin requested a deletion, delete the condition.

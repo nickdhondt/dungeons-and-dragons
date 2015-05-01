@@ -63,6 +63,7 @@ if(empty($_POST["data"])){
                                 $user_found = false;
                                 foreach($users_turn_data as $user_turn){
                                     if ($user_turn["turn"] == $next_turn){
+                                        $next_user_id = $user_turn["id"];
                                         $next_user = $user_turn["name"];
                                         $user_found = true;
                                     }
@@ -71,7 +72,8 @@ if(empty($_POST["data"])){
 
                             //Check the next_users conditions.
                             if($user_found){
-                                $processed = update_conditions_from_user($next_user);
+                                $processed = update_conditions_from_user($next_user_id);
+
                                 if($processed){
                                     //The conditions are succesfully checked.
                                     //There isn't anything else that this page needs to process right now.
@@ -101,11 +103,14 @@ if(empty($_POST["data"])){
     }
 }
 
+if(empty($next_user)) $next_user="systeem";
+
 // Prepare the return data
 if ($data_acquired === "true" && empty($errors)) {
     $return_message = array(
         "request_accepted" => $data_acquired,
-        "data" => $next_turn
+        "data" => $next_turn,
+        "next_user" => $next_user
     );
 } else {
     $return_message = array(

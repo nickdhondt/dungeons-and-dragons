@@ -143,12 +143,16 @@ function update_turn_in_db($turn){
     }
 }
 
-function delete_condition($ucd_id){
+function delete_condition($ucd_id, $user_id){
     global $connection;
 
     $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
     $sql->bind_param('i', $ucd_id);
     $sql->execute();
+
+    //update the timestamp
+    $now = microtime(true);
+    alter_timestamps($user_id, "", "", "", $now);
 }
 
 function update_conditions_from_user($user_id){
@@ -170,7 +174,7 @@ function update_conditions_from_user($user_id){
         $value = $condition["value"];
         if($value <= 0){
             //If the value <= 0, it means that the condition is expired.
-            delete_condition($condition["id"]);
+            delete_condition($condition["id"], $user_id);
 
             //When the condition is deleted, restore the condition
             $success = validate_condition($user_id, $condition["cid"], true);
@@ -179,12 +183,11 @@ function update_conditions_from_user($user_id){
             if(!$success){
                 $errors[] = $success;
             }
-        } else{
+        } else {
             $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
-        }
-
-        if(!$sql){
-            $errors[] = $connection->error;
+            if(!$sql){
+                $errors[] = $connection->error;
+            }
         }
     }
 
@@ -258,6 +261,7 @@ function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
     $nskill = $rows[0]["skill"];
     $ninventory = $rows[0]["inventory"];
     $ncondition = $rows[0]["condition"];
+
 
     if(!empty($basic)) $nbasic = $basic;
     if(!empty($skill)) $nskill = $skill;
@@ -1216,7 +1220,7 @@ function add_condition($user_id, $condition_id){
 
     //Alter Timestamps
     $now = microtime(true);
-    $success = alter_timestamps($user_id, $now, "", "", "");
+    $success = alter_timestamps($user_id, "", "", "", $now);
 
     if(!$success){
         $condition_data["error"] = $success;
