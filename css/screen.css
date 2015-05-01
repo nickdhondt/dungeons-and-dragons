@@ -24,7 +24,7 @@ ul > li > ul {
     margin-left: 2em;
 }
 
-div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li {
+div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -366,7 +366,7 @@ div#game_area > div#show_admin > div#admin_panel input[type=button] {
     width: 100%;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div, .condition_button {
+div#game_area > div#show_admin > div#admin_panel ul > li > div, .condition_button, .inventory_button {
     padding: .5em;
     margin-top: .3em;
     margin-right: .3em;
@@ -375,11 +375,11 @@ div#game_area > div#show_admin > div#admin_panel ul > li > div, .condition_butto
     display: inline-block;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div:hover, .condition_button:hover {
+div#game_area > div#show_admin > div#admin_panel ul > li > div:hover, .condition_button:hover, .inventory_button:hover {
     background: #ea7642;
 }
 
-div#game_area > div#show_admin > div#admin_panel ul > li > div:active, .condition_button:active {
+div#game_area > div#show_admin > div#admin_panel ul > li > div:active, .condition_button:active, .inventory_button:active {
     background: #ff8959;
 }
 

@@ -681,3 +681,21 @@ function list_basic_conditions() {
         return $conditions;
     }
 }
+
+function list_inventory_items() {
+    global $connection;
+
+    $sql = $connection->query("SELECT item_id, name FROM inventory");
+
+    if (!$sql) {
+        return $connection->error;
+    } else {
+        $conditions = array();
+
+        while($row = $sql->fetch_assoc()) {
+            $conditions[] = $row;
+        }
+
+        return $conditions;
+    }
+}

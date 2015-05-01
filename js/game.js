@@ -413,6 +413,9 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processConditions":
                     processConditions(response);
                     break;
+                case "processInventoryItems":
+                    processInventoryItems(response);
+                    break;
             }
         }
     };
@@ -700,6 +703,7 @@ function processUserList(jsonData) {
     openStream();
     requestBasics();
     requestConditions();
+    requestInventory();
 
     var changeUserview = document.getElementsByClassName("change_userview");
     var deleteUser = document.getElementsByClassName("delete_user");
@@ -716,6 +720,89 @@ function processUserList(jsonData) {
             else if (confirm("De gebruiker verwijderen?") === true) requestDeleteUser(this.id);
         });
     }
+}
+
+function requestInventory() {
+    sendXHR("", "http/http_list_inventory.php", "get", "processInventoryItems");
+}
+
+function processInventoryItems(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    console.log(responseParse);
+
+    if (responseParse !== null) {
+        if (responseParse.request_legal !== "true") {
+            displayErrors(responseParse.errors);
+        } else {
+            var conditions = document.getElementById("inventory");
+            conditions.innerHTML = "<h3>Inventory</h3>";
+            var selectNode = document.createElement("select");
+            selectNode.setAttribute("id", "lst_inventory");
+
+            for (var i = 0; i < responseParse.data.length; i++) {
+                var optionNode = document.createElement("option");
+                var optionTextNode = document.createTextNode(responseParse.data[i].name);
+                optionNode.setAttribute("value", responseParse.data[i].item_id);
+
+                optionNode.appendChild(optionTextNode);
+                selectNode.appendChild(optionNode);
+            }
+
+            conditions.appendChild(selectNode);
+
+            var addButtonNode = document.createElement("div");
+            var addButtonTextNode = document.createTextNode("+1");
+            addButtonNode.setAttribute("id", "add_inventory");
+            addButtonNode.setAttribute("class", "inventory_button");
+            addButtonNode.appendChild(addButtonTextNode);
+
+            conditions.appendChild(addButtonNode);
+
+            var subButtonNode = document.createElement("div");
+            var subButtonTextNode = document.createTextNode("-1");
+            subButtonNode.setAttribute("id", "sub_inventory");
+            subButtonNode.setAttribute("class", "inventory_button");
+            subButtonNode.appendChild(subButtonTextNode);
+
+            conditions.appendChild(subButtonNode);
+
+            document.getElementById("lst_inventory").addEventListener("click", function (e) {
+                e.stopPropagation();
+            });
+
+            catchInventoryEvent();
+        }
+    }
+}
+
+function catchInventoryEvent() {
+    var conditionButton = document.getElementsByClassName("inventory_button");
+
+    for (var i = 0; i < conditionButton.length; i++) {
+        conditionButton[i].addEventListener("click", function(e) {
+            e.stopPropagation();
+
+            var action;
+
+            if (e.target.id === "add_inventory") action = "add";
+            else action = "substract";
+
+            requestAddInventory(action);
+        });
+    }
+}
+
+function requestAddInventory(action) {
+    var conditionsList = document.getElementById("lst_inventory");
+    var condition = conditionsList.options[conditionsList.selectedIndex].value;
+
+    var requestCondition = {
+        "action": action,
+        "user_id": userId,
+        "condition": condition
+    };
+    sendXHR(JSON.stringify(requestCondition), "http/http_add_inventory.php", "post", "processAddInventory");
 }
 
 function requestConditions() {
