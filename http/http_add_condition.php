@@ -11,7 +11,7 @@ session_start();
 $errors = array();
 $post_data = array();
 $data_acquired = "false";
-//$_POST["data"] = array("action"=>"add", "user_id"=>"1", "condition"=>"0");
+//$_POST["data"] = array("action"=>"add", "user_id"=>"1", "condition"=>"1");
 
 if(empty($_POST["data"])){
     //Set the flag to false

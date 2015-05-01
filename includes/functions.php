@@ -1161,7 +1161,7 @@ function add_condition($user_id, $condition_id){
     $condition_data["error"] = false;
 
     //Select condition
-    $sql = $connection->query("SELECT duration WHERE condition_id='".$condition_id."'");
+    $sql = $connection->query("SELECT duration FROM `condition` WHERE condition_id='".$condition_id."'");
 
     if(!$sql){
         $condition_data["error"] = $connection->error;
@@ -1184,7 +1184,7 @@ function add_condition($user_id, $condition_id){
         $success = validate_condition($user_id, $condition_id);
     } else {
         $stmt = $connection->prepare("INSERT INTO user_condition_data(user_id, condition_id, condition_value) VALUES (?,?,?)");
-        $stmt->bind_param($user_id, $condition_id, $condition_value);
+        $stmt->bind_param('iii',$user_id, $condition_id, $condition_value);
         $stmt->execute();
 
         if(!$stmt){
@@ -1234,7 +1234,7 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
         //Get the current values
         $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id."')");
         $rows = $sql->fetch_assoc();
-        $current_value = $rows[0]["basic_value"];
+        $current_value = $rows["basic_value"];
 
         //Calculate the new value
         if($devalidate === false){
@@ -1246,9 +1246,12 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
         //Get the maximum value possible
         $maximum_basic_values = get_maximum_basic_values($user_id);
         foreach($maximum_basic_values as $maximum_basic_value){
-            if($maximum_basic_value["id"] === $id){
-                $max_value = $maximum_basic_value["max"];
-                $min_value = 0;
+            if(isset($max_basic["id"])) {
+                //The ID Must be set
+                if($maximum_basic_value["id"] === $id){
+                    $max_value = $maximum_basic_value["max"];
+                    $min_value = 0;
+                }
             }
         }
 
