@@ -1419,7 +1419,7 @@ function get_conditions_from_item($item_id){
     //This function returns the conditions from a requested item
     global $connection;
 
-    $sql = $connection->query("SELECT condition as 'id' FROM inventory WHERE item_id='".$item_id."'");
+    $sql = $connection->query("SELECT `condition` as 'id' FROM inventory WHERE item_id='".$item_id."'");
     $rows = $sql->fetch_assoc();
     $condition = $rows["id"];
 

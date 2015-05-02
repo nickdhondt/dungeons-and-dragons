@@ -35,13 +35,13 @@ if(empty($_POST["data"])){
             if($user_data["permission_type"] === "1"){
                 //Julie, Do The Thing
                 //Add the condition
-                $condition_id = get_conditions_by_id($item_id);
+                $condition_id = get_conditions_from_item($item_id);
                 if(!$condition_id){
                     $data_acquired = "false";
                     $errors[] = "Er is een fout opgetreden bij de conditions. Gelieve de mens die dit geprogrammeerd heeft te slaan.";
                 } else {
                     $condition = add_condition($user_id, $condition_id);
-                    if(isset($condition["error"])){
+                    if($condition["error"] != false){
                         $data_acquired = "false";
                         $errors[] = "Error: De server meldt het volgende";
                         $errors[] = $condition["error"];
