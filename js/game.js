@@ -135,6 +135,7 @@ function openStream() {
 
         for (var i = 0; i < changeUserview.length; i++) {
             changeUserview[i].addEventListener("click", function(e) { eventSource.close(); });
+            changeUserview[i].addEventListener("click", function(e) { eventSource.close(); });
         }
     }, 500);
 
@@ -504,7 +505,7 @@ function catchMonsterEvents() {
         if (typeof newExp !== "undefined") {
             var monsterExpUser = {
                 "add_exp_value": addExp,
-                "user_id": ownUserId,
+                "user_id": userId,
                 "basic_id": 11
             };
             sendXHR(JSON.stringify(monsterExpUser), "http/http_add_exp.php", "post", "processAddExp");
