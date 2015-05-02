@@ -422,15 +422,15 @@ function get_basic_data($user_id, $current_timestamp){
 
             //Fill the main array
             $rows = array();
-                //Get the user ID
+            //Get the user ID
             $rows["user_id"] = $user["user_id"];
-                //Get the associated username
+            //Get the associated username
             if(get_user_name($user["user_id"]) != false) $rows["username"] = get_user_name($user["user_id"]);
             else return false;
-                //Determine if you are this user
+            //Determine if you are this user
             if($user_id === $user["user_id"]) $rows["is_you"] = true;
             else $rows["is_you"] = false;
-                //Add data to the main array
+            //Add data to the main array
             $rows["data"] = $data;
 
             //Fill the gathered data in the array
@@ -457,12 +457,14 @@ function get_user_basic_data($user_id){
         $rows = array();    //Declare empty array to avoid problems
 
         while ($row = $sql->fetch_array(MYSQLI_ASSOC)) {
-            $rows[] = $row;
             foreach($max_data as $max){ //new
                 if($max["id"] == $row["id"]){   //new
                     $row["max"] = $max["max"];  //new
+                } else {
+                    $row["max"] = 10;
                 }
             }
+            $rows[] = $row; //new
         }
         $basic_data["data"] = $rows;
     }
@@ -543,7 +545,7 @@ function get_user_inventory_data($user_id){
     global $connection;
     $inventory_data = array();
 
-    $sql = $connection->query("SELECT uid.item_id, i.name as 'name', uid.item_value as 'count', t.name as 'type', i.condition as 'condition_id'
+    $sql = $connection->query("SELECT uid.item_id, i.name as 'name', uid.item_value as 'count', i.type as 'typenr', t.name as 'type', i.condition as 'condition_id'
         FROM user_inventory_data uid
         INNER JOIN inventory i ON uid.item_id = i.item_id
         INNER JOIN types t ON i.type = t.type_id
@@ -555,18 +557,27 @@ function get_user_inventory_data($user_id){
         $rows = array();
         $inventory = array();
         while ($row = $sql->fetch_array(MYSQLI_ASSOC)){
-            //Get the different conditions for the condition ID.
-            $conditions = get_conditions_by_id($row["condition_id"]);
+            //Check if this is an condition or a message item
+            if($row["typenr"] == 29){
+                $message_id = $row["count"];
+                $message = get_message($message_id);
+                $rows["conditions"] = $message;
+            } else {
+                //Get the different conditions for the condition ID.
+                $conditions = get_conditions_by_id($row["condition_id"]);
                 if($conditions["error"] != false)
                     $inventory_data["error"] = $conditions["error"];
+
+                //Fill the array
+                $rows["conditions"] = $conditions["data"];
+
+            }
 
             //Fill the array
             $rows["item_id"] = $row["item_id"];
             $rows["name"] = $row["name"];
             $rows["count"] = $row["count"];
             $rows["type"] = $row["type"];
-            $rows["conditions"] = $conditions["data"];
-
             $inventory[] = $rows;
         }
         $inventory_data["data"] = $inventory;
@@ -1012,7 +1023,7 @@ function get_shop_data($user_id, $current_timestamp){
     $shop_data = array();
 
     //Check the needed timestamps for the $shop_data
-        //What is needed? Money -> basic_array, Price -> inventory, skill_reqs -> skill
+    //What is needed? Money -> basic_array, Price -> inventory, skill_reqs -> skill
     $sql = $connection->query("SELECT basic_timestamp as 'basic', skill_timestamp as 'skill',
             inventory_timestamp as 'inventory' FROM timestamps WHERE user_id = '".$user_id."'");
 
@@ -1259,53 +1270,60 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
             $id = $advantage["id"];
             $change = $advantage["value"];
 
-            //Get the current values
-            $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='" . $id . "') AND (user_id='" . $user_id . "')");
-            $rows = $sql->fetch_assoc();
-            $current_value = $rows["basic_value"];
-echo "change=".$change;
-            //Calculate the new value
-            if ($devalidate === false) {
-                $new_value = $current_value + $change;
+            //If the condition contains a message, display it to the user for this turn:
+            if($id == 10){
+                $success2 = show_message($user_id, $change);
+
+                if(!$success2){
+                    $validate["error"] = $success2;
+                }
             } else {
-                $new_value = $current_value - $change;
-            }
-            echo"nw=".$new_value;
 
-            //Get the maximum value possible
-            $maximum_basic_values = get_maximum_basic_values($user_id);
-            foreach ($maximum_basic_values as $maximum_basic_value) {
-                if (isset($maximum_basic_value["id"])) {
-                    //The ID Must be set
-                    if ($maximum_basic_value["id"] === $id) {
-                        $max_value = $maximum_basic_value["max"];
-                        $min_value = 0;
+                //Get the current values
+                $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='" . $id . "') AND (user_id='" . $user_id . "')");
+                $rows = $sql->fetch_assoc();
+                $current_value = $rows["basic_value"];
+
+                //Calculate the new value
+                if ($devalidate === false) {
+                    $new_value = $current_value + $change;
+                } else {
+                    $new_value = $current_value - $change;
+                }
+
+                //Get the maximum value possible
+                $maximum_basic_values = get_maximum_basic_values($user_id);
+                foreach ($maximum_basic_values as $maximum_basic_value) {
+                    if (isset($maximum_basic_value["id"])) {
+                        //The ID Must be set
+                        if ($maximum_basic_value["id"] === $id) {
+                            $max_value = $maximum_basic_value["max"];
+                            $min_value = 0;
+                        }
                     }
                 }
-            }
 
-            if ((isset($max_value)) && (isset($min_value))) {
-                //The code is safe
-                if ($new_value > $max_value) {
-                    if(($id == 3) || ($id == 4)){
-                        $new_value = $max_value;
+                if ((isset($max_value)) && (isset($min_value))) {
+                    //The code is safe
+                    if ($new_value > $max_value) {
+                        if(($id == 3) || ($id == 4)){
+                            $new_value = $max_value;
+                        }
                     }
-                }
-                if ($new_value < $min_value) {
-                    $new_value = $min_value;
-                }
+                    if ($new_value < $min_value) {
+                        $new_value = $min_value;
+                    }
 
-                echo "new_value=".$new_value;
+                    //Write the new value to the database
+                    $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '".$new_value."' WHERE (`user_basic_data`.`basic_id`='" . $id . "') AND (`user_basic_data`.`user_id`='" . $user_id . "')");
 
-                //Write the new value to the database
-                $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '".$new_value."' WHERE (`user_basic_data`.`basic_id`='" . $id . "') AND (`user_basic_data`.`user_id`='" . $user_id . "')");
+                    //update the timestamp
+                    $now = microtime(true);
+                    $success = alter_timestamps($user_id, $now, "", "", "");
 
-                //update the timestamp
-                $now = microtime(true);
-                $success = alter_timestamps($user_id, $now, "", "", "");
-
-                if (!$success) {
-                    $validate["error"] = $success;
+                    if (!$success) {
+                        $validate["error"] = $success;
+                    }
                 }
             }
         }
@@ -1315,4 +1333,18 @@ echo "change=".$change;
 
     if(empty($validate["error"])) $validate = true;
     return $validate;
+}
+
+function show_message($user_id, $message){
+
+}
+
+function get_message($message_id){
+    global $connection;
+
+    $sql = $connection->query("SELECT message FROM messages WHERE message_id='".$message_id."'");
+    $rows = $sql->fetch_array(MYSQLI_BOTH);
+    $row = $rows[0];
+
+    return $row;
 }
