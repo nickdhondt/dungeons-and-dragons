@@ -130,11 +130,14 @@ function microtime(getAsFloat) {
 function openStream() {
     var eventSource = new EventSource("stream/stream_push_events.php?user_id=" + userId);
 
-    var changeUserview = document.getElementsByClassName("change_userview");
+    setInterval(function() {
+        var changeUserview = document.getElementsByClassName("change_userview");
 
-    for (var i = 0; i < changeUserview.length; i++) {
-        changeUserview[i].addEventListener("click", function() { eventSource.close(); });
-    }
+        for (var i = 0; i < changeUserview.length; i++) {
+            changeUserview[i].addEventListener("click", function(e) { eventSource.close(); });
+        }
+    }, 500);
+
 
     eventSource.addEventListener("ping", function(e) {
         var streamErrorNotifs = document.getElementsByClassName("streamErrorNotif");
@@ -851,6 +854,7 @@ function processUserData(jsonData) {
                 }
 
                 enableGameArea();
+                openStream();
             } else {
                 enableRaceClassPrompt();
             }
@@ -987,7 +991,6 @@ function processRegisterClassRace(jsonData) {
             requestUserData();
             disableRaceClassPrompt();
             enableGameArea();
-            openStream();
         }
     }
 }
@@ -1032,7 +1035,7 @@ function processUserList(jsonData) {
 
     userListTab.appendChild(userListNode);
 
-    openStream();
+    //openStream();
     requestBasics();
     requestConditions();
     requestInventory();
