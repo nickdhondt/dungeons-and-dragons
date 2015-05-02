@@ -271,7 +271,7 @@ function alter_timestamps($user_id, $basic, $skill, $inventory, $condition){
     if(!empty($condition)) $ncondition = $condition;
 
     //THE UPDATE QUERY
-    $timestamps = $connection->query("UPDATE `dungeons_and_dragons`.`timestamps` SET `basic_timestamp` = '".$nbasic."', `skill_timestamp` = '".$nskill."', `inventory_timestamp` = '".$ninventory."', `condition_timestamp` = '".$ncondition."' WHERE `timestamps`.`user_id` = 1");
+    $timestamps = $connection->query("UPDATE `dungeons_and_dragons`.`timestamps` SET `basic_timestamp` = '".$nbasic."', `skill_timestamp` = '".$nskill."', `inventory_timestamp` = '".$ninventory."', `condition_timestamp` = '".$ncondition."' WHERE `timestamps`.`user_id` = '".$user_id."'");
 
     if (!$sql || !$timestamps) {
         return $connection->connect_error;
