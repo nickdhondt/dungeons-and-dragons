@@ -260,7 +260,7 @@ function openStream() {
 
     setInterval(function () {
         if (((lastPing < (microtime(true) - 10)) || (connectionErrors >= 2)) && connectionLost === false) {
-            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus overwoog hij de pagina herladen.", true, "streamErrorNotif");
+            var notif = new Notification("Jantje ging naar de winkel, maar zijn serververbinding werd verbroken. Dus overwoog hij de pagina te herladen.", true, "streamErrorNotif");
             connectionLost = true;
         }
     }, 1000);
@@ -296,6 +296,23 @@ function renderShop(shopArrays) {
             addToShopColumn(shopArrays[i], "shop_four");
         }
     }
+
+    catchShopEvents();
+}
+
+function catchShopEvents() {
+    var buyButtons = document.getElementsByClassName("buy_item_button");
+
+    for (var i = 0; i < buyButtons.length; i++) {
+        buyButtons[i].addEventListener("click", function(e) {
+            var sendData = {
+                "user_id": userId,
+                "buy_item": e.target.id.substr(3, 3)
+            };
+
+            sendXHR(JSON.stringify(sendData), "http/http_buy_item.php", "post", "processBuyItem");
+        });
+    }
 }
 
 function formatNumber(x) {
@@ -312,25 +329,39 @@ function addToShopColumn(shopItem, column) {
     shopItemNode.appendChild(shopItemTextNode);
 
     columnAddTo.appendChild(shopItemNode);
-    for (var i = 0; i < shopItem.price_data.length; i++ ) {
-        var priceNode = document.createElement("div");
-        var priceTextNode = document.createTextNode(shopItem.price_data[i].item + ": " + formatNumber(shopItem.price_data[i].value));
-        priceNode.appendChild(priceTextNode);
-        shopItemNode.appendChild(priceNode);
-    }
+    if (shopItem.can_buy !== true) {
+        var messageNode = document.createElement("div");
+        var messageTextNode = document.createTextNode(shopItem.can_buy);
+        messageNode.appendChild(messageTextNode);
+        shopItemNode.appendChild(messageNode)
+    } else {
+        var buyButtonNode = document.createElement("div");
+        var buyButtonTextNode = document.createTextNode("Aankopen");
+        buyButtonNode.setAttribute("class", "buy_item_button");
+        buyButtonNode.setAttribute("id", "buy" + shopItem.item_id);
+        buyButtonNode.appendChild(buyButtonTextNode);
+        shopItemNode.appendChild(buyButtonNode);
 
-    for (var j = 0; j < shopItem.skill_data.length; j++ ) {
-        if (shopItem.skill_data[j].name !== "0") {
-            var skillNode = document.createElement("div");
-            var skillTextNode = document.createTextNode(shopItem.skill_data[j].name + " level: " + shopItem.skill_data[j].value);
-            skillNode.appendChild(skillTextNode);
-            shopItemNode.appendChild(skillNode);
+        for (var i = 0; i < shopItem.price_data.length; i++ ) {
+            var priceNode = document.createElement("div");
+            var priceTextNode = document.createTextNode(shopItem.price_data[i].item + ": " + formatNumber(shopItem.price_data[i].value));
+            priceNode.appendChild(priceTextNode);
+            shopItemNode.appendChild(priceNode);
         }
+
+        for (var j = 0; j < shopItem.skill_data.length; j++ ) {
+            if (shopItem.skill_data[j].name !== "0") {
+                var skillNode = document.createElement("div");
+                var skillTextNode = document.createTextNode(shopItem.skill_data[j].name + " level: " + shopItem.skill_data[j].value);
+                skillNode.appendChild(skillTextNode);
+                shopItemNode.appendChild(skillNode);
+            }
+        }
+
+        var inventoryConditionsFormatted = prepareConditions(shopItem.item_data.condition);
+
+        makeListConditions(inventoryConditionsFormatted, "item" + shopItem.item_id);
     }
-
-    var inventoryConditionsFormatted = prepareConditions(shopItem.item_data.condition);
-
-    makeListConditions(inventoryConditionsFormatted, "item" + shopItem.item_id);
 }
 
 function catchMonsterEvents() {
@@ -641,6 +672,9 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processInventoryItems":
                     processInventoryItems(response);
                     break;
+                case "processBuyItem":
+                    processBuyItem(response);
+                    break;
             }
         }
     };
@@ -657,12 +691,25 @@ function sendXHR(data, url, type, executeFunction) {
     }
 }
 
+function processBuyItem(jsonData) {
+    var responseParse = parseJSON(jsonData);
+
+    if (responseParse !== null) {
+        if (responseParse.request_accepted === "true") {
+            new Notification("Je hebt het item succesvol aangekocht. Dit is een nieuwe milestone in je avontuur, geef nu al je geld aan Nick!", false);
+        }
+        else {
+            displayErrors(responseParse.errors);
+        }
+    }
+}
+
 function processNextTurn(jsonData) {
     var responseParse = parseJSON(jsonData);
 
     if (responseParse !== null) {
         if (responseParse.request_accepted === "true") {
-            new Notification("Beurt doorgegeven aan" + responseParse.next_turn, false);
+            new Notification("Beurt doorgegeven aan: " + responseParse.next_user, false);
         }
         else {
             displayErrors(responseParse.errors);
