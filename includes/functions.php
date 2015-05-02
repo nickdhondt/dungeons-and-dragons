@@ -1414,18 +1414,3 @@ function extract_item_ids() {
         return $ids;
     }
 }
-
-function get_conditions_from_item($item_id){
-    //This function returns the conditions from a requested item
-    global $connection;
-
-    $sql = $connection->query("SELECT `condition` as 'id' FROM inventory WHERE item_id='".$item_id."'");
-    $rows = $sql->fetch_assoc();
-    $condition = $rows["id"];
-
-    if(!empty($condition)){
-        return $condition;
-    } else {
-        return false;
-    }
-}
