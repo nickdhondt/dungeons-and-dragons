@@ -36,7 +36,11 @@ if ($user_id != false) {
             }
         }
 
-        print_r($rand_items);
+        for ($j = 0; $j < count($rand_items); $j++) {
+            add_to_user_inventory($post_data["user_id"], $rand_items[$j]["item_id"]);
+        }
+
+        $request_legal = "true";
     }
 } else {
     $request_legal = "false";
