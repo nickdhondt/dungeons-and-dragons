@@ -25,6 +25,7 @@ function init() {
     window.matchMedia("(orientation: portrait)").addListener(handleOrientationChange);
     document.getElementById("btn_race_class").addEventListener("click", function() { requestChoiceRaceClass(); });
     document.getElementById("next_turn").addEventListener("click", function(e) { requestNextTurn(); e.stopPropagation(); });
+    document.getElementById("random_items").addEventListener("click", function(e) { /*requestNextTurn();*/ e.stopPropagation(); });
 
     requestUserData();
 }
@@ -206,67 +207,69 @@ function openStream() {
             }
         }
 
-        var pageMonsterList = document.getElementById("monsters_list");
-        pageMonsterList.innerHTML = "";
-        var monsterList = parsedGameEvent.levelling.levelling.monster_data;
-        var monstersAmount = Math.ceil(monsterList.length / 2);
-        var colOne = document.createElement("div");
-        colOne.setAttribute("id", "monster_column");
-        var colTwo = document.createElement("div");
-        colTwo.setAttribute("id", "monster_column_two");
+        if (typeof parsedGameEvent.levelling.levelling !== "undefined") {
+            var pageMonsterList = document.getElementById("monsters_list");
+            pageMonsterList.innerHTML = "";
+            var monsterList = parsedGameEvent.levelling.levelling.monster_data;
+            var monstersAmount = Math.ceil(monsterList.length / 2);
+            var colOne = document.createElement("div");
+            colOne.setAttribute("id", "monster_column");
+            var colTwo = document.createElement("div");
+            colTwo.setAttribute("id", "monster_column_two");
 
-        for (var k = 0; k < monsterList.length; k++) {
+            for (var k = 0; k < monsterList.length; k++) {
 
-            if ((k + 1) <= monstersAmount) {
-                var monsterButtonNode = document.createElement("div");
-                var monsterButtonTextNode = document.createTextNode(monsterList[k].name);
-                monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
+                if ((k + 1) <= monstersAmount) {
+                    var monsterButtonNode = document.createElement("div");
+                    var monsterButtonTextNode = document.createTextNode(monsterList[k].name);
+                    monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
 
-                monsterButtonNode.appendChild(monsterButtonTextNode);
-                colOne.appendChild(monsterButtonNode);
-            } else {
-                monsterButtonNode = document.createElement("div");
-                monsterButtonTextNode = document.createTextNode(monsterList[k].name);
-                monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
+                    monsterButtonNode.appendChild(monsterButtonTextNode);
+                    colOne.appendChild(monsterButtonNode);
+                } else {
+                    monsterButtonNode = document.createElement("div");
+                    monsterButtonTextNode = document.createTextNode(monsterList[k].name);
+                    monsterButtonNode.setAttribute("id", "exp" + monsterList[k].multiplier);
 
-                monsterButtonNode.appendChild(monsterButtonTextNode);
-                colTwo.appendChild(monsterButtonNode);
+                    monsterButtonNode.appendChild(monsterButtonTextNode);
+                    colTwo.appendChild(monsterButtonNode);
+                }
             }
+
+            pageMonsterList.appendChild(colOne);
+            pageMonsterList.appendChild(colTwo);
+
+            var expDisplayNode = document.createElement("div");
+            expDisplayNode.setAttribute("id", "user_multiplier");
+            pageMonsterList.appendChild(expDisplayNode);
+
+            var multiplierNode = document.createElement("input");
+            multiplierNode.setAttribute("type", "range");
+            multiplierNode.setAttribute("min", 0);
+            multiplierNode.setAttribute("max", 90);
+            multiplierNode.setAttribute("step", 10);
+            multiplierNode.setAttribute("id", "sld_exp");
+
+            pageMonsterList.appendChild(multiplierNode);
+
+            uExp = parsedGameEvent.levelling.levelling.user_exp;
+            uExpM = parsedGameEvent.levelling.levelling.user_exp_multiplier;
+
+            var expNode = document.createElement("div");
+            var expTextNode = document.createTextNode("jou exp + ( je multiplier ✖ slider ✖ monster ) = exp");
+            expNode.appendChild(expTextNode);
+            expNode.setAttribute("id", "calc_exp");
+            pageMonsterList.appendChild(expNode);
+
+            var confirmButtonNode = document.createElement("input");
+            confirmButtonNode.setAttribute("id", "btn_exp_user");
+            confirmButtonNode.setAttribute("type", "button");
+            confirmButtonNode.setAttribute("value", "Toevoegen");
+
+            pageMonsterList.appendChild(confirmButtonNode);
+
+            catchMonsterEvents();
         }
-
-        pageMonsterList.appendChild(colOne);
-        pageMonsterList.appendChild(colTwo);
-
-        var expDisplayNode = document.createElement("div");
-        expDisplayNode.setAttribute("id", "user_multiplier");
-        pageMonsterList.appendChild(expDisplayNode);
-
-        var multiplierNode = document.createElement("input");
-        multiplierNode.setAttribute("type", "range");
-        multiplierNode.setAttribute("min", 0);
-        multiplierNode.setAttribute("max", 90);
-        multiplierNode.setAttribute("step", 10);
-        multiplierNode.setAttribute("id", "sld_exp");
-
-        pageMonsterList.appendChild(multiplierNode);
-
-        uExp = parsedGameEvent.levelling.levelling.user_exp;
-        uExpM = parsedGameEvent.levelling.levelling.user_exp_multiplier;
-
-        var expNode = document.createElement("div");
-        var expTextNode = document.createTextNode("jou exp + ( je multiplier ✖ slider ✖ monster ) = exp");
-        expNode.appendChild(expTextNode);
-        expNode.setAttribute("id", "calc_exp");
-        pageMonsterList.appendChild(expNode);
-
-        var confirmButtonNode = document.createElement("input");
-        confirmButtonNode.setAttribute("id", "btn_exp_user");
-        confirmButtonNode.setAttribute("type", "button");
-        confirmButtonNode.setAttribute("value", "Toevoegen");
-
-        pageMonsterList.appendChild(confirmButtonNode);
-
-        catchMonsterEvents();
 
         renderShop(parsedGameEvent.shop);
     }, false);
