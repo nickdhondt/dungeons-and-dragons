@@ -144,45 +144,63 @@ function openStream() {
 
         for (var i = 0; i < parsedGameEvent.basic.length; i++) {
             if (parsedGameEvent.basic[i].is_you === true) {
-                var basicDataList = document.getElementById("basic_data_list");
-                basicDataList.innerHTML = "";
+                if (typeof parsedGameEvent.basic[i].data.basic_data !== "undefined") {
+                    var basicDataList = document.getElementById("basic_data_list");
+                    basicDataList.innerHTML = "";
 
-                for (var j = 0; j < parsedGameEvent.basic[i].data.basic_data.length; j++) {
-                    var basicValueNode = document.createElement("li");
-                    var basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
-                    basicValueNode.appendChild(basicValueTextNode);
-                    basicDataList.appendChild(basicValueNode);
+                    for (var j = 0; j < parsedGameEvent.basic[i].data.basic_data.length; j++) {
+                        var basicValueNode = document.createElement("li");
+                        var basicValueTextNode;
+                        if (parsedGameEvent.basic[i].data.basic_data[j].id === "8") {
+                            basicValueTextNode = document.createTextNode("Je bent speler: " + parsedGameEvent.basic[i].data.basic_data[j].value);
+                        } else {
+                            if (j < 5) {
+                                basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name  + " (max: " + parsedGameEvent.basic[i].data.basic_data[j].max + ")");
+                            } else {
+                                basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
+                            }
+                            basicValueNode.appendChild(basicValueTextNode);
+                            basicDataList.appendChild(basicValueNode);
+                        }
+                    }
                 }
 
-                var conditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.condition_data);
+                if (typeof parsedGameEvent.basic[i].data.condition_data !== "undefined") {
+                    var condList = document.getElementById("conditions_list");
+                    condList.innerHTML = "";
 
-                makeListConditions(conditionsFormatted, "conditions_list");
+                    var conditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.condition_data);
 
-                var inventoryList = document.getElementById("inventory_list");
-                inventoryList.innerHTML = "";
+                    makeListConditions(conditionsFormatted, "conditions_list");
+                }
 
-                for (var l = 0; l < parsedGameEvent.basic[i].data.inventory_data.length; l++) {
-                    var inventoryItemNode = document.createElement("li");
-                    var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
-                    var useItemButtonNode = document.createElement("div");
-                    useItemButtonNode.setAttribute("class", "use_item_button");
-                    useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
-                    var useItemButtonTextNode = document.createTextNode("Gebruiken");
-                    useItemButtonNode.appendChild(useItemButtonTextNode);
-                    var infoNode = document.createElement("ul");
-                    infoNode.setAttribute("class", "hover_show");
-                    infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                if (typeof parsedGameEvent.basic[i].data.inventory_data !== "undefined") {
+                    var inventoryList = document.getElementById("inventory_list");
+                    inventoryList.innerHTML = "";
 
-                    var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
+                    for (var l = 0; l < parsedGameEvent.basic[i].data.inventory_data.length; l++) {
+                        var inventoryItemNode = document.createElement("li");
+                        var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
+                        var useItemButtonNode = document.createElement("div");
+                        useItemButtonNode.setAttribute("class", "use_item_button");
+                        useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                        var useItemButtonTextNode = document.createTextNode("Gebruiken");
+                        useItemButtonNode.appendChild(useItemButtonTextNode);
+                        var infoNode = document.createElement("ul");
+                        infoNode.setAttribute("class", "hover_show");
+                        infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
 
-                    inventoryItemNode.appendChild(inventoryItemTextNode);
-                    inventoryItemNode.appendChild(useItemButtonNode);
-                    inventoryItemNode.appendChild(infoNode);
-                    inventoryList.appendChild(inventoryItemNode);
+                        var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
 
-                    document.getElementById("inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id).innerHTML = "";
+                        inventoryItemNode.appendChild(inventoryItemTextNode);
+                        inventoryItemNode.appendChild(useItemButtonNode);
+                        inventoryItemNode.appendChild(infoNode);
+                        inventoryList.appendChild(inventoryItemNode);
 
-                    makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                        document.getElementById("inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id).innerHTML = "";
+
+                        makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                    }
                 }
                 catchUseItemEvent();
             }
