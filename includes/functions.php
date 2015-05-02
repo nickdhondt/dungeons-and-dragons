@@ -143,12 +143,22 @@ function update_turn_in_db($turn){
     }
 }
 
-function delete_condition($ucd_id, $user_id){
+function delete_condition($ucd_id, $user_id, $condition_id){
     global $connection;
 
+    //Re-validate condition
+    //When the condition is deleted, restore the condition
+    $success = validate_condition($user_id, $condition_id, true);
+
+    //Delete condition
     $sql = $connection->prepare("DELETE FROM user_condition_data WHERE ucd_id = ?");
     $sql->bind_param('i', $ucd_id);
     $sql->execute();
+
+    //Controle
+    if(!$success){
+        $errors[] = $success;
+    }
 
     //update the timestamp
     $now = microtime(true);
@@ -174,15 +184,7 @@ function update_conditions_from_user($user_id){
         $value = $condition["value"];
         if($value <= 0){
             //If the value <= 0, it means that the condition is expired.
-            delete_condition($condition["id"], $user_id);
-
-            //When the condition is deleted, restore the condition
-            $success = validate_condition($user_id, $condition["cid"], true);
-
-            //Controle
-            if(!$success){
-                $errors[] = $success;
-            }
+            delete_condition($condition["id"], $user_id, $condition["cid"]);
         } else {
             $sql = $connection->query("UPDATE user_condition_data SET condition_value='".$value."' WHERE ucd_id = '".$condition["id"]."'");
             if(!$sql){
@@ -446,6 +448,7 @@ function get_user_basic_data($user_id){
     $basic_data = array();
 
     $sql = $connection->query("SELECT ubd.basic_id as 'id', b.name as 'name', ubd.basic_value as 'value' FROM user_basic_data ubd INNER JOIN basic b ON b.basic_id = ubd.basic_id WHERE user_id = '" . $user_id . "'");
+    $max_data = get_maximum_basic_values($user_id); //new
 
     if (!$sql) {
         $basic_data["error"] = $connection->error;
@@ -455,6 +458,11 @@ function get_user_basic_data($user_id){
 
         while ($row = $sql->fetch_array(MYSQLI_ASSOC)) {
             $rows[] = $row;
+            foreach($max_data as $max){ //new
+                if($max["id"] == $row["id"]){   //new
+                    $row["max"] = $max["max"];  //new
+                }
+            }
         }
         $basic_data["data"] = $rows;
     }
@@ -1245,57 +1253,64 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
         }
     }
 
-    foreach($rows as $advantage){
-        //Get the value info.
-        $id = $advantage["id"];
-        $change = $advantage["value"];
+    if(!empty($rows)){
+        foreach($rows as $advantage) {
+            //Get the value info.
+            $id = $advantage["id"];
+            $change = $advantage["value"];
 
-        //Get the current values
-        $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='".$id."') AND (user_id='".$user_id."')");
-        $rows = $sql->fetch_assoc();
-        $current_value = $rows["basic_value"];
+            //Get the current values
+            $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='" . $id . "') AND (user_id='" . $user_id . "')");
+            $rows = $sql->fetch_assoc();
+            $current_value = $rows["basic_value"];
+echo "change=".$change;
+            //Calculate the new value
+            if ($devalidate === false) {
+                $new_value = $current_value + $change;
+            } else {
+                $new_value = $current_value - $change;
+            }
+            echo"nw=".$new_value;
 
-        //Calculate the new value
-        if($devalidate === false){
-            $new_value = $current_value + $change;
-        } else {
-            $new_value = $current_value - $change;
-        }
+            //Get the maximum value possible
+            $maximum_basic_values = get_maximum_basic_values($user_id);
+            foreach ($maximum_basic_values as $maximum_basic_value) {
+                if (isset($maximum_basic_value["id"])) {
+                    //The ID Must be set
+                    if ($maximum_basic_value["id"] === $id) {
+                        $max_value = $maximum_basic_value["max"];
+                        $min_value = 0;
+                    }
+                }
+            }
 
-        //Get the maximum value possible
-        $maximum_basic_values = get_maximum_basic_values($user_id);
-        foreach($maximum_basic_values as $maximum_basic_value){
-            if(isset($max_basic["id"])) {
-                //The ID Must be set
-                if($maximum_basic_value["id"] === $id){
-                    $max_value = $maximum_basic_value["max"];
-                    $min_value = 0;
+            if ((isset($max_value)) && (isset($min_value))) {
+                //The code is safe
+                if ($new_value > $max_value) {
+                    if(($id == 3) || ($id == 4)){
+                        $new_value = $max_value;
+                    }
+                }
+                if ($new_value < $min_value) {
+                    $new_value = $min_value;
+                }
+
+                echo "new_value=".$new_value;
+
+                //Write the new value to the database
+                $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '".$new_value."' WHERE (`user_basic_data`.`basic_id`='" . $id . "') AND (`user_basic_data`.`user_id`='" . $user_id . "')");
+
+                //update the timestamp
+                $now = microtime(true);
+                $success = alter_timestamps($user_id, $now, "", "", "");
+
+                if (!$success) {
+                    $validate["error"] = $success;
                 }
             }
         }
-
-        if((isset($max_value)) && (isset($min_value))){
-            //The code is safe
-            if($new_value > $max_value){
-                $new_value = $max_value;
-            }
-            if($new_value < $min_value){
-                $new_value = $min_value;
-            }
-
-            //Write the new value to the database
-            $stmt = $connection->prepare("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '?' WHERE (`user_basic_data`.`basic_id`='".$id."') AND (`user_basic_data`.`user_id`='".$user_id."')");
-            $stmt->prepare('i', $new_value);
-            $stmt->execute();
-
-            //update the timestamp
-            $now = microtime(true);
-            $success = alter_timestamps($user_id, $now, "", "", "");
-
-            if(!$success){
-                $validate["error"] = $success;
-            }
-        }
+    } else {
+        $validate["error"] = "Het systeem kon geen advantages vinden voor de huidige condition. Please help";
     }
 
     if(empty($validate["error"])) $validate = true;
