@@ -39,7 +39,7 @@ function catchUseItemEvent() {
 }
 
 function requestUseItem(e) {
-    var useItem = e.target.id.substr(3, 1);
+    var useItem = e.target.id.substr(3, 3);
 
     var requestData = {
         "use_item": useItem,
@@ -180,27 +180,46 @@ function openStream() {
                     inventoryList.innerHTML = "";
 
                     for (var l = 0; l < parsedGameEvent.basic[i].data.inventory_data.length; l++) {
-                        var inventoryItemNode = document.createElement("li");
-                        var inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
-                        var useItemButtonNode = document.createElement("div");
-                        useItemButtonNode.setAttribute("class", "use_item_button");
-                        useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
-                        var useItemButtonTextNode = document.createTextNode("Gebruiken");
-                        useItemButtonNode.appendChild(useItemButtonTextNode);
-                        var infoNode = document.createElement("ul");
-                        infoNode.setAttribute("class", "hover_show");
-                        infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                        var inventoryItemNode, inventoryItemTextNode, useItemButtonNode, useItemButtonTextNode, infoNode;
+                        if (typeof parsedGameEvent.basic[i].data.inventory_data[l].conditions !== "string") {
+                            inventoryItemNode = document.createElement("li");
+                            inventoryItemTextNode = document.createTextNode(parsedGameEvent.basic[i].data.inventory_data[l].name + " (aantal: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
+                            useItemButtonNode = document.createElement("div");
+                            useItemButtonNode.setAttribute("class", "use_item_button");
+                            useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                            useItemButtonTextNode = document.createTextNode("Gebruiken");
+                            useItemButtonNode.appendChild(useItemButtonTextNode);
+                            infoNode = document.createElement("ul");
+                            infoNode.setAttribute("class", "hover_show");
+                            infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
 
-                        var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
+                            var inventoryConditionsFormatted = prepareConditions(parsedGameEvent.basic[i].data.inventory_data[l].conditions);
 
-                        inventoryItemNode.appendChild(inventoryItemTextNode);
-                        inventoryItemNode.appendChild(useItemButtonNode);
-                        inventoryItemNode.appendChild(infoNode);
-                        inventoryList.appendChild(inventoryItemNode);
+                            inventoryItemNode.appendChild(inventoryItemTextNode);
+                            inventoryItemNode.appendChild(useItemButtonNode);
+                            inventoryItemNode.appendChild(infoNode);
+                            inventoryList.appendChild(inventoryItemNode);
 
-                        document.getElementById("inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id).innerHTML = "";
+                            document.getElementById("inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id).innerHTML = "";
 
-                        makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                            makeListConditions(inventoryConditionsFormatted, "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                        } else {
+                            inventoryItemNode = document.createElement("li");
+                            inventoryItemTextNode = document.createTextNode("Bericht van de goden: " + parsedGameEvent.basic[i].data.inventory_data[l].conditions + " (nr: " + parsedGameEvent.basic[i].data.inventory_data[l].count + ")");
+                            useItemButtonNode = document.createElement("div");
+                            useItemButtonNode.setAttribute("class", "use_item_button");
+                            useItemButtonNode.setAttribute("id", "inv" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+                            useItemButtonTextNode = document.createTextNode("Gebruiken");
+                            useItemButtonNode.appendChild(useItemButtonTextNode);
+                            infoNode = document.createElement("ul");
+                            infoNode.setAttribute("class", "hover_show");
+                            infoNode.setAttribute("id", "inventory_hover_show" + parsedGameEvent.basic[i].data.inventory_data[l].item_id);
+
+                            inventoryItemNode.appendChild(inventoryItemTextNode);
+                            inventoryItemNode.appendChild(useItemButtonNode);
+                            inventoryItemNode.appendChild(infoNode);
+                            inventoryList.appendChild(inventoryItemNode);
+                        }
                     }
                 }
                 catchUseItemEvent();
