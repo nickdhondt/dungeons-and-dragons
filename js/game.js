@@ -405,7 +405,7 @@ function addToShopColumn(shopItem, column) {
 
         for (var i = 0; i < shopItem.price_data.length; i++ ) {
             var priceNode = document.createElement("div");
-            var priceTextNode = document.createTextNode(shopItem.price_data[i].item + ": " + formatNumber(shopItem.price_data[i].value));
+            var priceTextNode = document.createTextNode(shopItem.price_data[i].itemname + ": " + formatNumber(shopItem.price_data[i].value));
             priceNode.appendChild(priceTextNode);
             shopItemNode.appendChild(priceNode);
         }
@@ -413,7 +413,7 @@ function addToShopColumn(shopItem, column) {
         for (var j = 0; j < shopItem.skill_data.length; j++ ) {
             if (shopItem.skill_data[j].name !== "0") {
                 var skillNode = document.createElement("div");
-                var skillTextNode = document.createTextNode(shopItem.skill_data[j].name + " level: " + shopItem.skill_data[j].value);
+                var skillTextNode = document.createTextNode(shopItem.skill_data[j].skillname + " level: " + shopItem.skill_data[j].value);
                 skillNode.appendChild(skillTextNode);
                 shopItemNode.appendChild(skillNode);
             }
