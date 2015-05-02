@@ -1047,6 +1047,7 @@ function get_shop_data($user_id, $current_timestamp){
                     $pd = array();
                     $pd["value"] = $price_values[$i];
                     $pd["item"] = $price_items[$i];
+                    $pd["itemname"] = get_item_name($pd["item"]);
                     $price_data[] = $pd;
                 }
 
@@ -1058,6 +1059,7 @@ function get_shop_data($user_id, $current_timestamp){
                     $sd = array();
                     $sd["value"] = $skill_item[$j];
                     $sd["name"] = $skill_item[$j];
+                    $sd["skillname"] = get_skill_name_nick($sd["name"]);
                     $skill_data[] = $sd;
                 }
 
@@ -1080,12 +1082,12 @@ function get_shop_data($user_id, $current_timestamp){
                 //Fill the main array
                 $item_data = array();
                 $item_data["item_id"] = $shop_item["item_id"];
-                $item_data["can_buy"] = check_item_requirements($user_id, $item_data["item_id"], $upgrade_present);
-                if($item_data["can_buy"]["errors"] != false) return $item_data["can_buy"]["errors"];
                 $item_data["item_data"] = get_item_data($item_data["item_id"]);
                 $item_data["price_data"] = $price_data;
                 $item_data["skill_data"] = $skill_data;
                 $item_data["upgrade"] = $shop_item["upgrade"];
+                $item_data["can_buy"] = check_item_requirements($user_id, $price_data, $upgrade_present);
+                if($item_data["can_buy"]["errors"] != false) return $item_data["can_buy"]["errors"];
 
                 $shop_data[] = $item_data;
             }
@@ -1100,10 +1102,34 @@ function get_shop_data($user_id, $current_timestamp){
     return $shop_data;
 }
 
-function check_item_requirements($user_id, $item_id, $upgrade_present){
+function check_item_requirements($user_id, $price_data, $upgrade_present){
+   return true;
+   /* global $connection;
     //This function will check whether the conditions for buying an item are fulfilled.
     //["errors"] must be false if everything is owkay
-    return true;
+    if($upgrade_present){
+        $basic_data = get_user_basic_data($user_id);
+        $in_data = get_user_inventory_data($user_id);
+        foreach($price_data as $price){
+            $pcost = $price["value"];
+            $pitem = $price["item"];
+
+            if($pitem == 33){
+                foreach($basic_data as $bd){
+                    if($bd["id"] == 7){
+                        if($bd["value"] >= $pcost) return true;
+                    }
+                }
+            } else {
+                foreach($in_data["data"] as $in){
+                    if($in["count"] >= $pcost) return true;
+                }
+            }
+        }
+    } else {
+        return false;
+    }
+    return false; */
 }
 
 function get_shop_items(){
@@ -1428,4 +1454,22 @@ function get_conditions_from_item($item_id){
     } else {
         return false;
     }
+}
+
+function get_item_name($item_id){
+    global $connection;
+
+    $sql = $connection->query("SELECT name FROM inventory WHERE item_id='".$item_id."'");
+    $rows = $sql->fetch_array(MYSQLI_ASSOC);
+    $row = $rows["name"];
+    return $row;
+}
+
+function get_skill_name_nick($item_id){
+    global $connection;
+
+    $sql = $connection->query("SELECT name FROM skills WHERE skill_id='".$item_id."'");
+    $rows = $sql->fetch_array(MYSQLI_ASSOC);
+    $row = $rows["name"];
+    return $row;
 }
