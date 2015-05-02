@@ -159,9 +159,9 @@ function openStream() {
                             } else {
                                 basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
                             }
-                            basicValueNode.appendChild(basicValueTextNode);
-                            basicDataList.appendChild(basicValueNode);
                         }
+                        basicValueNode.appendChild(basicValueTextNode);
+                        basicDataList.appendChild(basicValueNode);
                     }
                 }
 
@@ -285,37 +285,39 @@ function openStream() {
 }
 
 function renderShop(shopArrays) {
-    var shopItemsPerColumn = Math.ceil(shopArrays.length / 4);
+    if (shopArrays !== false) {
+        var shopItemsPerColumn = Math.ceil(shopArrays.length / 4);
 
-    var shopListing = document.getElementById("shop_listing");
+        var shopListing = document.getElementById("shop_listing");
 
-    var shopColOneNode = document.getElementById("shop_one");
-    var shopColTwoNode = document.getElementById("shop_two");
-    var shopColThreeNode = document.getElementById("shop_three");
-    var shopColFourNode = document.getElementById("shop_four");
-    shopColOneNode.innerHTML = "";
-    shopColTwoNode.innerHTML = "";
-    shopColThreeNode.innerHTML = "";
-    shopColFourNode.innerHTML = "";
+        var shopColOneNode = document.getElementById("shop_one");
+        var shopColTwoNode = document.getElementById("shop_two");
+        var shopColThreeNode = document.getElementById("shop_three");
+        var shopColFourNode = document.getElementById("shop_four");
+        shopColOneNode.innerHTML = "";
+        shopColTwoNode.innerHTML = "";
+        shopColThreeNode.innerHTML = "";
+        shopColFourNode.innerHTML = "";
 
-    shopListing.appendChild(shopColOneNode);
-    shopListing.appendChild(shopColTwoNode);
-    shopListing.appendChild(shopColThreeNode);
-    shopListing.appendChild(shopColFourNode);
+        shopListing.appendChild(shopColOneNode);
+        shopListing.appendChild(shopColTwoNode);
+        shopListing.appendChild(shopColThreeNode);
+        shopListing.appendChild(shopColFourNode);
 
-    for (var i = 0; i < shopArrays.length; i++) {
-        if (i < shopItemsPerColumn) {
-            addToShopColumn(shopArrays[i], "shop_one");
-        } else if (i >= shopItemsPerColumn && i < (shopItemsPerColumn * 2)) {
-            addToShopColumn(shopArrays[i], "shop_two");
-        } else if (i >= (shopItemsPerColumn * 2) && i < (shopItemsPerColumn * 3)) {
-            addToShopColumn(shopArrays[i], "shop_three");
-        } else if (i >= (shopItemsPerColumn * 3) && i < (shopItemsPerColumn * 4)) {
-            addToShopColumn(shopArrays[i], "shop_four");
+        for (var i = 0; i < shopArrays.length; i++) {
+            if (i < shopItemsPerColumn) {
+                addToShopColumn(shopArrays[i], "shop_one");
+            } else if (i >= shopItemsPerColumn && i < (shopItemsPerColumn * 2)) {
+                addToShopColumn(shopArrays[i], "shop_two");
+            } else if (i >= (shopItemsPerColumn * 2) && i < (shopItemsPerColumn * 3)) {
+                addToShopColumn(shopArrays[i], "shop_three");
+            } else if (i >= (shopItemsPerColumn * 3) && i < (shopItemsPerColumn * 4)) {
+                addToShopColumn(shopArrays[i], "shop_four");
+            }
         }
-    }
 
-    catchShopEvents();
+        catchShopEvents();
+    }
 }
 
 function catchShopEvents() {
