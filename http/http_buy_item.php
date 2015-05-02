@@ -38,7 +38,6 @@ if ($user_id != false) {
 
         foreach ($will_buy["price_data"] as $price) {
             if($price["item"] == 33) {
-                echo "gold";
                 write_to_user_basic($post_data["user_id"], 7, -$price["value"]);
             } else  {
                 add_to_user_inventory($post_data["user_id"], $post_data["buy_item"], $substract = false, $value = $price["value"]);
