@@ -24,7 +24,7 @@ ul > li > ul {
     margin-left: 2em;
 }
 
-div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button {
+div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button, .basic_control_button {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -423,7 +423,7 @@ div#tab_one > div.col > div > ul > li {
     margin-bottom: .5em;
 }
 
-div#tab_one > div.col > div > ul > li > div.use_item_button {
+div.use_item_button, div.buy_item_button {
     display: inline-block;
     background: #ceb9ff;
     padding: .3em;
@@ -431,11 +431,11 @@ div#tab_one > div.col > div > ul > li > div.use_item_button {
     cursor: pointer;
 }
 
-div#tab_one > div.col > div > ul > li > div.use_item_button:hover {
+div.use_item_button:hover, div.buy_item_button:hover {
     background: rgba(208, 183, 255, .7);
 }
 
-div#tab_one > div.col > div > ul > li > div.use_item_button:active {
+div.use_item_button:active, div.buy_item_button:active {
     background: rgba(208, 183, 255, .45);
 }
 
@@ -502,21 +502,17 @@ div#tab_one > div.col > div > ul > li:hover > ul.hover_show {
 }
 
 #shop_listing > ul > li {
-    background: rgba(0, 0, 255, 0.1);
+    background: rgba(255, 255, 255, 0.5);
     padding: .5em;
     margin: 0 .5em .5em 0;
     cursor: pointer;
 }
 
 #shop_listing > ul > li:last-of-type {
-    background: rgba(0, 0, 255, 0.1);
-    padding: .5em;
     margin: 0 .5em 0 0;
 }
 
 #shop_listing > ul#shop_four > li {
-    background: rgba(0, 0, 255, 0.1);
-    padding: .5em;
     margin: 0 0 .5em 0;
 }
 
