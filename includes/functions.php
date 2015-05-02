@@ -1270,60 +1270,50 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
             $id = $advantage["id"];
             $change = $advantage["value"];
 
-            //If the condition contains a message, display it to the user for this turn:
-            if($id == 10){
-                $success2 = show_message($user_id, $change);
+            //Get the current values
+            $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='" . $id . "') AND (user_id='" . $user_id . "')");
+            $rows = $sql->fetch_assoc();
+            $current_value = $rows["basic_value"];
 
-                if(!$success2){
-                    $validate["error"] = $success2;
-                }
+            //Calculate the new value
+            if ($devalidate === false) {
+                $new_value = $current_value + $change;
             } else {
+                $new_value = $current_value - $change;
+            }
 
-                //Get the current values
-                $sql = $connection->query("SELECT basic_value FROM user_basic_data WHERE (basic_id='" . $id . "') AND (user_id='" . $user_id . "')");
-                $rows = $sql->fetch_assoc();
-                $current_value = $rows["basic_value"];
-
-                //Calculate the new value
-                if ($devalidate === false) {
-                    $new_value = $current_value + $change;
-                } else {
-                    $new_value = $current_value - $change;
-                }
-
-                //Get the maximum value possible
-                $maximum_basic_values = get_maximum_basic_values($user_id);
-                foreach ($maximum_basic_values as $maximum_basic_value) {
-                    if (isset($maximum_basic_value["id"])) {
-                        //The ID Must be set
-                        if ($maximum_basic_value["id"] === $id) {
-                            $max_value = $maximum_basic_value["max"];
-                            $min_value = 0;
-                        }
+            //Get the maximum value possible
+            $maximum_basic_values = get_maximum_basic_values($user_id);
+            foreach ($maximum_basic_values as $maximum_basic_value) {
+                if (isset($maximum_basic_value["id"])) {
+                    //The ID Must be set
+                    if ($maximum_basic_value["id"] === $id) {
+                        $max_value = $maximum_basic_value["max"];
+                        $min_value = 0;
                     }
                 }
+            }
 
-                if ((isset($max_value)) && (isset($min_value))) {
-                    //The code is safe
-                    if ($new_value > $max_value) {
-                        if(($id == 3) || ($id == 4)){
-                            $new_value = $max_value;
-                        }
+            if ((isset($max_value)) && (isset($min_value))) {
+                //The code is safe
+                if ($new_value > $max_value) {
+                    if(($id == 3) || ($id == 4)){
+                        $new_value = $max_value;
                     }
-                    if ($new_value < $min_value) {
-                        $new_value = $min_value;
-                    }
+                }
+                if ($new_value < $min_value) {
+                    $new_value = $min_value;
+                }
 
-                    //Write the new value to the database
-                    $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '".$new_value."' WHERE (`user_basic_data`.`basic_id`='" . $id . "') AND (`user_basic_data`.`user_id`='" . $user_id . "')");
+                //Write the new value to the database
+                $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_basic_data` SET `basic_value` = '".$new_value."' WHERE (`user_basic_data`.`basic_id`='" . $id . "') AND (`user_basic_data`.`user_id`='" . $user_id . "')");
 
-                    //update the timestamp
-                    $now = microtime(true);
-                    $success = alter_timestamps($user_id, $now, "", "", "");
+                //update the timestamp
+                $now = microtime(true);
+                $success = alter_timestamps($user_id, $now, "", "", "");
 
-                    if (!$success) {
-                        $validate["error"] = $success;
-                    }
+                if (!$success) {
+                    $validate["error"] = $success;
                 }
             }
         }
@@ -1335,11 +1325,23 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
     return $validate;
 }
 
-function show_message($user_id, $message){
+function add_message($user_id, $message){
+    //This will add a message to the user inventory.
 
+    global $connection;
+
+    //save the message
+    $message = htmlentities($message);
+    $stmt = $connection->query("INSERT INTO messages(message) VALUES('".$message."')");
+    $id = $connection->insert_id;
+
+    //Add to the users inventory
+    $success = add_to_user_inventory($user_id, 188, false, $id);
+
+    return $success;
 }
 
-function add_to_user_inventory($user_id, $item_id, $substract = false){
+function add_to_user_inventory($user_id, $item_id, $substract = false, $value=""){
     global $connection;
 
     //Get the inventory items
@@ -1353,8 +1355,10 @@ function add_to_user_inventory($user_id, $item_id, $substract = false){
         $uid = $rows[0]["uid_id"];
     }
 
+    if(empty($value)) $value = 1;
+
     //Check if the items are already in the inventory
-    if(isset($uid)){
+    if((isset($uid)) && ($item_id != 188)){
         //If existing, update the value
         if($substract){
             $value = $rows[0]["item_value"] - 1;
@@ -1373,7 +1377,7 @@ function add_to_user_inventory($user_id, $item_id, $substract = false){
         }
     } else {
         //If non existing, enter the value in the database
-        $create = $connection->query("INSERT INTO user_inventory_data(user_id, item_id, item_value) VALUES(".$user_id.", ".$item_id.", 1)");
+        $create = $connection->query("INSERT INTO user_inventory_data(user_id, item_id, item_value) VALUES(".$user_id.", ".$item_id.", ".$value.")");
     }
     //update the inventory timestamp
     $now = microtime(true);
