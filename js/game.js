@@ -25,9 +25,21 @@ function init() {
     window.matchMedia("(orientation: portrait)").addListener(handleOrientationChange);
     document.getElementById("btn_race_class").addEventListener("click", function() { requestChoiceRaceClass(); });
     document.getElementById("next_turn").addEventListener("click", function(e) { requestNextTurn(); e.stopPropagation(); });
-    document.getElementById("random_items").addEventListener("click", function(e) { /*requestNextTurn();*/ e.stopPropagation(); });
+    document.getElementById("random_items").addEventListener("click", function(e) { requestRandomItems(); e.stopPropagation(); });
 
     requestUserData();
+}
+
+function requestRandomItems() {
+    var randomItemData = {
+        "user_id": userId
+    };
+
+    sendXHR(JSON.stringify(randomItemData), "http/http_add_random_items.php", "post", "processRandomItemsAdd");
+}
+
+function processRandomItemsAdd(jsonData) {
+    console.log(parseJSON(jsonData));
 }
 
 function catchUseItemEvent() {
@@ -150,19 +162,22 @@ function openStream() {
                     basicDataList.innerHTML = "";
 
                     for (var j = 0; j < parsedGameEvent.basic[i].data.basic_data.length; j++) {
-                        var basicValueNode = document.createElement("li");
-                        var basicValueTextNode;
-                        if (parsedGameEvent.basic[i].data.basic_data[j].id === "8") {
-                            basicValueTextNode = document.createTextNode("Je bent speler: " + parsedGameEvent.basic[i].data.basic_data[j].value);
-                        } else {
-                            if (j < 5) {
-                                basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name  + " (max: " + parsedGameEvent.basic[i].data.basic_data[j].max + ")");
+                        if (parsedGameEvent.basic[i].data.basic_data[j].id !== "10") {
+                            var basicValueNode = document.createElement("li");
+                            var basicValueTextNode;
+
+                            if (parsedGameEvent.basic[i].data.basic_data[j].id === "8") {
+                                basicValueTextNode = document.createTextNode("Je bent speler: " + parsedGameEvent.basic[i].data.basic_data[j].value);
                             } else {
-                                basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
+                                if (j < 5) {
+                                    basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name  + " (max: " + parsedGameEvent.basic[i].data.basic_data[j].max + ")");
+                                } else {
+                                    basicValueTextNode = document.createTextNode(parsedGameEvent.basic[i].data.basic_data[j].value + " " + parsedGameEvent.basic[i].data.basic_data[j].name);
+                                }
                             }
+                            basicValueNode.appendChild(basicValueTextNode);
+                            basicDataList.appendChild(basicValueNode);
                         }
-                        basicValueNode.appendChild(basicValueTextNode);
-                        basicDataList.appendChild(basicValueNode);
                     }
                 }
 
@@ -717,6 +732,9 @@ function sendXHR(data, url, type, executeFunction) {
                 case "processBuyItem":
                     processBuyItem(response);
                     break;
+                case "processRandomItemsAdd":
+                    processRandomItemsAdd(response);
+                    break;
             }
         }
     };
@@ -1112,7 +1130,7 @@ function requestAddInventory(action) {
     var requestCondition = {
         "action": action,
         "user_id": userId,
-        "condition": condition
+        "inventory": condition
     };
     sendXHR(JSON.stringify(requestCondition), "http/http_add_inventory.php", "post", "processAddInventory");
 }
