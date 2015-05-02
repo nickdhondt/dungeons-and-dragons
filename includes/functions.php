@@ -1335,50 +1335,41 @@ function validate_condition($user_id, $condition_id, $devalidate = false){
     return $validate;
 }
 
-function show_message($user_id, $message){
-
-}
-
-function add_to_user_inventory($user_id, $item_id, $substract = false){
+function add_to_user_inventory($user_id, $item_id, $substract = false, $value=""){
     global $connection;
-
     //Get the inventory items
     $sql = $connection->query("SELECT uid_id, item_value FROM user_inventory_data WHERE (user_id='".$user_id."') AND (item_id='".$item_id."')");
     $rows = array();
     while($row = $sql->fetch_array(MYSQLI_ASSOC)){
         $rows[] = $row;
     }
-
     if(count($rows) == 1){
         $uid = $rows[0]["uid_id"];
     }
-
+    if(empty($value)) $value = 1;
     //Check if the items are already in the inventory
-    if(isset($uid)){
+    if((isset($uid)) && ($item_id != 188)){
         //If existing, update the value
         if($substract){
             $value = $rows[0]["item_value"] - 1;
         } else {
             $value = $rows[0]["item_value"] + 1;
         }
-
         //If value would be zero
         if($value <= 0){
             $del = $connection->query("DELETE FROM user_inventory_data WHERE uid_id = '".$uid."'");
         }
-
         //if value wouldn't be zero
         if($value > 0){
             $stmt = $connection->query("UPDATE `dungeons_and_dragons`.`user_inventory_data` SET `item_value` = '".$value."' WHERE `user_inventory_data`.`uid_id` = '".$uid."'");
         }
     } else {
         //If non existing, enter the value in the database
-        $create = $connection->query("INSERT INTO user_inventory_data(user_id, item_id, item_value) VALUES(".$user_id.", ".$item_id.", 1)");
+        $create = $connection->query("INSERT INTO user_inventory_data(user_id, item_id, item_value) VALUES(".$user_id.", ".$item_id.", ".$value.")");
     }
     //update the inventory timestamp
     $now = microtime(true);
     $success = alter_timestamps($user_id, "", "", $now, "");
-
     return $success;
 }
 
@@ -1390,6 +1381,19 @@ function get_message($message_id){
     $row = $rows[0];
 
     return $row;
+}
+
+
+function add_message($user_id, $message){
+    //This will add a message to the user inventory.
+    global $connection;
+    //save the message
+    $message = htmlentities($message);
+    $stmt = $connection->query("INSERT INTO messages(message) VALUES('".$message."')");
+    $id = $connection->insert_id;
+    //Add to the users inventory
+    $success = add_to_user_inventory($user_id, 188, false, $id);
+    return $success;
 }
 
 
