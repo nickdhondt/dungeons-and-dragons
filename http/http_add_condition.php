@@ -1,9 +1,9 @@
 <?php
 
 //This page expects:
-    //"action", "user_id", "condition"
+//"action", "user_id", "condition"
 //This page will execute the following:
-    //Change the required values in the database
+//Change the required values in the database
 
 require_once "../includes/functions.php";
 session_start();
@@ -57,7 +57,8 @@ if(empty($_POST["data"])){
                         }
 
                         //If the admin requested a deletion, delete the condition.
-                        delete_condition($ucd);
+                        delete_condition($ucd, $user_id, $condition);
+                        $request_completed = "true for substract";
                         break;
                     default:
                         $request_completed = "false";
@@ -79,15 +80,20 @@ if(empty($_POST["data"])){
     }
 }
 
+//Check the output data
+if(empty($request_completed)) $request_completed = "unknown";
+
 // Prepare the return data
 if ($data_acquired === "true" && empty($errors)) {
     $return_message = array(
         "request_accepted" => $data_acquired,
+        "request_parsed" => $request_completed,     //OFwel true ofwel message.
         "data" => "true"
     );
 } else {
     $return_message = array(
         "request_accepted" => $data_acquired,
+        "request_parsed" => $request_completed,
         "errors" => $errors
     );
 }
