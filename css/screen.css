@@ -24,7 +24,7 @@ ul > li > ul {
     margin-left: 2em;
 }
 
-div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button {
+div#notifications > div, div#game_area > header > div.button, div#container > nav > ul > li, .condition_button, .inventory_button, .basic_control_button {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
